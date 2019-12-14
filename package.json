@@ -1,0 +1,33 @@
+{
+  "name": "effects-js",
+  "version": "0.0.1",
+  "description": "Algebraic Effects For Javascript 🎉",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dpchamps/effects-js.git"
+  },
+  "keywords": [
+    "algebraic",
+    "effects",
+    "cps",
+    "control",
+    "flow"
+  ],
+  "author": "Dave Campion",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dpchamps/effects-js/issues"
+  },
+  "homepage": "https://github.com/dpchamps/effects-js#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.12.17",
+    "jest": "^24.9.0",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  }
+}
