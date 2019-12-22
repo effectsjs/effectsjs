@@ -1,6 +1,6 @@
-// Helper method to lens a value as not null and not undefined
 import { Continuation } from "./StackFrame";
 
+// Helper method to lens a value as not null and not undefined
 export const exists = <T>(x: T): x is Exclude<T, null | undefined> =>
   typeof x !== "undefined" && x !== null;
 

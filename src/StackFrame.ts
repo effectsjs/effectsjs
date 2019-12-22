@@ -41,9 +41,6 @@ export const isHandlerType = (
   return getHandler(frame, type) !== null;
 };
 
-export const resumeFrame = (frame: StackFrame, ...args: any) =>
-  frame.next(...args);
-
 export const addReturn = (
   targetFrame: StackFrame,
   returnFrame: StackFrame | Continuation | null
@@ -72,18 +69,3 @@ export const findHandlerFrame = (
 
   return frameWithHandler;
 };
-
-// TODO: What's a better name for this?
-//  In some places it's better to curry these methods rather than wrap them inside the current closure.
-export const withFrameContext = (frame: StackFrame | Generator) => ({
-  addHandler: (handler: Handler) => void addHandler(frame, handler),
-  addReturn: (returnFrame: StackFrame | Continuation | null) =>
-    void addReturn(frame, returnFrame),
-  resume: (...args: any) => resumeFrame(frame, ...args),
-  getReturnFrame() {
-    return getReturnFrame(frame);
-  },
-  getHandler(type) {
-    return getHandler(frame, type);
-  }
-});

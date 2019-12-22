@@ -4,7 +4,8 @@
   "description": "Algebraic Effects For Javascript 🎉",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --collectCoverage",
+    "fixup" : "prettier --write ./test/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -24,9 +25,16 @@
   },
   "homepage": "https://github.com/dpchamps/effects-js#readme",
   "devDependencies": {
+    "@babel/helper-plugin-test-runner": "^7.7.4",
+    "@babel/traverse": "^7.7.4",
+    "@babel/types": "^7.7.4",
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.17",
+    "babel-plugin-tester": "^8.0.1",
+    "babel-test": "^0.2.3",
     "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
   }
