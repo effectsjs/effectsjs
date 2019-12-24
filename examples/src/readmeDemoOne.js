@@ -1,7 +1,7 @@
 require('../../lib/prelude-polyfill');
 
 try{
-    const result = performEffect ({type : 'effect'});
+    const result = perform ({type : 'effect'});
     console.log(result);
 } handle (e) {
     if(e.type === 'effect'){
