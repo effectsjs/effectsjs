@@ -5,11 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --collectCoverage",
-    "fixup" : "prettier --write ./test/**/*.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dpchamps/effects-js.git"
+    "fixup": "prettier --write ./{test,src}/**/*.{js,ts}"
   },
   "keywords": [
     "algebraic",
@@ -26,6 +22,7 @@
   "homepage": "https://github.com/dpchamps/effects-js#readme",
   "devDependencies": {
     "@babel/helper-plugin-test-runner": "^7.7.4",
+    "@babel/parser": "^7.7.7",
     "@babel/traverse": "^7.7.4",
     "@babel/types": "^7.7.4",
     "@types/jest": "^24.0.23",
@@ -37,5 +34,14 @@
     "ts-jest": "^24.2.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
+  },
+  "contributes": {
+    "grammars": [
+      {
+        "language": "JavaScript",
+        "scopeName": "source.js",
+        "path": "./js-with-effects-tmbundle/syntaxes/JavaScript.tmLanguage."
+      }
+    ]
   }
 }
