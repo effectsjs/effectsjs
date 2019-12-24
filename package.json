@@ -16,10 +16,6 @@
   ],
   "author": "Dave Campion",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/dpchamps/effects-js/issues"
-  },
-  "homepage": "https://github.com/dpchamps/effects-js#readme",
   "devDependencies": {
     "@babel/helper-plugin-test-runner": "^7.7.4",
     "@babel/parser": "^7.7.7",
