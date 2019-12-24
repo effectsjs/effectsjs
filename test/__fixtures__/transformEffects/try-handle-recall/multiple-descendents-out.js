@@ -7,7 +7,7 @@ const a = function*() {
 };
 
 const b = function*() {
-  yield perform(Log("I did it!"));
+  yield performEffect(Log("I did it!"));
 };
 
 runProgram(
@@ -17,7 +17,7 @@ runProgram(
         const result = yield function(handler) {
           console.log(e.message);
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {

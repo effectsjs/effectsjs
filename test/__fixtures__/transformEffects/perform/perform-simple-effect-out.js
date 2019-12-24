@@ -1,3 +1,3 @@
 const someFunc = function*() {
-  yield perform(Log("It works!"));
+  yield performEffect(Log("It works!"));
 };

@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --collectCoverage",
-    "fixup": "prettier --write ./{test,src}/**/*.{js,ts}"
+    "fixup": "prettier --write ./{test,src}/**/*.{js,ts}",
+    "clean": "rm -rf ./lib || true",
+    "build:example" : "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
+    "build:source": "npm run clean && tsc"
   },
   "keywords": [
     "algebraic",
     "effects",
-    "cps",
     "control",
     "flow"
   ],
@@ -30,14 +32,5 @@
     "ts-jest": "^24.2.0",
     "ts-node": "^8.5.4",
     "typescript": "^3.7.3"
-  },
-  "contributes": {
-    "grammars": [
-      {
-        "language": "JavaScript",
-        "scopeName": "source.js",
-        "path": "./js-with-effects-tmbundle/syntaxes/JavaScript.tmLanguage."
-      }
-    ]
   }
 }

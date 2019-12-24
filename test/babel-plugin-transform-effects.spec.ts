@@ -59,7 +59,7 @@ describe("transformEffects", () => {
         title: "It Should preserve try/catch",
         fixture: `${fixturesDirectory}/preserve-try-catch-in.js`,
         outputFixture: `${fixturesDirectory}/preserve-try-catch-out.js`
-      },
+      }
     ]
   });
 });

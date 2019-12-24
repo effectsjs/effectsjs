@@ -74,7 +74,13 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
       [types.identifier("data"), types.identifier("resume")],
       types.blockStatement([
         resultContinuation,
-        types.returnStatement(types.yieldExpression(types.identifier("result")))
+        types.returnStatement(
+          types.yieldExpression(
+            types.callExpression(types.identifier("resume"), [
+              types.identifier("result")
+            ])
+          )
+        )
       ]),
       false
     );

@@ -5,7 +5,7 @@ runProgram(
         const result = yield function(handler) {
           stackResume(handler, "Aye Aye Captain!");
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {

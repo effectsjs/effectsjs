@@ -9,7 +9,7 @@ runProgram(
 
           handleTheThing(e);
         };
-        return yield result;
+        return yield resume(result);
       },
 
       *"the other thing"(data, resume) {
@@ -20,11 +20,11 @@ runProgram(
 
           handleTheOtherThing(e);
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {
-      const messageFromTheThing = yield perform({
+      const messageFromTheThing = yield performEffect({
         type: "the thing"
       });
     })()

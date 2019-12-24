@@ -1,7 +1,7 @@
 import {
   stackResume,
   runProgram,
-  perform,
+  performEffect,
   withHandler,
   InvalidStackFrameError,
   UnhandledEffectError
@@ -237,7 +237,7 @@ describe("Effects Unit Tests", () => {
 
   describe("perform", () => {
     it("Should throw when a frame performs an effect that has not be handled", () => {
-      const performContinuation = perform({ type: "nonexist" });
+      const performContinuation = performEffect({ type: "nonexist" });
 
       expect(performContinuation).toThrowError(UnhandledEffectError);
     });
@@ -252,7 +252,7 @@ describe("Effects Unit Tests", () => {
       };
 
       const controlFrame = (function* main() {
-        yield perform({ type: "test" });
+        yield performEffect({ type: "test" });
       })();
 
       addHandler(controlFrame, handler);
@@ -272,7 +272,7 @@ describe("Effects Unit Tests", () => {
       };
 
       const controlFrame = (function* main() {
-        yield perform({ type: "test", data: expectedValue });
+        yield performEffect({ type: "test", data: expectedValue });
       })();
 
       addHandler(controlFrame, handler);
@@ -291,7 +291,10 @@ describe("Effects Unit Tests", () => {
       };
 
       const controlFrame = (function* main() {
-        const result = yield perform({ type: "test", data: expectedValue });
+        const result = yield performEffect({
+          type: "test",
+          data: expectedValue
+        });
         controlFrameSpy(result);
       })();
 
@@ -321,7 +324,7 @@ describe("Effects Unit Tests", () => {
       };
 
       const controlFrame = (function* main() {
-        yield perform({ type: "test" });
+        yield performEffect({ type: "test" });
         controlFrameSpy();
       })();
 
@@ -352,7 +355,7 @@ describe("Effects Unit Tests", () => {
       };
 
       const controlFrame = (function* main() {
-        const result = yield perform({ type: "test" });
+        const result = yield performEffect({ type: "test" });
 
         expect(result).toBe(expectedResult);
       })();

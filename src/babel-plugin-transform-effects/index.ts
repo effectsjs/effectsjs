@@ -11,7 +11,7 @@ import {
 } from "./to-generator-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
 
-interface Plugin {
+export interface Plugin {
   visitor: Visitor;
   parserOverride: typeof parse;
 }
@@ -93,7 +93,8 @@ export default function transformEffects({ types }: Babel): Plugin {
         const handlerType = path.node.handler?.type;
 
         // @ts-ignore
-        if (handlerType !== 'HandleClause' || !handlerBody || !handlerParam) return;
+        if (handlerType !== "HandleClause" || !handlerBody || !handlerParam)
+          return;
 
         const handler = createHandler(types, handlerBody);
 
@@ -110,7 +111,7 @@ export default function transformEffects({ types }: Babel): Plugin {
           fixupParentGenerator(path, types);
           path.replaceWith(
             types.yieldExpression(
-              types.callExpression(types.identifier("perform"), [
+              types.callExpression(types.identifier("performEffect"), [
                 path.node.argument
               ])
             )

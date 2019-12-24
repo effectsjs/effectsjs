@@ -3,7 +3,7 @@ const main = function*() {
 };
 
 const a = function*() {
-  const result = yield perform(Fetch(""));
+  const result = yield performEffect(Fetch(""));
 };
 
 runProgram(

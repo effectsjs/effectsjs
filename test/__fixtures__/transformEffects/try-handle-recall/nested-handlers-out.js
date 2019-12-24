@@ -5,12 +5,12 @@ function* main() {
         const result = yield function(handler) {
           stackResume(handler, false);
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {
       yield parent();
-      yield perform(Main());
+      yield performEffect(Main());
     })()
   );
 }
@@ -20,7 +20,7 @@ function* parent() {
     {
       *child(data, resume) {
         const result = yield function(handler) {};
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {
@@ -30,7 +30,7 @@ function* parent() {
 }
 
 function* child() {
-  yield perform(Child());
+  yield performEffect(Child());
 }
 
 runProgram(
@@ -40,7 +40,7 @@ runProgram(
         const result = yield function(handler) {
           stackResume(handler, true);
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {

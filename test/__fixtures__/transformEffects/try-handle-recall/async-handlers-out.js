@@ -11,7 +11,7 @@ runProgram(
             stackResume(handler, result);
           });
         };
-        return yield result;
+        return yield resume(result);
       }
     },
     (function*() {

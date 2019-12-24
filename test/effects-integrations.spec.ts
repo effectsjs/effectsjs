@@ -2,7 +2,7 @@
 //  interaction between the core components.
 // This mainly revolves around when the interpreter fires what frame in what order.
 
-import { perform, runProgram, stackResume, withHandler } from "../src";
+import { performEffect, runProgram, stackResume, withHandler } from "../src";
 import { Effect, Handler } from "../src/types/Effects";
 import { assignmentPattern } from "@babel/types";
 
@@ -72,14 +72,14 @@ describe("Effect Integrations", () => {
 
     function* parent() {
       addExecution("parent pre effect");
-      yield perform({ type: "test" });
+      yield performEffect({ type: "test" });
       addExecution("parent post effect");
       yield child();
     }
 
     function* child() {
       addExecution("child pre effect");
-      yield perform({ type: "test" });
+      yield performEffect({ type: "test" });
       addExecution("child post effect");
     }
 
@@ -132,10 +132,10 @@ describe("Effect Integrations", () => {
 
     function* parent() {
       addExecution("parent pre cps effect");
-      yield perform({ type: "testCps" });
+      yield performEffect({ type: "testCps" });
       addExecution("parent post cps effect");
       addExecution("parent pre async effect");
-      yield perform({ type: "testAsync" });
+      yield performEffect({ type: "testAsync" });
       addExecution("parent post async effect");
     }
 
@@ -183,7 +183,7 @@ describe("Effect Integrations", () => {
       handler,
       (function*() {
         const then = Date.now();
-        yield perform({ type: "testAsync" });
+        yield performEffect({ type: "testAsync" });
         const now = Date.now();
 
         expect(now - then).toBeGreaterThanOrEqual(10);
@@ -209,13 +209,13 @@ describe("Effect Integrations", () => {
     };
 
     function* parent() {
-      yield perform({ type: "parent" });
+      yield performEffect({ type: "parent" });
       yield withHandler(childHandler, child());
     }
 
     function* child() {
-      yield perform({ type: "parent" });
-      yield perform({ type: "child" });
+      yield performEffect({ type: "parent" });
+      yield performEffect({ type: "child" });
     }
 
     expect(() => {
@@ -238,13 +238,13 @@ describe("Effect Integrations", () => {
     };
 
     function* parent() {
-      yield perform({ type: "child" });
+      yield performEffect({ type: "child" });
       yield withHandler(childHandler, child());
     }
 
     function* child() {
-      yield perform({ type: "parent" });
-      yield perform({ type: "child" });
+      yield performEffect({ type: "parent" });
+      yield performEffect({ type: "child" });
     }
 
     expect(() => {
@@ -265,7 +265,7 @@ describe("Effect Integrations", () => {
     };
 
     function* parent() {
-      const result = yield perform({ type: "effect1" });
+      const result = yield performEffect({ type: "effect1" });
 
       expect(result).toBe(finalResult);
     }

@@ -78,7 +78,7 @@ export const runProgram = (root: Generator, continuation?: Continuation) => {
   stackResume(root, null);
 };
 
-export const perform = ({ type, data }: Effect) => (
+export const performEffect = ({ type, data }: Effect) => (
   currentFrame: Generator
 ) => {
   const frameWithEffectHandler = findHandlerFrame(currentFrame, type);

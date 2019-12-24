@@ -13,7 +13,7 @@ export const performVisitor: Visitor<TypesVisitorPrototype> = {
       fixupParentGenerator(path, types);
       path.replaceWith(
         types.yieldExpression(
-          types.callExpression(types.identifier("perform"), [
+          types.callExpression(types.identifier("performEffect"), [
             path.node.argument
           ])
         )
