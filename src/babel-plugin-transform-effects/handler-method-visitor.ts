@@ -22,7 +22,12 @@ const isCorrectMemberPropertyPath = (
  */
 export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
   HandlerCreationPrototype> = {
-  IfStatement(path, { types, handlerObject }) {
+  Identifier(path, {handlerParam}){
+    if(path.node.name === handlerParam.name){
+      path.node.name = `__${path.node.name}__`
+    }
+  },
+  IfStatement(path, { types, handlerObject, handlerParam }) {
     const testPath = path.get("test");
     const consequent = path.get("consequent") as any;
     const memberPropertyPath = path.get("test.right") as NodePath<
@@ -71,7 +76,7 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
     const objectMethod = types.objectMethod(
       "method",
       memberPropertyPath.node,
-      [types.identifier("data"), types.identifier("resume")],
+      [types.identifier(`__${this.handlerParam.name}__`), types.identifier("resume")],
       types.blockStatement([
         resultContinuation,
         types.returnStatement(
@@ -88,9 +93,11 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
     objectMethod.generator = true;
 
     handlerObject.properties.push(objectMethod);
+
     const alternate = path.get("alternate");
+
     if (alternate) {
-      path.traverse(handlerMethodVisitor, { types, handlerObject });
+      path.traverse(handlerMethodVisitor, { types, handlerObject, handlerParam });
     }
     path.remove();
   }

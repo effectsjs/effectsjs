@@ -1,5 +1,5 @@
 import { Visitor, NodePath } from "@babel/traverse";
-import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
+import BabelTypes, {Identifier, ObjectExpression, TryStatement} from "@babel/types";
 import { parse } from "@babel/parser";
 const parser = require("../../babel/packages/babel-parser/lib");
 import { handlerMethodVisitor } from "./handler-method-visitor";
@@ -20,11 +20,11 @@ export interface Babel {
   types: typeof BabelTypes;
 }
 
-function createHandler(types: Babel["types"], path: NodePath) {
+function createHandler(types: Babel["types"], path: NodePath, handlerParam : Identifier) {
   const handlerObject = types.objectExpression([]);
 
   path.traverse(recallVisitor, { types });
-  path.traverse(handlerMethodVisitor, { types, handlerObject });
+  path.traverse(handlerMethodVisitor, { types, handlerObject, handlerParam });
 
   return handlerObject;
 }
@@ -96,7 +96,7 @@ export default function transformEffects({ types }: Babel): Plugin {
         if (handlerType !== "HandleClause" || !handlerBody || !handlerParam)
           return;
 
-        const handler = createHandler(types, handlerBody);
+        const handler = createHandler(types, handlerBody, handlerParam.node);
 
         if (parentFunction === null) {
           createRuntimeRoot(types, path, handler);

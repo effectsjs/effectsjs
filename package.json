@@ -8,7 +8,8 @@
     "fixup": "prettier --write ./{test,src}/**/*.{js,ts}",
     "clean": "rm -rf ./lib || true",
     "build:example" : "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
-    "build:source": "npm run clean && tsc"
+    "build:source": "npm run clean && tsc",
+    "build" : "npm run build:source && npm run build:example"
   },
   "keywords": [
     "algebraic",

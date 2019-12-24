@@ -12,7 +12,7 @@ const main = function* () {
 };
 
 runProgram(withHandler({
-  *'sleepHandler'(data, resume) {
+  *'sleepHandler'(__e__, resume) {
     const result = yield function (handler) {
       const asyncHandler = async () => {
         const start = Date.now();
