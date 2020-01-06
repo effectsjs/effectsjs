@@ -1,13 +1,13 @@
 runProgram(
   withHandler(
     {
-      *bigFun(data, resume) {
+      *bigFun(__e__, resume) {
         const result = yield function(handler) {
           const performBigFunEffect = async () => {
             await Promise.resolve();
           };
 
-          performBigFunEffect(e).then(result => {
+          performBigFunEffect(__e__).then(result => {
             stackResume(handler, result);
           });
         };

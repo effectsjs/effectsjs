@@ -1,7 +1,10 @@
 import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 import { Visitor, NodePath } from "@babel/traverse";
-import BabelTypes, { ArrowFunctionExpression } from "@babel/types";
-import { arrowExpressionToGenerator } from "./traverse-utilities";
+import BabelTypes, {
+  ArrowFunctionExpression,
+  CallExpression, ExpressionStatement
+} from "@babel/types";
+import {arrowExpressionToGenerator, fixupParentGenerator} from "./traverse-utilities";
 import { performVisitor } from "./perform-visitor";
 
 export const toGeneratorVisitor: Visitor<TypesVisitorPrototype> = {
@@ -21,6 +24,7 @@ export const toGeneratorVisitor: Visitor<TypesVisitorPrototype> = {
 
     const body = path.get("body");
 
+    body?.traverse(yieldCallExpressionVisitor, { types });
     body?.traverse(callExpressionVisitor, { types });
     body?.traverse(performVisitor, { types });
   }
@@ -46,7 +50,24 @@ export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
         binding?.path.traverse(toGeneratorVisitor, { types });
       }
 
-      path.replaceWith(types.yieldExpression(path.node));
+      if (!types.isYieldExpression(path.node)) {
+        path.replaceWith(types.yieldExpression(path.node));
+      }
     }
+  }
+};
+
+export const yieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
+  CallExpression(path, {types}) {
+    const immediateParent = path.parent;
+    if (types.isYieldExpression(immediateParent)) return;
+
+    path.replaceWith(
+        types.yieldExpression(path.node)
+    );
+
+    // Safety First
+
+    fixupParentGenerator(path, types);
   }
 };

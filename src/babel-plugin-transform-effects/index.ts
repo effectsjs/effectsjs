@@ -1,5 +1,10 @@
 import { Visitor, NodePath } from "@babel/traverse";
-import BabelTypes, {Identifier, ObjectExpression, TryStatement} from "@babel/types";
+import BabelTypes, {
+  CallExpression,
+  Identifier,
+  ObjectExpression,
+  TryStatement
+} from "@babel/types";
 import { parse } from "@babel/parser";
 const parser = require("../../babel/packages/babel-parser/lib");
 import { handlerMethodVisitor } from "./handler-method-visitor";
@@ -10,9 +15,13 @@ import {
   toGeneratorVisitor
 } from "./to-generator-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
+import { type } from "os";
+import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 
 export interface Plugin {
   visitor: Visitor;
+  pre?: (state?: any) => void;
+  post?: (state?: any) => void;
   parserOverride: typeof parse;
 }
 
@@ -20,7 +29,11 @@ export interface Babel {
   types: typeof BabelTypes;
 }
 
-function createHandler(types: Babel["types"], path: NodePath, handlerParam : Identifier) {
+function createHandler(
+  types: Babel["types"],
+  path: NodePath,
+  handlerParam: Identifier
+) {
   const handlerObject = types.objectExpression([]);
 
   path.traverse(recallVisitor, { types });
@@ -33,11 +46,11 @@ function createHandler(types: Babel["types"], path: NodePath, handlerParam : Ide
 // Transform a try-statement path and a handler into a `runProgram` call
 // TODO [major] - Capture errors into a continuation,
 // TODO [major] - Extend grammar to include a final catch clause, which will receive errors into the continuation.
-function createRuntimeRoot(
+const createWithHandlerInvocation = (
   types: typeof BabelTypes,
   path: NodePath<TryStatement>,
   handler: ObjectExpression
-) {
+) => {
   const mainFunctionExpression = types.functionExpression(
     null,
     [],
@@ -45,39 +58,11 @@ function createRuntimeRoot(
     true
   );
 
-  const runTimeRoot = types.callExpression(types.identifier("runProgram"), [
-    types.callExpression(types.identifier("withHandler"), [
-      handler,
-      types.callExpression(mainFunctionExpression, [])
-    ])
+  return types.callExpression(types.identifier("withHandler"), [
+    handler,
+    types.callExpression(mainFunctionExpression, [])
   ]);
-
-  path.replaceWith(runTimeRoot);
-  path.traverse(callExpressionVisitor, { types });
-}
-
-function createNestedHandler(
-  types: typeof BabelTypes,
-  path: NodePath<TryStatement>,
-  handler: ObjectExpression
-) {
-  const mainFunctionExpression = types.functionExpression(
-    null,
-    [],
-    path.node.block,
-    true
-  );
-
-  const yieldedHandler = types.yieldExpression(
-    types.callExpression(types.identifier("withHandler"), [
-      handler,
-      types.callExpression(mainFunctionExpression, [])
-    ])
-  );
-
-  path.replaceWith(yieldedHandler);
-  path.traverse(callExpressionVisitor, { types });
-}
+};
 
 export default function transformEffects({ types }: Babel): Plugin {
   return {
@@ -86,22 +71,38 @@ export default function transformEffects({ types }: Babel): Plugin {
       return parser.parse(code, opts);
     },
     visitor: {
-      TryStatement(path) {
-        const parentFunction = path.findParent(types.isFunction);
-        const handlerBody = path.get("handler.body") as any;
-        const handlerParam = path.get("handler.param") as any;
-        const handlerType = path.node.handler?.type;
+      Program: {
+        exit(path) {
+          path.traverse(effectsDirectiveVisitor, { types });
+        }
+      },
+      TryStatement: {
+        enter(path) {
+          const handlerBody = path.get("handler.body") as any;
+          const handlerParam = path.get("handler.param") as any;
+          const handlerType = path.node.handler?.type;
 
-        // @ts-ignore
-        if (handlerType !== "HandleClause" || !handlerBody || !handlerParam)
-          return;
+          // @ts-ignore
+          if (handlerType !== "HandleClause" || !handlerBody || !handlerParam)
+            return;
 
-        const handler = createHandler(types, handlerBody, handlerParam.node);
+          const handler = createHandler(types, handlerBody, handlerParam.node);
+          const withHandlerExpression = createWithHandlerInvocation(
+            types,
+            path,
+            handler
+          );
 
-        if (parentFunction === null) {
-          createRuntimeRoot(types, path, handler);
-        } else {
-          createNestedHandler(types, path, handler);
+          fixupParentGenerator(path, types);
+          const parent = path.findParent(types.isFunction) as NodePath<
+            BabelTypes.Function
+          >;
+
+          if (parent?.node?.generator) {
+            path.replaceWith(types.returnStatement(types.yieldExpression(withHandlerExpression)));
+          } else {
+            path.replaceWith(withHandlerExpression);
+          }
         }
       },
       UnaryExpression(path) {

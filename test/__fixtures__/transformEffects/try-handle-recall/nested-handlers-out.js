@@ -1,7 +1,7 @@
 function* main() {
   yield withHandler(
     {
-      *parent(data, resume) {
+      *parent(__e__, resume) {
         const result = yield function(handler) {
           stackResume(handler, false);
         };
@@ -18,7 +18,7 @@ function* main() {
 function* parent() {
   yield withHandler(
     {
-      *child(data, resume) {
+      *child(__e__, resume) {
         const result = yield function(handler) {};
         return yield resume(result);
       }
@@ -34,17 +34,19 @@ function* child() {
 }
 
 runProgram(
-  withHandler(
-    {
-      *main(data, resume) {
-        const result = yield function(handler) {
-          stackResume(handler, true);
-        };
-        return yield resume(result);
-      }
-    },
-    (function*() {
-      yield main();
-    })()
-  )
+  (function*() {
+    withHandler(
+      {
+        *main(__e__, resume) {
+          const result = yield function(handler) {
+            stackResume(handler, true);
+          };
+          return yield resume(result);
+        }
+      },
+      (function*() {
+        yield main();
+      })()
+    );
+  })()
 );

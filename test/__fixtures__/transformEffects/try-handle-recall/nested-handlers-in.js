@@ -1,32 +1,15 @@
-function main() {
-  try {
-    parent();
-    perform Main();
-  } handle (e) {
-    if (e.type === "parent") {
-      recall false;
-    }
-  }
-}
+const inboundResponseHandler = (req, res) => {
+  'use effects';
+  withLogPurgeHandler(
+      withLogHandler(
+          () => {
+            const {statusCode, message} = handleInboundRequest(req);
 
-function parent() {
-  try{
-    child();
-  }handle(e){
-    if(e.type === 'child'){
-
-    }
-  }
-}
-
-function child(){
-  perform Child();
-}
-
-try {
-  main();
-} handle (e) {
-  if (e.type === "main") {
-    recall true;
-  }
-}
+            res.statusCode = statusCode;
+            res.write(`${ message}\n`);
+            res.end();
+          },
+          req
+      )
+  )
+};

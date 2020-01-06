@@ -1,6 +1,6 @@
 require('../../lib/prelude-polyfill');
 
-const timesTwoHandler = ({number}) => {
+const timesTwoHandler = (number) => {
     recall (number * 2)
 };
 
@@ -13,6 +13,6 @@ try{
     main();
 } handle (e){
     if(e.type === 'timesTwo'){
-        timesTwoHandler(e);
+        timesTwoHandler(e.number);
     }
 }

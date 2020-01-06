@@ -11,8 +11,8 @@ const main = function* () {
   yield console.log('main end');
 };
 
-runProgram(withHandler({
-  *'sleepHandler'(__e__, resume) {
+withHandler({
+  *sleepHandler(__e__, resume) {
     const result = yield function (handler) {
       const asyncHandler = async () => {
         const start = Date.now();
@@ -30,4 +30,4 @@ runProgram(withHandler({
 
 }, function* () {
   yield main();
-}()));
+}());

@@ -278,7 +278,7 @@ describe("Effects Unit Tests", () => {
       addHandler(controlFrame, handler);
       stackResume(controlFrame);
 
-      expect(handlerSpy).toHaveBeenCalledWith({data : expectedValue});
+      expect(handlerSpy).toHaveBeenCalledWith({ data: expectedValue });
     });
 
     it("Should pass an data from the effect handler back to the control frame", () => {

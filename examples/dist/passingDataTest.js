@@ -8,20 +8,18 @@ const main = function* () {
   yield console.log(result);
 };
 
-runProgram(withHandler({
-  *'timesTwo'(__e__, resume) {
+withHandler({
+  *timesTwo(__e__, resume) {
     const result = yield function (handler) {
-      const timesTwoHandler = ({
-        number
-      }) => {
+      const timesTwoHandler = number => {
         stackResume(handler, number * 2);
       };
 
-      timesTwoHandler(__e__);
+      timesTwoHandler(__e__.number);
     };
     return yield resume(result);
   }
 
 }, function* () {
   yield main();
-}()));
+}());

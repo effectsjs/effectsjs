@@ -40,7 +40,8 @@ const unwindStack = (e: Error | any, frame: StackFrame) => {
 
 export const stackResume = (gen: Generator | StackFrame, arg?: any) => {
   if (!isIterator(gen)) {
-    throw new InvalidStackFrameError();
+    // throw new InvalidStackFrameError();
+    return gen;
   }
 
   try {

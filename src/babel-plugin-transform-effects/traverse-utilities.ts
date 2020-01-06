@@ -1,6 +1,17 @@
 import { NodePath } from "@babel/traverse";
-import BabelTypes, { ArrowFunctionExpression } from "@babel/types";
+import BabelTypes, {
+  ArrowFunctionExpression, BlockStatement,
+  CallExpression,
+  VariableDeclarator
+} from "@babel/types";
 import { Babel } from "./index";
+import {yieldCallExpressionVisitor} from "./to-generator-visitor";
+
+export const hasEffectsDirective = (path : NodePath<BabelTypes.Function>) => {
+  return (path.get('body.directives') as NodePath[])?.map(directive => {
+    return (directive.get('value.value') as NodePath)?.node as unknown as string
+  }).includes('use effects');
+};
 
 export const arrowExpressionToGenerator = (
   types: Babel["types"],
@@ -20,17 +31,18 @@ export const arrowExpressionToGenerator = (
 };
 
 // Starting from a child path, find the parent function and convert it to a generator.
+// Because we cannot predict what the value of call expressions will be, we must yield them to the stack interpreter.
 export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
   const parentFunctionPath = path.findParent(x => x.isFunction()) as NodePath<
     BabelTypes.Function
   >;
 
   if (!parentFunctionPath) {
-    // TODO: Way more specific error message
-    throw new Error(
-      "Encountered an expression that must be performed within a generator"
-    );
+    // TODO: Think about what needs to be done here... Can we safely just return?
+    return;
   }
+
+  if(hasEffectsDirective(parentFunctionPath)) return;
 
   if (!parentFunctionPath?.node?.generator) {
     if (types.isArrowFunctionExpression(parentFunctionPath.node)) {
@@ -42,6 +54,41 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
       );
     } else {
       parentFunctionPath.node.generator = true;
+    }
+
+    parentFunctionPath.get('body')?.traverse(yieldCallExpressionVisitor, {types});
+    const name = types.isFunctionDeclaration(parentFunctionPath.node)
+      ? parentFunctionPath.node.id?.name
+      : (parentFunctionPath.parentPath.node as any)?.id?.name;
+
+    if (name) {
+      const bindingScope = parentFunctionPath.findParent(x =>
+        x.scope.hasBinding(name)
+      );
+
+      bindingScope.scope.getBinding(name)?.referencePaths.forEach(reference => {
+        const expStatementParent = reference.findParent(
+          types.isExpressionStatement
+        );
+
+        if(!expStatementParent) return;
+
+        const isYield = types.isYieldExpression(
+          expStatementParent.get("expression")
+        );
+
+        if (!isYield) {
+          const callExpression = reference.findParent(
+            types.isCallExpression
+          ) as NodePath<CallExpression>;
+
+          callExpression?.replaceWith(
+            types.yieldExpression(callExpression.node)
+          );
+
+          fixupParentGenerator(reference, types);
+        }
+      });
     }
   }
 };

@@ -1,7 +1,7 @@
 runProgram(
   withHandler(
     {
-      *getResponseFromFirstMate(data, resume) {
+      *getResponseFromFirstMate(__e__, resume) {
         const result = yield function(handler) {
           stackResume(handler, "Aye Aye Captain!");
         };
