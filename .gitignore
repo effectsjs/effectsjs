@@ -37,3 +37,4 @@ node_modules
 # transpiled file directory
 lib
 scratches
+examples/dist
