@@ -1,15 +1,11 @@
-import { Visitor, NodePath } from "@babel/traverse";
-import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
-import { parse } from "@babel/parser";
-const parser = require("../../babel/packages/babel-parser/lib");
-import { handlerMethodVisitor } from "./handler-method-visitor";
-import { recallVisitor } from "./recall-visitor";
-import { performVisitor } from "./perform-visitor";
-import {
-  callExpressionVisitor,
-  toGeneratorVisitor
-} from "./to-generator-visitor";
+import { callExpressionVisitor } from "./to-generator-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
+import { handlerMethodVisitor } from "./handler-method-visitor";
+import { NodePath, Visitor } from "@babel/traverse";
+import { parse } from "@babel/parser";
+import { recallVisitor } from "./recall-visitor";
+import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
+const parser = require("../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
   visitor: Visitor;
