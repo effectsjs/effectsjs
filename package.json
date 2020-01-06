@@ -2,13 +2,14 @@
   "name": "effects-js",
   "version": "0.0.1",
   "description": "Algebraic Effects For Javascript 🎉",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "test": "jest --collectCoverage",
     "fixup": "prettier --write ./{test,src}/**/*.{js,ts}",
+    "compile": "tsc",
     "clean": "rm -rf ./lib || true",
-    "build:example" : "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
-    "build:source": "npm run clean && tsc"
+    "build:example": "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
+    "build:source": "run-s clean compile"
   },
   "keywords": [
     "algebraic",
@@ -28,6 +29,7 @@
     "babel-plugin-tester": "^8.0.1",
     "babel-test": "^0.2.3",
     "jest": "^24.9.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "ts-jest": "^24.2.0",
     "ts-node": "^8.5.4",
