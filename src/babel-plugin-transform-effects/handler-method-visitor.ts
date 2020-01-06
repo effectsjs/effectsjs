@@ -14,6 +14,34 @@ const isCorrectMemberPropertyPath = (
     types.isStringLiteral(memberPropertyNode)
   );
 };
+
+const extractMemberPropertyPathName = (
+  parentPath: NodePath,
+  types: typeof BabelTypes,
+  memberPropertyNode: BabelTypes.Node
+) => {
+  if (types.isStringLiteral(memberPropertyNode)) {
+    return types.identifier(memberPropertyNode.value);
+  } else if (types.isIdentifier(memberPropertyNode)) {
+    const binding = parentPath.scope.getBinding(memberPropertyNode.name) as any;
+
+    if (!binding) {
+      throw new Error(
+        `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
+      );
+    }
+
+    return extractMemberPropertyPathName(
+      binding.path.parent,
+      types,
+      binding?.path.node.init
+    );
+  }
+
+  throw new Error(
+    `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
+  );
+};
 /**
  * From within a handle block,
  *
@@ -22,7 +50,12 @@ const isCorrectMemberPropertyPath = (
  */
 export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
   HandlerCreationPrototype> = {
-  IfStatement(path, { types, handlerObject }) {
+  Identifier(path, { handlerParam }) {
+    if (path.node.name === handlerParam.name) {
+      path.node.name = `__${path.node.name}__`;
+    }
+  },
+  IfStatement(path, { types, handlerObject, handlerParam }) {
     const testPath = path.get("test");
     const consequent = path.get("consequent") as any;
     const memberPropertyPath = path.get("test.right") as NodePath<
@@ -34,6 +67,12 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
     if (!types.isMemberExpression(testPath.node.left)) return;
     if (!memberPropertyPath) return;
     if (!isCorrectMemberPropertyPath(types, memberPropertyPath.node)) return;
+
+    const handlerPropertyName = extractMemberPropertyPathName(
+      path,
+      types,
+      memberPropertyPath.node
+    );
 
     // Collect all call expressions located inside of the handler (consequent block)
     const callExpressionDeclarations: Node[] = [];
@@ -70,8 +109,11 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
 
     const objectMethod = types.objectMethod(
       "method",
-      memberPropertyPath.node,
-      [types.identifier("data"), types.identifier("resume")],
+      handlerPropertyName ? handlerPropertyName : memberPropertyPath.node,
+      [
+        types.identifier(`__${this.handlerParam.name}__`),
+        types.identifier("resume")
+      ],
       types.blockStatement([
         resultContinuation,
         types.returnStatement(
@@ -88,9 +130,15 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
     objectMethod.generator = true;
 
     handlerObject.properties.push(objectMethod);
+
     const alternate = path.get("alternate");
+
     if (alternate) {
-      path.traverse(handlerMethodVisitor, { types, handlerObject });
+      path.traverse(handlerMethodVisitor, {
+        types,
+        handlerObject,
+        handlerParam
+      });
     }
     path.remove();
   }

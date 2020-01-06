@@ -1,3 +1,4 @@
+'use effects';
 try{
     aMethod()
 } handle (e){

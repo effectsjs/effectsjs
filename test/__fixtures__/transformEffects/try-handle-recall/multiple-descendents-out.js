@@ -13,9 +13,9 @@ const b = function*() {
 runProgram(
   withHandler(
     {
-      *log(data, resume) {
+      *log(__e__, resume) {
         const result = yield function(handler) {
-          console.log(e.message);
+          console.log(__e__.message);
         };
         return yield resume(result);
       }

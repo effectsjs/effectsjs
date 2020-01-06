@@ -9,9 +9,9 @@ const handleTheOtherThing = () => {
 try{
     const messageFromTheThing = perform ({type : 'the thing'})
 }handle(e){
-    if(e.type === 'the thing'){
+    if(e.type === 'the_thing'){
         handleTheThing(e);
-    }else if(e.type === 'the other thing'){
+    }else if(e.type === 'the_other_thing'){
         handleTheOtherThing(e);
     }
 }

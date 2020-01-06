@@ -1,24 +1,24 @@
 runProgram(
   withHandler(
     {
-      *"the thing"(data, resume) {
+      *the_thing(__e__, resume) {
         const result = yield function(handler) {
           function handleTheThing() {
             stackResume(handler, "The thing has been dealth with.");
           }
 
-          handleTheThing(e);
+          handleTheThing(__e__);
         };
         return yield resume(result);
       },
 
-      *"the other thing"(data, resume) {
+      *the_other_thing(__e__, resume) {
         const result = yield function(handler) {
           const handleTheOtherThing = () => {
             stackResume(handler, "The other thing has been dealt with.");
           };
 
-          handleTheOtherThing(e);
+          handleTheOtherThing(__e__);
         };
         return yield resume(result);
       }

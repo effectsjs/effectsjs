@@ -40,7 +40,8 @@ const unwindStack = (e: Error | any, frame: StackFrame) => {
 
 export const stackResume = (gen: Generator | StackFrame, arg?: any) => {
   if (!isIterator(gen)) {
-    throw new InvalidStackFrameError();
+    // throw new InvalidStackFrameError();
+    return gen;
   }
 
   try {
@@ -78,7 +79,7 @@ export const runProgram = (root: Generator, continuation?: Continuation) => {
   stackResume(root, null);
 };
 
-export const performEffect = ({ type, data }: Effect) => (
+export const performEffect = ({ type, ...data }: Effect) => (
   currentFrame: Generator
 ) => {
   const frameWithEffectHandler = findHandlerFrame(currentFrame, type);

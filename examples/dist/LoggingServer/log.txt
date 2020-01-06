@@ -1,0 +1,153 @@
+12/24/2019, 5:56:34 PM - 127.0.0.1 - Inbound Request
+12/24/2019, 5:56:34 PM - 127.0.0.1 - Sending response : Wowie!
+12/24/2019, 5:57:49 PM - 127.0.0.1 - Inbound Request
+12/24/2019, 5:57:49 PM - 127.0.0.1 - Sending response : Swell!
+12/24/2019, 6:19:13 PM - 127.0.0.1 - Inbound Request /hello
+12/24/2019, 6:19:57 PM - 127.0.0.1 - Inbound Request /hello
+12/24/2019, 6:20:57 PM - 127.0.0.1 - Inbound Request /hello
+1/4/2020, 5:10:35 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:10:35 PM - 127.0.0.1 - Sending message : undefined
+1/4/2020, 5:11:20 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:12:19 PM - 127.0.0.1 - Sending message : undefined
+1/4/2020, 5:12:28 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:12:28 PM - 127.0.0.1 - Sending message : undefined
+1/4/2020, 5:13:29 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:13:29 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 5:13:29 PM - 127.0.0.1 - Sending message : Complete!
+1/4/2020, 5:13:35 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:13:35 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 5:13:35 PM - 127.0.0.1 - Sending message : Complete!
+1/4/2020, 5:28:40 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:29:46 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:29:58 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 5:29:58 PM - 127.0.0.1 - Sending message : undefined
+1/4/2020, 5:30:57 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:31:14 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 5:31:14 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 5:31:26 PM - 127.0.0.1 - Sending message : Swell!
+1/4/2020, 5:31:44 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:31:45 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 5:31:45 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 5:31:46 PM - 127.0.0.1 - Sending message : Swell!
+1/4/2020, 5:57:39 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 5:57:39 PM - 127.0.0.1 - Sending message : undefined
+1/4/2020, 6:10:30 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:10:30 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:10:30 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:10:30 PM - 127.0.0.1 - Sending message : Complete!
+1/4/2020, 6:10:54 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/4/2020, 6:10:54 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:36:57 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/4/2020, 6:36:57 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:37:10 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:37:10 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:37:10 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:37:10 PM - 127.0.0.1 - Sending message : Complete!
+1/4/2020, 6:37:31 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:37:31 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:37:31 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:37:31 PM - 127.0.0.1 - Sending message : Swell!
+1/4/2020, 6:38:50 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:38:50 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:38:50 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:38:50 PM - 127.0.0.1 - Sending message : Swell!
+1/4/2020, 6:39:31 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:39:31 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:39:31 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:39:31 PM - 127.0.0.1 - Sending message : Wowie!
+1/4/2020, 6:40:46 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:40:46 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:40:46 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:40:46 PM - 127.0.0.1 - Sending message : Swell!
+1/4/2020, 6:41:05 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/4/2020, 6:41:05 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:46:15 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:46:18 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:47:18 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:47:24 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:47:27 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:47:34 PM - 127.0.0.1 - Sending message : Complete!
+1/4/2020, 6:51:23 PM - 127.0.0.1 - Inbound Request /
+1/4/2020, 6:51:23 PM - 127.0.0.1 - Getting response from uri
+1/4/2020, 6:51:23 PM - 127.0.0.1 - Generating silly response
+1/4/2020, 6:51:23 PM - 127.0.0.1 - Sending message : Wowie!
+1/5/2020, 3:00:15 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:00:15 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:00:15 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:00:15 PM - 127.0.0.1 - Sending message : Wowie!
+1/5/2020, 3:02:18 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:02:18 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:14:26 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:14:26 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:14:36 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:14:36 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:14:36 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:14:36 PM - 127.0.0.1 - Sending message : Swell!
+1/5/2020, 3:22:32 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:22:32 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:22:32 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:22:32 PM - 127.0.0.1 - Sending message : Swell!
+1/5/2020, 3:22:36 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:22:36 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:25:33 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:25:33 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:25:33 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:25:33 PM - 127.0.0.1 - Sending message : Wowie!
+1/5/2020, 3:25:36 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:25:36 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:26:29 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:26:30 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:32:24 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:32:24 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:33:06 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:33:06 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:33:18 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:33:18 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:33:18 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:33:18 PM - 127.0.0.1 - Sending message : Wowie!
+1/5/2020, 3:34:53 PM - 127.0.0.1 - Inbound Request /
+1/5/2020, 3:34:53 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:34:53 PM - 127.0.0.1 - Generating silly response
+1/5/2020, 3:34:53 PM - 127.0.0.1 - Sending message : Complete!
+1/5/2020, 3:34:56 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:34:56 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:37:04 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:37:04 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:39:03 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:39:03 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:42:19 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:42:19 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:44:14 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:44:14 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:44:42 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:44:44 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:45:15 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:45:15 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:45:40 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:45:41 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 3:54:10 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 3:54:19 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:00:50 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:00:53 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:02:13 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:02:14 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:06:01 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:06:01 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:07:28 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:07:28 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:15:53 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:15:53 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:17:32 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:17:32 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:18:13 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:18:13 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:18:30 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:18:30 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:19:21 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:19:21 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:19:42 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:19:42 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:20:01 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:20:01 PM - 127.0.0.1 - Getting response from uri
+1/5/2020, 4:22:13 PM - 127.0.0.1 - Inbound Request /purge-logs
+1/5/2020, 4:22:13 PM - 127.0.0.1 - Getting response from uri

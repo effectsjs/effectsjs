@@ -1,7 +1,7 @@
 require('../../lib/prelude-polyfill');
 
-runProgram(withHandler({
-  *'effect'(data, resume) {
+withHandler({
+  *effect(__e__, resume) {
     const result = yield function (handler) {
       stackResume(handler, "Effect Result");
     };
@@ -12,5 +12,5 @@ runProgram(withHandler({
   const result = yield performEffect({
     type: 'effect'
   });
-  yield console.log(result);
-}()));
+  console.log(result);
+}());
