@@ -19,7 +19,7 @@
     "flow"
   ],
   "author": "Dave Campion",
-  "license": "MIT",
+  "license": "ISC",
   "devDependencies": {
     "@babel/helper-plugin-test-runner": "^7.7.4",
     "@babel/parser": "^7.7.7",
