@@ -15,7 +15,7 @@ try{
 }
 ```
 
-Where `perform` allows you to step into a previous stack frame, do something, then (optionally) return to the 
+Where `perform` allows you to step into a previous stack frame, do something, then (optionally) return to the
 original stack frame with some new data.
 
 This works with async handlers:
@@ -49,17 +49,17 @@ Introducing Effects provides some nifty advantages:
 - Program in a true direct style.
     - Isolate async actions to effect handlers, write your program directly
 - Encapsulate side effects, perform them in a controlled manner
-    - Effect handlers provide an interface to perform side-effects in a scoped environment 
+    - Effect handlers provide an interface to perform side-effects in a scoped environment
     without polluting descendent scopes
 - Improve function purity
-    
+
     - Being a more controlled form of Delimited Continuation, the relationship between performer -> effect -> handler
     allows for delimiting scoped definitions and writing pure functions to perform into into them
-    
-    - Instead of passing dependencies through you program to make them accessible anywhere, 
+
+    - Instead of passing dependencies through you program to make them accessible anywhere,
     effects allow you to _delimit_ scope accessible to descendants.
-    
-         
+
+
 
 
 ## Try it out
@@ -70,9 +70,12 @@ The repo contains a babel fork as a sub module. The babel fork introduces three 
 - `handle` - To delimit an effect handler
 - `recall` - (needs a better name) - To resume into the frame that performed.
 
-You'll need to do cd into the babel fork run the following commands:
+You'll need to run the following commands to setup the babel fork:
 
 ```
+git submodule init
+git submodule update
+cd babel
 make bootstrap
 make build
 ```
