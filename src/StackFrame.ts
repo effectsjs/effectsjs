@@ -14,7 +14,7 @@ export interface StackFrameSymbols {
 
 export type Continuation = (...args: any[]) => any;
 
-export type StackFrame = Generator & StackFrameSymbols;
+export type StackFrame = (Generator | AsyncGenerator) & StackFrameSymbols;
 
 export type FrameLink = StackFrame | Continuation | null;
 

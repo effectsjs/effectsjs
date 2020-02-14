@@ -1,21 +1,15 @@
 import {
   addHandler,
   addReturn,
-  Continuation,
   findHandlerFrame,
   FrameLink,
   getHandler,
   getReturnFrame,
   isRootContinuation,
-  setRootContinuation,
   StackFrame,
 } from "./StackFrame";
-import { exists, isContinuation, isIterator } from "./util";
+import { exists, isContinuation, isIterator, isAsyncGenerator } from "./util";
 import { Effect, Handler } from "./types/Effects";
-
-export class InvalidStackFrameError extends Error {
-  message = `Received a non-iterator-like input at top-level resume call. This is likely a plumbing issue. And if you\'re encountering this, the babel-plugin-effects-transform is likely acting up.`;
-}
 
 export class UnhandledEffectError extends TypeError {
   constructor({ type }: Effect) {
@@ -38,31 +32,32 @@ const unwindStack = (e: Error | any, frame: StackFrame) => {
   else throw e;
 };
 
-export const stackResume = (gen: Generator | StackFrame, arg?: any) => {
+export const stackResume = async (gen: Generator | StackFrame | any, arg?: any) : Promise<any> => {
   if (!isIterator(gen)) {
-    // throw new InvalidStackFrameError();
     return gen;
   }
 
   try {
-    const { value, done } = gen.next(arg);
+    const { value, done } = await gen.next(arg);
 
     if (!done) {
       if (isIterator(value)) {
         addReturn(value, gen);
-        stackResume(value, null);
+        return await stackResume(value, null);
       } else if (isContinuation(value)) {
-        value(gen);
+        return await value(gen);
       } else {
-        stackResume(gen, value);
+        return await stackResume(gen, value);
       }
     } else {
       const returnFrame = getReturnFrame(gen);
 
       if (isIterator(returnFrame)) {
-        stackResume(returnFrame, value);
+        return await stackResume(returnFrame, value);
       } else if (isContinuation(returnFrame)) {
-        returnFrame(value);
+        return await returnFrame(value);
+      } else {
+        return arg;
       }
     }
   } catch (e) {
@@ -70,16 +65,11 @@ export const stackResume = (gen: Generator | StackFrame, arg?: any) => {
   }
 };
 
-export const runProgram = (root: Generator, continuation?: Continuation) => {
-  if (exists(continuation)) {
-    setRootContinuation(continuation);
-    addReturn(root, continuation);
-  }
-
-  stackResume(root, null);
+export const runProgram = async (root: Generator) => {
+  return await stackResume(root, null);
 };
 
-export const performEffect = ({ type, ...data }: Effect) => (
+export const performEffect = ({ type, ...data }: Effect) => async (
   currentFrame: Generator
 ) => {
   const frameWithEffectHandler = findHandlerFrame(currentFrame, type);
@@ -110,18 +100,18 @@ export const performEffect = ({ type, ...data }: Effect) => (
      * It's possible to do something with that frame.. but I don't think it's necessary,
      * just resume the frame that performed with the result of the perform.
      */
-    (currentControlFrame: StackFrame) => {
-      stackResume(currentFrame, handlerFnResult);
+    async (currentControlFrame: StackFrame) => {
+      return await stackResume(currentFrame, handlerFnResult);
     };
 
   const handlerFrame = handlerFrameCreator(data, capturedContinuation);
 
   addReturn(handlerFrame, getReturnFrame(frameWithEffectHandler));
 
-  stackResume(handlerFrame);
+  return await stackResume(handlerFrame);
 };
 
-export const withHandler = (handler: Handler, frame: Generator) => {
+export const withHandler = (handler: Handler, frame: StackFrame) => {
   const handlerFrame = (function*() {
     return yield frame;
   })();

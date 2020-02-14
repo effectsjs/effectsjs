@@ -44,7 +44,8 @@ const createWithHandlerInvocation = (
     null,
     [],
     path.node.block,
-    true
+    true,
+      true
   );
 
   return types.callExpression(types.identifier("withHandler"), [
@@ -63,6 +64,19 @@ export default function transformEffects({ types }: Babel): Plugin {
       Program: {
         exit(path) {
           path.traverse(effectsDirectiveVisitor, { types });
+          // path.traverse({
+          //   CallExpression(path, {types}){
+          //     const id = (path.get('callee.name') as any).node;
+          //     if(id === 'stackResume'){
+          //       path.replaceWith(
+          //           types.returnStatement(
+          //               path.node
+          //           )
+          //       )
+          //       path.skip();
+          //     }
+          //   }
+          // }, {types})
         }
       },
       TryStatement: {
@@ -115,6 +129,12 @@ export default function transformEffects({ types }: Babel): Plugin {
               path.node.argument
             ])
           );
+
+          path.findParent(types.isExpressionStatement)?.replaceWith(
+              types.returnStatement(
+                  path.node
+              )
+          )
         }
       }
     }

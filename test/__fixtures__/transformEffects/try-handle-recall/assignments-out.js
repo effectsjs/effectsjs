@@ -13,4 +13,4 @@ runProgram(
       yield main();
     })()
   )
-);
+)

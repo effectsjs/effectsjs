@@ -20,6 +20,16 @@ function createRuntimeRoot(
   ]);
 }
 
+const runProgramYieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
+  Identifier(idPath, {types}){
+    if(idPath.node.name === 'runProgram'){
+      (idPath.findParent(types.isCallExpression)?.get('arguments') as any)?.forEach(
+          n => n.traverse(yieldCallExpressionVisitor, {types, skipChildTraversal : true})
+      );
+    }
+  }
+};
+
 export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
   ExpressionStatement(path, { types }) {
     const expression = path.get("expression")?.node;
@@ -45,6 +55,7 @@ export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
         }
 
       path.replaceWith(createRuntimeRoot(types, continuation));
+        path.traverse(runProgramYieldCallExpressionVisitor, {types});
     }
   },
   Directive(path, {types}){
@@ -60,16 +71,12 @@ export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
     }
 
     blockParent.node.body = [
-        types.expressionStatement(createRuntimeRoot(types, blockParent.node.body))
+        types.returnStatement(
+                createRuntimeRoot(types, blockParent.node.body),
+        )
     ];
 
-    blockParent.traverse({
-      Identifier(idPath){
-        if(idPath.node.name === 'runProgram'){
-          (idPath.findParent(types.isCallExpression)?.get('arguments') as any)?.forEach(n => n.traverse(yieldCallExpressionVisitor, {types}));
-        }
-      }
-    });
+    blockParent.traverse(runProgramYieldCallExpressionVisitor, {types});
 
 
     path.remove();

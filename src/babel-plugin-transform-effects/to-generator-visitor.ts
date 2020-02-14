@@ -2,10 +2,10 @@ import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 import { Visitor, NodePath } from "@babel/traverse";
 import BabelTypes, {
   ArrowFunctionExpression,
-  CallExpression, ExpressionStatement
 } from "@babel/types";
 import {arrowExpressionToGenerator, fixupParentGenerator} from "./traverse-utilities";
 import { performVisitor } from "./perform-visitor";
+import {exists} from "../util";
 
 export const toGeneratorVisitor: Visitor<TypesVisitorPrototype> = {
   Function(path, { types }) {
@@ -58,7 +58,7 @@ export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
 };
 
 export const yieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
-  CallExpression(path, {types}) {
+  CallExpression(path, {types, skipChildTraversal}) {
     const immediateParent = path.parent;
     if (types.isYieldExpression(immediateParent)) return;
 
@@ -69,5 +69,9 @@ export const yieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
     // Safety First
 
     fixupParentGenerator(path, types);
+
+    if(exists(skipChildTraversal) && Boolean(skipChildTraversal)){
+      path.skip();
+    }
   }
 };

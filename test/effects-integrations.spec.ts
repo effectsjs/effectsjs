@@ -4,7 +4,6 @@
 
 import { performEffect, runProgram, stackResume, withHandler } from "../src";
 import { Effect, Handler } from "../src/types/Effects";
-import { assignmentPattern } from "@babel/types";
 
 describe("Effect Integrations", () => {
   test("Relationship between descendent frames", () => {
@@ -26,7 +25,7 @@ describe("Effect Integrations", () => {
     runProgram(parent());
   });
 
-  test("Execution order of descendant frames", () => {
+  test("Execution order of descendant frames", async () => {
     const executionOrder: string[] = [];
     const addExecution = (title: string) => executionOrder.push(title);
     function* parent() {
@@ -46,7 +45,7 @@ describe("Effect Integrations", () => {
       addExecution("childB call");
     }
 
-    runProgram(parent());
+    await runProgram(parent());
 
     expect(executionOrder).toEqual([
       "parent start",
@@ -58,7 +57,7 @@ describe("Effect Integrations", () => {
     ]);
   });
 
-  test("Execution order with handlers", () => {
+  test("Execution order with handlers",  async() => {
     const executionOrder: string[] = [];
     const addExecution = (title: string) => executionOrder.push(title);
 
@@ -85,7 +84,7 @@ describe("Effect Integrations", () => {
 
     const program = withHandler(handler, parent());
 
-    runProgram(program);
+    await runProgram(program);
 
     expect(executionOrder).toEqual([
       "parent pre effect",
@@ -97,7 +96,7 @@ describe("Effect Integrations", () => {
     ]);
   });
 
-  test("Execution order of async handlers", done => {
+  test("Execution order of async handlers", async () => {
     const executionOrder: string[] = [];
     const addExecution = (title: string) => executionOrder.push(title);
 
@@ -106,9 +105,11 @@ describe("Effect Integrations", () => {
         addExecution("testCps start");
 
         yield handler => {
-          setTimeout(() => {
-            stackResume(handler);
-          }, 10);
+          return new Promise(res => {
+            setTimeout(() => {
+              stackResume(handler).then(res);
+            }, 10);
+          });
         };
 
         addExecution("testCps end");
@@ -122,7 +123,7 @@ describe("Effect Integrations", () => {
           const p = new Promise(res => setTimeout(res, 10));
           await p;
 
-          stackResume(handler);
+          await stackResume(handler);
         };
 
         addExecution("testAsync end");
@@ -130,34 +131,34 @@ describe("Effect Integrations", () => {
       }
     };
 
-    function* parent() {
+    async function* parent() {
       addExecution("parent pre cps effect");
-      yield performEffect({ type: "testCps" });
+      yield await performEffect({ type: "testCps" });
       addExecution("parent post cps effect");
       addExecution("parent pre async effect");
-      yield performEffect({ type: "testAsync" });
+      yield await performEffect({ type: "testAsync" });
       addExecution("parent post async effect");
     }
 
-    const program = withHandler(handler, parent());
+    const program = (function* () {
+      yield withHandler(handler, parent())
+    })();
 
-    runProgram(program, () => {
-      expect(executionOrder).toEqual([
-        "parent pre cps effect",
-        "testCps start",
-        "testCps end",
-        "parent post cps effect",
-        "parent pre async effect",
-        "testAsync start",
-        "testAsync end",
-        "parent post async effect"
-      ]);
+    await runProgram(program);
 
-      done();
-    });
+    expect(executionOrder).toEqual([
+      "parent pre cps effect",
+      "testCps start",
+      "testCps end",
+      "parent post cps effect",
+      "parent pre async effect",
+      "testAsync start",
+      "testAsync end",
+      "parent post async effect"
+    ]);
   });
 
-  test("Async handler timing", done => {
+  test("Async handler timing", async () => {
     expect.assertions(4);
 
     const handler = {
@@ -191,7 +192,7 @@ describe("Effect Integrations", () => {
       })()
     );
 
-    runProgram(program, done);
+    await runProgram(program);
   });
 
   test("Happy path with handler bubbling", () => {
@@ -223,7 +224,7 @@ describe("Effect Integrations", () => {
     }).not.toThrow();
   });
 
-  test("Sad path with handler bubbling", () => {
+  test("Sad path with handler bubbling", async () => {
     expect.assertions(1);
     const parentHandler = {
       *parent(_, resume) {
@@ -247,9 +248,7 @@ describe("Effect Integrations", () => {
       yield performEffect({ type: "child" });
     }
 
-    expect(() => {
-      runProgram(withHandler(parentHandler, parent()));
-    }).toThrow();
+    await expect(runProgram(withHandler(parentHandler, parent()))).rejects.toThrow()
   });
 
   test("Relationship between effects", () => {
@@ -274,4 +273,40 @@ describe("Effect Integrations", () => {
       runProgram(withHandler(handler, parent()));
     }).not.toThrow();
   });
+
+  test('Test', async () => {
+    const getIntegerHandler = 'getInteger';
+
+    const GetIntegerEffect = () => ({
+      type: getIntegerHandler
+    });
+
+    const expectation = 5;
+
+    const main = async () => {
+      return runProgram(function* () {
+        yield withHandler({
+          *getInteger(__e__, resume) {
+            const result = yield function (handler) {
+              return stackResume(handler, expectation);
+            };
+            return yield resume(result);
+          }
+
+        }, async function* () {
+          return await (yield asyncChild());
+        }());
+      }());
+    };
+
+    const asyncChild = async function* () {
+      const a = yield performEffect((yield GetIntegerEffect()));
+      const result = await (yield Promise.resolve(a));
+      return result;
+    };
+
+    const result = await main();
+
+    expect(result).not.toBeUndefined();
+  })
 });

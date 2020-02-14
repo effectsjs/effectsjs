@@ -3,29 +3,27 @@ import {
   runProgram,
   performEffect,
   withHandler,
-  InvalidStackFrameError,
   UnhandledEffectError
 } from "../src";
 import {
   addHandler,
   addReturn,
-  Continuation,
   getHandler,
   isRootContinuation,
   setRootContinuation
 } from "../src/StackFrame";
-import { Handler, HandlerDefinition } from "../src/types/Effects";
+import { Handler } from "../src/types/Effects";
 
 describe("Effects Unit Tests", () => {
   describe("stackResume", () => {
-    it("Should throw an InvalidStackFrame error upon receiving a non generator input", () => {
-      const dummyFrame = ((() => {}) as unknown) as Generator;
-      expect(() => stackResume(dummyFrame)).toThrowError(
-        InvalidStackFrameError
-      );
+
+    it("Should return identity when input is not a generator", async () => {
+      const data = Symbol('Data') as unknown as Generator;
+
+      await expect(stackResume(data)).resolves.toBe(data)
     });
 
-    it("Should run a generator until completion", () => {
+    it("Should run a generator until completion", async () => {
       function* test() {
         yield 1;
         yield 2;
@@ -34,7 +32,7 @@ describe("Effects Unit Tests", () => {
 
       const testInstance = test();
 
-      stackResume(testInstance);
+      await stackResume(testInstance);
 
       expect(testInstance.next()).toEqual({
         value: undefined,
@@ -55,20 +53,20 @@ describe("Effects Unit Tests", () => {
       stackResume(test());
     });
 
-    it(`Should call a continuation yielded by a generator with the generator as it's only argument`, () => {
+    it(`Should call a continuation yielded by a generator with the generator as it's only argument`, async() => {
       const spy = jest.fn();
       function* test() {
         yield spy;
       }
       const testInstance = test();
 
-      stackResume(testInstance);
+      await stackResume(testInstance);
 
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledWith(testInstance);
     });
 
-    it(`Should resume a generator yielded by a generator`, () => {
+    it(`Should resume a generator yielded by a generator`, async () => {
       const childSpy = jest.fn();
 
       function* parent() {
@@ -81,12 +79,12 @@ describe("Effects Unit Tests", () => {
         childSpy();
       }
 
-      stackResume(parent());
+      await stackResume(parent());
 
       expect(childSpy).toHaveBeenCalledTimes(2);
     });
 
-    it(`Should preserve execution order of parent/child frames`, () => {
+    it(`Should preserve execution order of parent/child frames`, async () => {
       const executionOrder: any[] = [];
       const addExecution = (input: any) => void executionOrder.push(input);
 
@@ -103,7 +101,7 @@ describe("Effects Unit Tests", () => {
         yield;
       }
 
-      stackResume(parent());
+      await stackResume(parent());
 
       expect(executionOrder).toMatchSnapshot([
         "parent1",
@@ -113,7 +111,7 @@ describe("Effects Unit Tests", () => {
       ]);
     });
 
-    it(`Should return the result of the child frame to the parent `, () => {
+    it(`Should return the result of the child frame to the parent `, async () => {
       expect.assertions(1);
       const result = Symbol();
       function* parent() {
@@ -128,10 +126,10 @@ describe("Effects Unit Tests", () => {
         return result;
       }
 
-      stackResume(parent());
+      await stackResume(parent());
     });
 
-    it(`Should call the return frame if the return frame is a continuation`, () => {
+    it(`Should call the return frame if the return frame is a continuation`, async () => {
       const result = Symbol();
       function* test() {
         yield;
@@ -144,21 +142,21 @@ describe("Effects Unit Tests", () => {
 
       addReturn(testInstance, continuation);
 
-      stackResume(testInstance);
+      await stackResume(testInstance);
 
       expect(continuation).toHaveBeenCalledWith(result);
     });
 
-    it(`Should throw an error should no root continuation exist`, () => {
+    it(`Should throw an error should no root continuation exist`, async() => {
       function* test() {
         yield;
         throw new Error("Error");
       }
 
-      expect(() => stackResume(test())).toThrowError("Error");
+      await expect(stackResume(test())).rejects.toThrowError("Error");
     });
 
-    it(`Should pass an error onto the root continuation if it exists`, () => {
+    it(`Should pass an error onto the root continuation if it exists`, async () => {
       const error = new Error("Error");
       function* test() {
         yield;
@@ -171,7 +169,7 @@ describe("Effects Unit Tests", () => {
       setRootContinuation(rootContinuation);
       addReturn(program, rootContinuation);
 
-      expect(() => stackResume(program)).not.toThrow();
+      await expect(stackResume(program)).resolves.not.toThrow();
 
       expect(rootContinuation).toHaveBeenCalledWith(error);
     });
@@ -188,22 +186,6 @@ describe("Effects Unit Tests", () => {
       }
 
       runProgram(main());
-    });
-
-    it("Should attach and run the supplied continuation as the root continuation of the program", () => {
-      const programResult = Symbol();
-      const rootContinuation = jest.fn();
-
-      function* main() {
-        yield;
-        return programResult;
-      }
-
-      runProgram(main(), rootContinuation);
-
-      expect(isRootContinuation(rootContinuation)).toBe(true);
-      expect(rootContinuation).toHaveBeenCalledTimes(1);
-      expect(rootContinuation).toHaveBeenCalledWith(programResult);
     });
   });
 
@@ -236,13 +218,14 @@ describe("Effects Unit Tests", () => {
   });
 
   describe("perform", () => {
-    it("Should throw when a frame performs an effect that has not be handled", () => {
+    it("Should throw when a frame performs an effect that has not be handled", async () => {
       const performContinuation = performEffect({ type: "nonexist" });
+      const mockFrame = function*(){};
 
-      expect(performContinuation).toThrowError(UnhandledEffectError);
+      await expect(performContinuation(mockFrame())).rejects.toThrowError(UnhandledEffectError);
     });
 
-    it("Should call an effect handler", () => {
+    it("Should call an effect handler", async () => {
       const handlerSpy = jest.fn();
       const handler: Handler = {
         *test(_, resume) {
@@ -256,12 +239,12 @@ describe("Effects Unit Tests", () => {
       })();
 
       addHandler(controlFrame, handler);
-      stackResume(controlFrame);
+      await stackResume(controlFrame);
 
       expect(handlerSpy).toHaveBeenCalled();
     });
 
-    it("Should pass an effect handler data from the current frame", () => {
+    it("Should pass an effect handler data from the current frame", async () => {
       const handlerSpy = jest.fn();
       const expectedValue = Symbol();
       const handler: Handler = {
@@ -276,12 +259,12 @@ describe("Effects Unit Tests", () => {
       })();
 
       addHandler(controlFrame, handler);
-      stackResume(controlFrame);
+      await stackResume(controlFrame);
 
       expect(handlerSpy).toHaveBeenCalledWith({ data: expectedValue });
     });
 
-    it("Should pass an data from the effect handler back to the control frame", () => {
+    it("Should pass an data from the effect handler back to the control frame", async () => {
       const controlFrameSpy = jest.fn();
       const expectedValue = Symbol();
       const handler: Handler = {
@@ -299,24 +282,25 @@ describe("Effects Unit Tests", () => {
       })();
 
       addHandler(controlFrame, handler);
-      stackResume(controlFrame);
+      await stackResume(controlFrame);
 
       expect(controlFrameSpy).toHaveBeenCalledWith(expectedValue);
     });
 
-    it("Should fire arbitrary continuations before passing control back to the control frame", () => {
+    it("Should fire arbitrary continuations before passing control back to the control frame", async () => {
       const continuationSpy = jest.fn();
       const controlFrameSpy = jest.fn();
+
       const handler: Handler = {
         *test(_, resume) {
-          yield handler => {
+          yield async handler => {
             continuationSpy();
-            stackResume(handler);
+            await stackResume(handler);
           };
 
-          yield handler => {
+          yield async handler => {
             continuationSpy();
-            stackResume(handler);
+            await stackResume(handler);
           };
 
           return yield resume();
@@ -329,9 +313,10 @@ describe("Effects Unit Tests", () => {
       })();
 
       addHandler(controlFrame, handler);
-      stackResume(controlFrame);
+      await stackResume(controlFrame);
 
       expect(continuationSpy).toHaveBeenCalledTimes(2);
+
       expect(controlFrameSpy).toHaveBeenCalledTimes(1);
       expect(continuationSpy.mock.invocationCallOrder[1]).toBeLessThan(
         controlFrameSpy.mock.invocationCallOrder[0]
@@ -361,8 +346,6 @@ describe("Effects Unit Tests", () => {
       })();
 
       addHandler(controlFrame, handler);
-      // Note: because the test handler is async, we need to let jest know when
-      //  the interpreter has finished.
       addReturn(controlFrame, done);
 
       stackResume(controlFrame);

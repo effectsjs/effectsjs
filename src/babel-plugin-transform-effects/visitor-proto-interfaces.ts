@@ -2,6 +2,7 @@ import BabelTypes, { Identifier, ObjectExpression } from "@babel/types";
 
 export interface TypesVisitorPrototype {
   types: Babel["types"];
+  skipChildTraversal?: boolean;
 }
 
 export interface HandlerCreationPrototype {

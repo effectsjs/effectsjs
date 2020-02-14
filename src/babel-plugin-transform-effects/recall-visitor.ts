@@ -14,6 +14,12 @@ export const recallVisitor: Visitor<TypesVisitorPrototype> = {
           path.node.argument
         ])
       );
+
+      path.findParent(types.isExpressionStatement)?.replaceWith(
+          types.returnStatement(
+              path.node
+          )
+      )
     }
   }
 };
