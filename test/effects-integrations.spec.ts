@@ -275,38 +275,36 @@ describe("Effect Integrations", () => {
   });
 
   test('Test', async () => {
-    const getIntegerHandler = 'getInteger';
+    const gatherBananasEffectType = 'throwErrorHandler';
 
-    const GetIntegerEffect = () => ({
-      type: getIntegerHandler
+    const GatherBananasEffect = () => ({
+      type: gatherBananasEffectType
     });
 
-    const expectation = 5;
-
-    const main = async () => {
+    const main = () => {
       return runProgram(function* () {
         yield withHandler({
-          *getInteger(__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function (handler) {
-              return stackResume(handler, expectation);
+              return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                  stackResume(handler, "Bananas")
+                      .then(resolve)
+                      .catch(reject);
+                }, 1);
+              });
             };
             return yield resume(result);
           }
 
         }, async function* () {
-          return await (yield asyncChild());
+          const someBananas = yield performEffect(GatherBananasEffect());
+          throw new Error('I wanted Plantains!');
         }());
       }());
     };
 
-    const asyncChild = async function* () {
-      const a = yield performEffect((yield GetIntegerEffect()));
-      const result = await (yield Promise.resolve(a));
-      return result;
-    };
-
-    const result = await main();
-
-    expect(result).not.toBeUndefined();
+    await expect(main()).rejects.toThrowError();
+    console.log('done');
   })
 });

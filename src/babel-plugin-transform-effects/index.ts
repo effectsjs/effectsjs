@@ -64,19 +64,6 @@ export default function transformEffects({ types }: Babel): Plugin {
       Program: {
         exit(path) {
           path.traverse(effectsDirectiveVisitor, { types });
-          // path.traverse({
-          //   CallExpression(path, {types}){
-          //     const id = (path.get('callee.name') as any).node;
-          //     if(id === 'stackResume'){
-          //       path.replaceWith(
-          //           types.returnStatement(
-          //               path.node
-          //           )
-          //       )
-          //       path.skip();
-          //     }
-          //   }
-          // }, {types})
         }
       },
       TryStatement: {
@@ -123,11 +110,21 @@ export default function transformEffects({ types }: Babel): Plugin {
         }
         // @ts-ignore
         if (path.node.operator === "recall") {
+          const stackResumeExpression =  types.callExpression(types.identifier("stackResume"), [
+            types.identifier("handler"),
+            path.node.argument
+          ]);
+          const thenExpression = types.callExpression(
+              types.memberExpression(stackResumeExpression, types.identifier('then')),
+              [types.identifier('res')]
+          );
+          const catchExpression = types.callExpression(
+              types.memberExpression(thenExpression, types.identifier('catch')),
+              [types.identifier('rej')]
+          );
+
           path.replaceWith(
-            types.callExpression(types.identifier("stackResume"), [
-              types.identifier("handler"),
-              path.node.argument
-            ])
+            catchExpression
           );
 
           path.findParent(types.isExpressionStatement)?.replaceWith(

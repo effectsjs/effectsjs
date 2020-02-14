@@ -66,7 +66,8 @@ export const stackResume = async (gen: Generator | StackFrame | any, arg?: any) 
 };
 
 export const runProgram = async (root: Generator) => {
-  return await stackResume(root, null);
+  const result = await stackResume(root, null);
+  return result;
 };
 
 export const performEffect = ({ type, ...data }: Effect) => async (

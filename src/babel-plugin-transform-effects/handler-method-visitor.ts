@@ -91,6 +91,7 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
       }
     });
 
+    // GEE WHIZ!
     const resultContinuation = types.variableDeclaration("const", [
       types.variableDeclarator(
         types.identifier("result"),
@@ -99,8 +100,23 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
             null,
             [types.identifier("handler")],
             types.blockStatement([
-              ...callExpressionDeclarations,
-              ...consequent.node.body
+                types.returnStatement(
+                    types.newExpression(
+                        types.identifier('Promise'),
+                        [
+                            types.arrowFunctionExpression(
+                                [
+                                    types.identifier('res'),
+                                    types.identifier('rej')
+                                ],
+                                types.blockStatement([
+                                  ...callExpressionDeclarations,
+                                  ...consequent.node.body
+                                ])
+                            )
+                        ]
+                    )
+                )
             ])
           )
         )
