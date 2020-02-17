@@ -1,17 +1,17 @@
 const fs = require('fs');
-
+const path = require('path');
 const logPurgeType = 'log_purge';
 
 const LogPurgeEffect = () => ({type : logPurgeType});
 
 const withLogPurgeHandler = (fn) => {
   try{
-      fn();
+      return fn();
   } handle(e){
     if(e.type === logPurgeType){
-        fs.unlink(__dirname+'./log.txt', (err) => {
+        fs.unlink(path.resolve(__dirname, 'log.txt'), (err) => {
             if(err){
-                recall new Error(`Failed to purge logs`);
+                recall err;
             }
 
             recall null;

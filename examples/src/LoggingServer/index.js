@@ -39,43 +39,39 @@ const getResponseFromUri = (url) => {
     }
 };
 
-const handleInboundRequest = (res) => {
-    perform LogEffect(`Inbound Request ${res.url}`);
+const handleInboundRequest = (req) => {
+    perform LogEffect(`Inbound Request ${req.url}`);
 
-    const response = getResponseFromUri(res.url);
+    const response = getResponseFromUri(req.url);
 
     perform LogEffect(`Sending message : ${response.message}`);
 
     return response;
 };
 
-const inboundResponseHandler = (req, res) => {
-    try{
-    'use effects';
-        withLogHandler(
+
+const entry = (req, res) => {
+    "use effects";
+    return withLogPurgeHandler(
+        () => withLogHandler(
             () => {
                 const {statusCode, message} = handleInboundRequest(req);
 
                 res.statusCode = statusCode;
-                res.write(`${ message}\n`);
+                res.write(`${message}\n`);
                 res.end();
             },
-            req
-        )
-    }catch(e){
-        console.log('Error');
-        res.statusCode = 500;
-        res.write(`Encountered an error`)
-        res.end();
-    }
-        // try{
-            // withLogPurgeHandler(
+                req
+            )
+    )
+};
 
-            // )
-        // }handle(e){}
-        // catch(e){
-        //     console.log('An error happened');
-        // }
+const inboundResponseHandler = (req, res) => {
+    entry(req, res).catch(e => {
+        res.statusCode = 500;
+        res.write(`Encountered an error: ${e.message}\n`)
+        res.end();
+    });
 };
 
 

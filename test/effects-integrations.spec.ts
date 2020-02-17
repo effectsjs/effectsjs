@@ -273,38 +273,4 @@ describe("Effect Integrations", () => {
       runProgram(withHandler(handler, parent()));
     }).not.toThrow();
   });
-
-  test('Test', async () => {
-    const gatherBananasEffectType = 'throwErrorHandler';
-
-    const GatherBananasEffect = () => ({
-      type: gatherBananasEffectType
-    });
-
-    const main = () => {
-      return runProgram(function* () {
-        yield withHandler({
-          *throwErrorHandler(__e__, resume) {
-            const result = yield function (handler) {
-              return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                  stackResume(handler, "Bananas")
-                      .then(resolve)
-                      .catch(reject);
-                }, 1);
-              });
-            };
-            return yield resume(result);
-          }
-
-        }, async function* () {
-          const someBananas = yield performEffect(GatherBananasEffect());
-          throw new Error('I wanted Plantains!');
-        }());
-      }());
-    };
-
-    await expect(main()).rejects.toThrowError();
-    console.log('done');
-  })
 });

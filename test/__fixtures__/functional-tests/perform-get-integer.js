@@ -2,18 +2,18 @@ const getIntegerHandler = 'getInteger';
 
 const GetIntegerEffect = () => ({type : getIntegerHandler});
 
-const main = () => new Promise((res) => {
+const main = async () => {
     'use effects';
     try{
         const integer = perform GetIntegerEffect();
 
-        res(integer);
+        return integer
     }handle(e){
         if(e.type === getIntegerHandler){
             recall 5;
         }
     }
-});
+}
 
 module.exports.test = ({it, expect, code}) => {
     it("Should compile, and return expected results", async () => {

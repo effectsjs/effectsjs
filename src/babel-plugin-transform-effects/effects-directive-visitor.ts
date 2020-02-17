@@ -24,7 +24,9 @@ const runProgramYieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
   Identifier(idPath, {types}){
     if(idPath.node.name === 'runProgram'){
       (idPath.findParent(types.isCallExpression)?.get('arguments') as any)?.forEach(
-          n => n.traverse(yieldCallExpressionVisitor, {types, skipChildTraversal : true})
+          n => {
+            n.traverse(yieldCallExpressionVisitor, {types, skipChildTraversal : true})
+          }
       );
     }
   }

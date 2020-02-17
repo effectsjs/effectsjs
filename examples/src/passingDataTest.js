@@ -9,6 +9,7 @@ const main = () => {
     console.log(result);
 };
 
+'use effects';
 try{
     main();
 } handle (e){

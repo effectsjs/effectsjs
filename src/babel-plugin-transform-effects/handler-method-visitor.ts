@@ -110,9 +110,28 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
                                     types.identifier('rej')
                                 ],
                                 types.blockStatement([
-                                  ...callExpressionDeclarations,
-                                  ...consequent.node.body
-                                ])
+                                  types.tryStatement(
+                                      types.blockStatement([
+                                        ...callExpressionDeclarations,
+                                        ...consequent.node.body
+                                      ]),
+                                      types.catchClause(
+                                          types.identifier("handlerError"),
+                                          types.blockStatement([
+                                              types.expressionStatement(
+                                                  types.callExpression(
+                                                      types.identifier("rej"),
+                                                      [
+                                                        types.identifier("handlerError")
+                                                      ]
+                                                  )
+                                              )
+                                          ])
+                                      ),
+                                      null
+                                  )
+                                ]),
+                                true
                             )
                         ]
                     )

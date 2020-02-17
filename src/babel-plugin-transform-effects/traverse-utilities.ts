@@ -8,7 +8,10 @@ import { Babel } from "./index";
 import {yieldCallExpressionVisitor} from "./to-generator-visitor";
 
 export const hasEffectsDirective = (path : NodePath<BabelTypes.Function>) => {
-  return (path.get('body.directives') as NodePath[])?.map(directive => {
+  const directives = (path.get('body.directives') as NodePath[]);
+  if(!Array.isArray(directives)) return;
+
+  return directives?.map(directive => {
     return (directive.get('value.value') as NodePath)?.node as unknown as string
   }).includes('use effects');
 };
@@ -56,7 +59,9 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
       parentFunctionPath.node.generator = true;
     }
 
+    // Yield all internal call expressions
     parentFunctionPath.get('body')?.traverse(yieldCallExpressionVisitor, {types});
+
     const name = types.isFunctionDeclaration(parentFunctionPath.node)
       ? parentFunctionPath.node.id?.name
       : (parentFunctionPath.parentPath.node as any)?.id?.name;
@@ -69,7 +74,7 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
       bindingScope.scope.getBinding(name)?.referencePaths.forEach(reference => {
         const expStatementParent = reference.findParent(
           types.isExpressionStatement
-        );
+        ) || reference.parentPath;
 
         if(!expStatementParent) return;
 
@@ -85,8 +90,6 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
           callExpression?.replaceWith(
             types.yieldExpression(callExpression.node)
           );
-
-          fixupParentGenerator(reference, types);
         }
       });
     }

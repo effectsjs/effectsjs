@@ -23,9 +23,8 @@ const main = async () => {
 
 };
 
-module.exports.test = async ({it, expect, code}) => {
-    it('Should handle errors within effects', async () => {
-        console.log(code);
+module.exports.test = async ({it, expect}) => {
+    it('Should handle errors when effects recall from within a timer', async () => {
         await expect(main()).rejects.toThrowError('I wanted Plantains!');
     })
 };

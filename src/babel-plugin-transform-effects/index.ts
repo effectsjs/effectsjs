@@ -64,6 +64,11 @@ export default function transformEffects({ types }: Babel): Plugin {
       Program: {
         exit(path) {
           path.traverse(effectsDirectiveVisitor, { types });
+          path.traverse({
+            YieldExpression(path){
+              fixupParentGenerator(path, types);
+            }
+          }, {types})
         }
       },
       TryStatement: {
@@ -99,7 +104,6 @@ export default function transformEffects({ types }: Babel): Plugin {
         // TODO [minor] ignore required because types do not recognize the operator as valid. Fix that.
         // @ts-ignore
         if (path.node.operator === "perform") {
-          fixupParentGenerator(path, types);
           path.replaceWith(
             types.yieldExpression(
               types.callExpression(types.identifier("performEffect"), [
@@ -107,6 +111,7 @@ export default function transformEffects({ types }: Babel): Plugin {
               ])
             )
           );
+          fixupParentGenerator(path, types);
         }
         // @ts-ignore
         if (path.node.operator === "recall") {

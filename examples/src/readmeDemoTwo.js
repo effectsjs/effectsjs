@@ -16,6 +16,7 @@ const main = () => {
 };
 
 
+'use effects';
 try{
     main();
 }handle (e){

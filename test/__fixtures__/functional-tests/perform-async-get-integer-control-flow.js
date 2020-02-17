@@ -25,9 +25,7 @@ const asyncChild = async () => {
 
 module.exports.test = ({it, expect, code}) => {
   it('Should compile, and return expected results with an async effect handler', async () => {
-      console.log(code);
       const result = await main();
-
       expect(result).toBe(expectation)
   })
 };

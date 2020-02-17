@@ -26,7 +26,6 @@ const main = () => {
 
 module.exports.test = ({it, expect, code}) => {
     it('Should handle the happy-path nested child', async () => {
-        console.log(code);
         const result = await main();
 
         expect(result).toEqual('main')

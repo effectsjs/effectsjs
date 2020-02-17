@@ -1,21 +1,34 @@
-const fs = require('fs');
+const {promises : fsPromise, ...fs} = require('fs');
+const path = require('path');
 
-const logFileStream = fs.createWriteStream(__dirname+'/./log.txt', {flags : 'a'});
+const logFilePath = path.resolve(__dirname, 'log.txt');
+let logFileStream = fs.createWriteStream(logFilePath, {flags : 'a'});
 const logHandlerType = 'logHandler';
 
-function logAndSave(message, requestContext){
-    const messageToLog = `${(new Date()).toLocaleString()} - ${requestContext.connection.remoteAddress} - ${message}\n`;
-
-    logFileStream.write(messageToLog, (err) => {
+const writeToDisk = (message) => new Promise((res, rej) => {
+    logFileStream.write(message, (err) => {
         if(err) {
-            throw new Error(`Failed to write to log stream.`)
+            console.log('pst, an error occured');
+            rej(Error(`Failed to write to log stream.`))
         }
 
-        console.log(messageToLog);
-
-        recall null;
+        res();
     })
-}
+});
+
+const logAndSave = async (message, requestContext) => {
+    const messageToLog = `${(new Date()).toLocaleString()} - ${requestContext.connection.remoteAddress} - ${message}\n`;
+
+    try{
+        await fsPromise.stat(logFilePath);
+    }catch(e){
+        logFileStream = fs.createWriteStream(logFilePath, {flags : 'a'});
+    }
+    await writeToDisk(messageToLog);
+    console.log(messageToLog);
+
+    recall null;
+};
 
 const LogEffect = function(message){
   return {
@@ -24,12 +37,12 @@ const LogEffect = function(message){
   }
 };
 
-const withLogHandler = (fn, requestContext = {}) => {
+const withLogHandler = async (fn, requestContext = {}) => {
     try{
-        fn();
+        return fn();
     } handle (e){
         if(e.type === logHandlerType){
-            logAndSave(e.message, requestContext);
+            await logAndSave(e.message, requestContext);
         }
     }
 };
