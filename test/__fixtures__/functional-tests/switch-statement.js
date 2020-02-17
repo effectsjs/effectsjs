@@ -54,13 +54,7 @@ const performCTest = () => {
 const performAllTest = () => {
     'use effects'
     main(() => {
-        let result = '';
-
-        result += perform EffectA();
-        result += perform EffectB();
-        result += perform EffectC();
-
-        return result;
+        return `${perform EffectA()}${perform EffectB()}${perform EffectC()}`;
     });
 };
 

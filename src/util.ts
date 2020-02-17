@@ -8,7 +8,10 @@ export const exists = <T>(x: T): x is Exclude<T, null | undefined> =>
 //  But the virtual stack interpreter checks to see if frames point to "continuations" which
 //  are plain old functions... helps the readability.
 export const isContinuation = (x: any): x is Continuation =>
-  typeof x === "function";
+  typeof x === "function" &&
+  ['AsyncGeneratorFunction', 'GeneratorFunction'].every(
+      type => type !== Reflect.getPrototypeOf(x).constructor.name
+  );
 
 export const isIterator = (x: any): x is Generator =>
   exists(x) && isContinuation(x.next);

@@ -7,7 +7,6 @@ function createRuntimeRoot(
   types: typeof BabelTypes,
   continuation: BabelTypes.Statement[]
 ) {
-
   const mainFunctionExpression = types.functionExpression(
     null,
     [],
@@ -35,6 +34,8 @@ const runProgramYieldCallExpressionVisitor : Visitor<TypesVisitorPrototype> = {
 export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
   ExpressionStatement(path, { types }) {
     const expression = path.get("expression")?.node;
+    const parentFunction = path.findParent(types.isFunction) as unknown as NodePath<BabelTypes.Function>;
+
     if (
       types.isStringLiteral(expression) &&
       expression.value === "use effects"
@@ -56,7 +57,11 @@ export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
             path.getSibling(i)?.remove();
         }
 
-      path.replaceWith(createRuntimeRoot(types, continuation));
+        const runtimeExpression = parentFunction?.node.async
+            ? types.awaitExpression(createRuntimeRoot(types, continuation))
+            : createRuntimeRoot(types, continuation);
+
+      path.replaceWith(runtimeExpression);
         path.traverse(runProgramYieldCallExpressionVisitor, {types});
     }
   },
@@ -79,7 +84,6 @@ export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
     ];
 
     blockParent.traverse(runProgramYieldCallExpressionVisitor, {types});
-
 
     path.remove();
   }
