@@ -41,8 +41,9 @@ const withLogHandler = async (fn, requestContext = {}) => {
     try{
         return fn();
     } handle (e){
-        if(e.type === logHandlerType){
-            await logAndSave(e.message, requestContext);
+        switch(e.type){
+            case logHandlerType:
+                await logAndSave(e.message, requestContext);
         }
     }
 };

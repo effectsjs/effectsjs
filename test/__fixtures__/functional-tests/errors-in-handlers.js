@@ -55,7 +55,6 @@ const continuationEjectCase = () => {
 
 module.exports.test = async ({it, expect, code}) => {
     it('Should handle errors as expected when effect handlers throw', async() => {
-        console.log(code);
         await expect(syncEjectCase()).rejects.toThrowError('eject');
     });
 

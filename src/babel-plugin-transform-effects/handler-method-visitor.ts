@@ -1,5 +1,5 @@
 import { NodePath, Visitor } from "@babel/traverse";
-import BabelTypes, { MemberExpression } from "@babel/types";
+import BabelTypes, {Identifier, IfStatement, MemberExpression, ObjectExpression, SwitchCase} from "@babel/types";
 import {
   TypesVisitorPrototype,
   HandlerCreationPrototype
@@ -42,6 +42,117 @@ const extractMemberPropertyPathName = (
     `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
   );
 };
+
+const makeHandlerMethod =
+    (
+        memberPropertyPath : NodePath<MemberExpression|Identifier>,
+        rootPath : NodePath<IfStatement|SwitchCase>,
+        types : typeof BabelTypes,
+        consequent : any,
+        handlerParamName : string
+    ) => {
+
+    const handlerPropertyName = extractMemberPropertyPathName(
+        rootPath,
+        types,
+        memberPropertyPath.node
+    );
+
+        // Collect all call expressions located inside of the handler (consequent block)
+    const callExpressionDeclarations: Node[] = [];
+    consequent.traverse({
+            CallExpression(expressionPath) {
+                const binding = expressionPath.scope.getBinding(
+                    expressionPath.node.callee.name
+                );
+                const declaration = binding?.path.find(
+                    x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
+                );
+                if (declaration) {
+                    callExpressionDeclarations.push(declaration.node);
+                    declaration.remove();
+                }
+            }
+        });
+
+    const consequentBody = types.isBlockStatement(consequent.node) ? consequent.node.body : types.blockStatement([consequent.node]).body;
+
+        // GEE WHIZ!
+        const resultContinuation = types.variableDeclaration("const", [
+            types.variableDeclarator(
+                types.identifier("result"),
+                types.yieldExpression(
+                    types.functionExpression(
+                        null,
+                        [types.identifier("handler")],
+                        types.blockStatement([
+                            types.returnStatement(
+                                types.newExpression(
+                                    types.identifier('Promise'),
+                                    [
+                                        types.arrowFunctionExpression(
+                                            [
+                                                types.identifier('res'),
+                                                types.identifier('rej')
+                                            ],
+                                            types.blockStatement([
+                                                types.tryStatement(
+                                                    types.blockStatement([
+                                                        ...callExpressionDeclarations,
+                                                        ...consequentBody
+                                                    ]),
+                                                    types.catchClause(
+                                                        types.identifier("handlerError"),
+                                                        types.blockStatement([
+                                                            types.expressionStatement(
+                                                                types.callExpression(
+                                                                    types.identifier("rej"),
+                                                                    [
+                                                                        types.identifier("handlerError")
+                                                                    ]
+                                                                )
+                                                            )
+                                                        ])
+                                                    ),
+                                                    null
+                                                )
+                                            ]),
+                                            true
+                                        )
+                                    ]
+                                )
+                            )
+                        ])
+                    )
+                )
+            )
+        ]);
+
+        const objectMethod = types.objectMethod(
+            "method",
+            handlerPropertyName ? handlerPropertyName : memberPropertyPath.node,
+            [
+                types.identifier(`__${handlerParamName}__`),
+                types.identifier("resume")
+            ],
+            types.blockStatement([
+                resultContinuation,
+                types.returnStatement(
+                    types.yieldExpression(
+                        types.callExpression(types.identifier("resume"), [
+                            types.identifier("result")
+                        ])
+                    )
+                )
+            ]),
+            false
+        );
+
+        objectMethod.generator = true;
+
+        return objectMethod;
+};
+
 /**
  * From within a handle block,
  *
@@ -68,103 +179,9 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
     if (!memberPropertyPath) return;
     if (!isCorrectMemberPropertyPath(types, memberPropertyPath.node)) return;
 
-    const handlerPropertyName = extractMemberPropertyPathName(
-      path,
-      types,
-      memberPropertyPath.node
+    handlerObject.properties.push(
+        makeHandlerMethod(memberPropertyPath, path, types, consequent, handlerParam.name)
     );
-
-    // Collect all call expressions located inside of the handler (consequent block)
-    const callExpressionDeclarations: Node[] = [];
-    consequent.traverse({
-      CallExpression(expressionPath) {
-        const binding = expressionPath.scope.getBinding(
-          expressionPath.node.callee.name
-        );
-        const declaration = binding?.path.find(
-          x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
-        );
-        if (declaration) {
-          callExpressionDeclarations.push(declaration.node);
-          declaration.remove();
-        }
-      }
-    });
-
-    // GEE WHIZ!
-    const resultContinuation = types.variableDeclaration("const", [
-      types.variableDeclarator(
-        types.identifier("result"),
-        types.yieldExpression(
-          types.functionExpression(
-            null,
-            [types.identifier("handler")],
-            types.blockStatement([
-                types.returnStatement(
-                    types.newExpression(
-                        types.identifier('Promise'),
-                        [
-                            types.arrowFunctionExpression(
-                                [
-                                    types.identifier('res'),
-                                    types.identifier('rej')
-                                ],
-                                types.blockStatement([
-                                  types.tryStatement(
-                                      types.blockStatement([
-                                        ...callExpressionDeclarations,
-                                        ...consequent.node.body
-                                      ]),
-                                      types.catchClause(
-                                          types.identifier("handlerError"),
-                                          types.blockStatement([
-                                              types.expressionStatement(
-                                                  types.callExpression(
-                                                      types.identifier("rej"),
-                                                      [
-                                                        types.identifier("handlerError")
-                                                      ]
-                                                  )
-                                              )
-                                          ])
-                                      ),
-                                      null
-                                  )
-                                ]),
-                                true
-                            )
-                        ]
-                    )
-                )
-            ])
-          )
-        )
-      )
-    ]);
-
-    const objectMethod = types.objectMethod(
-      "method",
-      handlerPropertyName ? handlerPropertyName : memberPropertyPath.node,
-      [
-        types.identifier(`__${this.handlerParam.name}__`),
-        types.identifier("resume")
-      ],
-      types.blockStatement([
-        resultContinuation,
-        types.returnStatement(
-          types.yieldExpression(
-            types.callExpression(types.identifier("resume"), [
-              types.identifier("result")
-            ])
-          )
-        )
-      ]),
-      false
-    );
-
-    objectMethod.generator = true;
-
-    handlerObject.properties.push(objectMethod);
 
     const alternate = path.get("alternate");
 
@@ -175,6 +192,21 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
         handlerParam
       });
     }
+
     path.remove();
-  }
+  },
+    SwitchCase(path, {types, handlerObject, handlerParam}){
+      const memberPropertyPath = path.get('test') as NodePath<Identifier>;
+      const consequent = path.get("consequent") as any;
+
+      consequent.forEach(x => x.traverse(handlerMethodVisitor, {...this}));
+
+      if(!memberPropertyPath) return;
+
+      handlerObject.properties.push(
+          makeHandlerMethod(memberPropertyPath, path, types, consequent[0], handlerParam.name)
+      );
+
+      path.remove();
+    }
 };
