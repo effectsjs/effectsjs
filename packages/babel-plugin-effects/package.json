@@ -1,0 +1,25 @@
+{
+  "name": "babel-plugin-effects",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/plugin.js",
+  "typings": "lib/plugin.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "echo 'SKIPPED: rm -rf lib'",
+    "prebuild": "run-s clean",
+    "test": "echo '[babel-plugin-effects]: testing covered by effects-runtime'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "effects-common": "^0.0.1",
+    "@babel/parser": "^7.7.7",
+    "@babel/traverse": "^7.7.4",
+    "@babel/types": "^7.7.4"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}

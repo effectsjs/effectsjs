@@ -1,40 +1,30 @@
 {
-  "name": "effects-js",
-  "version": "0.0.1",
-  "description": "Algebraic Effects For Javascript 🎉",
-  "main": "lib/index.js",
+  "name": "effectsjs",
+  "version": "1.0.0",
+  "description": "",
   "scripts": {
-    "build:example": "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
-    "build:source": "run-s clean compile",
-    "build": "run-s build:source build:example",
-    "clean": "rm -rf ./lib || true",
-    "compile": "tsc",
-    "fixup": "prettier --write ./{test,src}/**/*.{js,ts}",
-    "test": "jest --collectCoverage"
+    "bootstrap": "npm install && npx lerna bootstrap --loglevel verbose",
+    "build": "tsc -b packages",
+    "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
+    "test": "lerna exec npm run test",
+    "format": "prettier --write ./packages/*/{test,src}/**/*.{js,ts}"
   },
-  "keywords": [
-    "algebraic",
-    "effects",
-    "control",
-    "flow"
-  ],
-  "author": "Dave Campion",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dpchamps/effectsjs.git"
+  },
+  "keywords": [],
+  "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@babel/helper-plugin-test-runner": "^7.7.4",
-    "@babel/parser": "^7.7.7",
-    "@babel/traverse": "^7.7.4",
-    "@babel/types": "^7.7.4",
-    "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.17",
-    "babel-plugin-tester": "^8.0.1",
-    "babel-test": "^0.2.3",
-    "jest": "^24.9.0",
-    "node-eval": "^2.0.0",
-    "npm-run-all": "^4.1.5",
+  "bugs": {
+    "url": "https://github.com/dpchamps/effectsjs/issues"
+  },
+  "homepage": "https://github.com/dpchamps/effectsjs#readme",
+  "dependencies": {
+    "del-cli": "^3.0.0",
+    "eslint": "^6.8.0",
+    "lerna": "^3.20.2",
     "prettier": "^1.19.1",
-    "ts-jest": "^24.2.0",
-    "ts-node": "^8.5.4",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.5"
   }
 }

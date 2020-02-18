@@ -1,0 +1,39 @@
+{
+  "name": "effects-runtime",
+  "version": "0.0.1",
+  "description": "babel plugin Algebraic Effects For Javascript 🎉",
+  "main": "lib/runtime.js",
+  "scripts": {
+    "build:example": "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
+    "build:source": "run-s clean compile",
+    "build": "run-s build:source build:example",
+    "clean": "rm -rf ./lib || true",
+    "compile": "tsc",
+    "test": "jest --collectCoverage"
+  },
+  "keywords": [
+    "algebraic",
+    "effects",
+    "control",
+    "flow"
+  ],
+  "author": "Dave Campion",
+  "license": "ISC",
+  "dependencies": {
+    "effects-common": "^0.0.1"
+  },
+  "devDependencies": {
+    "@babel/helper-plugin-test-runner": "^7.7.4",
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.12.17",
+    "babel-plugin-effects": "^0.0.1",
+    "babel-plugin-tester": "^8.0.1",
+    "babel-test": "^0.2.3",
+    "jest": "^24.9.0",
+    "node-eval": "^2.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "ts-node": "^8.5.4"
+  }
+}

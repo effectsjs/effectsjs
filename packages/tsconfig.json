@@ -1,0 +1,9 @@
+// https://github.com/RyanCavanaugh/learn-a
+{
+  "files": [],
+  "references": [
+      { "path": "./effects-runtime" },
+      { "path": "./effects-common" },
+      { "path": "./babel-plugin-effects" }
+  ]
+}

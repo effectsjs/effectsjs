@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.settings.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "./lib",
+    "noImplicitAny": false
+  },
+  "references": [
+    { "path": "../effects-common" }
+  ]
+}
