@@ -9,7 +9,7 @@ import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { handlerMethodVisitor } from "./handler-method-visitor";
 import { recallVisitor } from "./recall-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
-const parser = require("../../babel/packages/babel-parser/lib");
+const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
   visitor: Visitor;

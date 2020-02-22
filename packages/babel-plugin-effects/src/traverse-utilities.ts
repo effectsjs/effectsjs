@@ -40,9 +40,9 @@ export const arrowExpressionToGenerator = (
 // Starting from a child path, find the parent function and convert it to a generator.
 // Because we cannot predict what the value of call expressions will be, we must yield them to the stack interpreter.
 export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
-  const parentFunctionPath = path.findParent((x: any) => x.isFunction()) as NodePath<
-    BabelTypes.Function
-  >;
+  const parentFunctionPath = path.findParent((x: any) =>
+    x.isFunction()
+  ) as NodePath<BabelTypes.Function>;
 
   if (!parentFunctionPath) {
     // TODO: Think about what needs to be done here... Can we safely just return?
@@ -77,27 +77,29 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
         x.scope.hasBinding(name)
       );
 
-      bindingScope.scope.getBinding(name)?.referencePaths.forEach((reference: any) => {
-        const expStatementParent =
-          reference.findParent(types.isExpressionStatement) ||
-          reference.parentPath;
+      bindingScope.scope
+        .getBinding(name)
+        ?.referencePaths.forEach((reference: any) => {
+          const expStatementParent =
+            reference.findParent(types.isExpressionStatement) ||
+            reference.parentPath;
 
-        if (!expStatementParent) return;
+          if (!expStatementParent) return;
 
-        const isYield = types.isYieldExpression(
-          expStatementParent.get("expression")
-        );
-
-        if (!isYield) {
-          const callExpression = reference.findParent(
-            types.isCallExpression
-          ) as NodePath<CallExpression>;
-
-          callExpression?.replaceWith(
-            types.yieldExpression(callExpression.node)
+          const isYield = types.isYieldExpression(
+            expStatementParent.get("expression")
           );
-        }
-      });
+
+          if (!isYield) {
+            const callExpression = reference.findParent(
+              types.isCallExpression
+            ) as NodePath<CallExpression>;
+
+            callExpression?.replaceWith(
+              types.yieldExpression(callExpression.node)
+            );
+          }
+        });
     }
   }
 };
