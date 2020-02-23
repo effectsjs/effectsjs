@@ -1,0 +1,61 @@
+<div class="node"><h2>What is it?</h2></div><div class="node"><p>Extensions to the javascript language, enabling new control flows that may be well suited to a variety of general purpose programming contexts.</p></div><div class="node"><h2>Example</h2></div><div class="node eff"><pre><code class="highlight-js">'use effects'
+try {
+  await work()
+} handle (event) {
+  switch event.type {
+    case 'log': {
+      console.log(event)
+      recall null
+    }
+  }
+}
+const work () =&gt;
+  fetch(...)
+    .then(res =&gt; {
+      perform { type: 'log', message: `fetch completed with status: ${res.status}` }
+      return res
+    })
+    .then(res =&gt; res.json())
+</code></pre>
+<p>As seen above, the<code> 'use effects'</code> directive enables the user to begin using effects<a class="super" href="#whyuseeffects">1</a>. Further, you may observe that a few new keywords have been added:</p><h3>Effects keywords</h3><table>
+<thead>
+<tr>
+<th style="text-align:left">Keyword</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>perform</code></td>
+<td style="text-align:left">Initiates an effect. The current function halts, and later resumes when an effect handler <code>resume</code>s</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>handle</code></td>
+<td style="text-align:left"><code>try/handle</code> blocks allow users to specify handlers for effect events, using well-known <code>try/catch</code>-like semantics.  <code>try/handle</code> is <em>not</em> compatible with <code>try/catch</code></td>
+</tr>
+<tr>
+<td style="text-align:left"><code>resume</code></td>
+<td style="text-align:left">Resumes the previously halted function, who called <code>perform</code>.</td>
+</tr>
+</tbody>
+</table>
+</div><div class="node funsies"><!-- https://mavo.io/demos/svgpath/ -->
+<!-- https://css-tricks.com/svg-line-animation-works/ --><svg width="50px" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 50"><path d="m 25 25 a 10 10 0 0 0 20 0 a 10 10 0 0 0 -20 0 a 10 10 0 0 1 -20 0 a 10 10 0 0 1 20 0" stroke="#529fd9" stroke-width="2" fill="none" id="wire"></path></svg></div><div class="node"><h2>References</h2><table>
+<thead>
+<tr>
+<th style="text-align:left">Reference</th>
+<th style="text-align:left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Source code</td>
+<td style="text-align:left"><a href="https://github.com/dpchamps/effectsjs">github.com/dpchamps/effectsjs</a></td>
+</tr>
+<tr>
+<td style="text-align:left">Dan's Conceptualization</td>
+<td style="text-align:left"><a href="https://overreacted.io/algebraic-effects-for-the-rest-of-us/">Algebraic Effects for the Rest of Us</a></td>
+</tr>
+</tbody>
+</table>
+</div><div class="node"><h2>FAQ</h2><h3>Why do I need to use `'use effects'`?</h3><a name="whyuseeffects"></a><p>The `'use effects'` directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support `effectjs` at runtime.</p><h3>Can I `perform` an effect from within an effect?</h3><a name="nestedeffects"></a><p>Currently, no.  In the future, maybe!</p></div>
