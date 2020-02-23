@@ -8,7 +8,7 @@ module.exports = {
   plugins: ["@typescript-eslint"],
   extends: ["eslint:recommended", "plugin:prettier/recommended"],
   rules: {
-    "no-unused-vars": 0 // eslint/ts has doesn't play nice with interfaces/type imports
+    "no-unused-vars": 0 // eslint/ts doesn't play nice with interfaces imports consistently
   },
   env: {
     browser: true,
