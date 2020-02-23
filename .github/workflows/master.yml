@@ -8,7 +8,7 @@ on:
       - master
 
 jobs:
-  install:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -17,21 +17,10 @@ jobs:
           node-version: 12.16.1
       - name: install
         run: npm ci && npm run bootstrap
-  lint:
-    needs: [install]
-    runs-on: ubuntu-latest
-    steps:
       - name: lint
         run: npm run lint
-  build:
-    needs: [install]
-    runs-on: ubuntu-latest
-    steps:
       - name: build
         run: npm run build
-  babel:
-    runs-on: ubuntu-latest
-    steps:
       - name: init-babel
         run: |
           set -ex
@@ -41,16 +30,11 @@ jobs:
           make bootstrap
           make build
           cd ..
-  test:
-    needs: [build, babel]
-    runs-on: ubuntu-latest
-    steps:
       - name: test
         run: npm run test
-  deploy-docs:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
+      # - name: GitHub Pages Deploy
+      #   uses: maxheld83/ghpages@v0.2.1
+      # @ref https://github.com/JamesIves/github-pages-deploy-action
       - name: gh-pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
