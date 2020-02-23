@@ -1,5 +1,12 @@
 module.exports = {
-  ignorePatterns: ["node_modules", "**/lib/**", "!.eslintrc.js", "*highlight*"],
+  ignorePatterns: [
+    "node_modules",
+    "**/lib/**",
+    "!.eslintrc.js",
+    "*highlight*",
+    "**/effects-runtime/examples/**", // ignore until eslint-plugin :ok_hand:
+    "**/effects-runtime/test/**" // ignore until eslint-plugin :ok_hand:
+  ],
   parserOptions: {
     ecmaVersion: 2019,
     sourceType: "module"

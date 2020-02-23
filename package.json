@@ -8,7 +8,7 @@
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
     "format:dryrun": "prettier ./*.{js,ts} ./packages/*/{test,src}/**/*.{js,ts}",
     "format": "npm run format:dryrun -- --write",
-    "lint": "eslint ./.?*.js packages/**/*.{js,ts} && npm run format:dryrun -- --check",
+    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && npm run format:dryrun -- --check",
     "test": "lerna exec npm run test"
   },
   "repository": {
