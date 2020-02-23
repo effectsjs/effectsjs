@@ -4,11 +4,12 @@
   "description": "",
   "scripts": {
     "bootstrap": "npm install && npx lerna bootstrap --loglevel verbose",
-    "build:compile": "",
     "build": "tsc -b packages && lerna exec --scope effects-docs -- npm run build",
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
-    "test": "lerna exec npm run test",
-    "format": "prettier --write ./packages/*/{test,src}/**/*.{js,ts}"
+    "format:dryrun": "prettier ./*.{js,ts} ./packages/*/{test,src}/**/*.{js,ts}",
+    "format": "npm run format:dryrun -- --write",
+    "lint": "eslint ./.?*.js packages/**/*.{js,ts} && npm run format:dryrun -- --check",
+    "test": "lerna exec npm run test"
   },
   "repository": {
     "type": "git",
@@ -21,8 +22,12 @@
     "url": "https://github.com/dpchamps/effectsjs/issues"
   },
   "homepage": "https://github.com/dpchamps/effectsjs#readme",
-  "dependencies": {
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.20.0",
+    "@typescript-eslint/parser": "^2.20.0",
     "del-cli": "^3.0.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
     "eslint": "^6.8.0",
     "lerna": "^3.20.2",
     "prettier": "^1.19.1",
