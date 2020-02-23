@@ -19,7 +19,6 @@
   "include" : [
     "./src/**/*",
     "./types/**/*"
-
   ],
   "exclude": [
     "./lib/**/*",

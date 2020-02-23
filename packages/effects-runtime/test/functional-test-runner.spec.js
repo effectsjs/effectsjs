@@ -1,4 +1,4 @@
-const { transform } = require("../../babel/packages/babel-core");
+const { transform } = require("../../../babel/packages/babel-core");
 const { promises: fs, readdirSync, readFileSync } = require("fs");
 const path = require("path");
 const nodeEval = require("node-eval");

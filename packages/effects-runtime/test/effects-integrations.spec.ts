@@ -2,7 +2,12 @@
 //  interaction between the core components.
 // This mainly revolves around when the interpreter fires what frame in what order.
 
-import { performEffect, runProgram, stackResume, withHandler } from "../";
+import {
+  performEffect,
+  runProgram,
+  stackResume,
+  withHandler
+} from "../src/runtime";
 import { Handler } from "effects-common";
 
 describe("Effect Integrations", () => {

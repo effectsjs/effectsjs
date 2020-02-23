@@ -4,9 +4,14 @@ import {
   performEffect,
   withHandler,
   UnhandledEffectError
-} from "../";
+} from "../src/runtime";
 import { Handler } from "effects-common";
-import { getHandler, addHandler, addReturn } from "effects-common/lib/StackFrame";
+import {
+  getHandler,
+  addHandler,
+  addReturn,
+  setRootContinuation
+} from "effects-common/lib/StackFrame";
 
 describe("Effects Unit Tests", () => {
   describe("stackResume", () => {

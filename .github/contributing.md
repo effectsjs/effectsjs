@@ -1,6 +1,6 @@
 # contributing
 
-Thanks for you interest in contributing.
+Thanks for your interest in contributing.
 
 # bootstrapping
 
@@ -34,4 +34,3 @@ You're awesome.  Thank you!
 # code of conduct
 
 Please refer to the [nodejs code-of-conduct](https://github.com/nodejs/node/blob/master/CODE_OF_CONDUCT.md).
-

@@ -31,7 +31,8 @@ module.exports = {
         "/node_modules/",
         "/test/mocks/",
         "/test/__fixtures__",
-        "/lib/"
+        "/lib/",
+        "babel.config.js"
     ],
 
     // A list of reporter names that Jest uses when writing coverage reports
