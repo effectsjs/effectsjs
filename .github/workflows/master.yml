@@ -32,3 +32,14 @@ jobs:
           cd ..
       - name: test
         run: npm run test
+      # - name: GitHub Pages Deploy
+      #   uses: maxheld83/ghpages@v0.2.1
+      # @ref https://github.com/JamesIves/github-pages-deploy-action
+      - name: gh-pages
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
+          BASE_BRANCH: master
+          BRANCH: gh-pages
+          FOLDER: packages/effects-docs/src
+          CLEAN: true
