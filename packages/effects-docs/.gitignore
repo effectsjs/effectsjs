@@ -1,0 +1,8 @@
+*.html
+node_modules
+.DS_Store
+src/highlight/**/*css
+src/highlight/**/*jpg
+src/highlight/**/*png
+src/highlight/**/*md
+!solarized-*.css
