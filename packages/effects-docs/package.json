@@ -13,6 +13,7 @@
     "build": "pug src",
     "serve": "httpster -d src",
     "build:watch": "pug -w src",
-    "start": "run-p serve build:watch"
+    "start": "run-p serve build:watch",
+    "test": "echo skipped"
   }
 }

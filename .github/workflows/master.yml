@@ -1,0 +1,34 @@
+# @info
+# master & pull_request jobs cannot de-dupe their workflow configuration :(
+# https://github.community/t5/GitHub-Actions/Start-a-workflow-from-another-workflow/td-p/37586
+name: ci-master
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@master
+        with:
+          node-version: 12.16.1
+      - name: install
+        run: npm ci && npm run bootstrap
+      - name: lint
+        run: npm run lint
+      - name: build
+        run: npm run build
+      - name: init-babel
+        run: |
+          set -ex
+          git submodule init
+          git submodule update
+          cd babel
+          make bootstrap
+          make build
+          cd ..
+      - name: test
+        run: npm run test
