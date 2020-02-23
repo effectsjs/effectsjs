@@ -1,7 +1,7 @@
 # @info
 # master & pull_request jobs cannot de-dupe their workflow configuration :(
 # https://github.community/t5/GitHub-Actions/Start-a-workflow-from-another-workflow/td-p/37586
-name: ci-master
+name: master
 on:
   push:
     branches:
