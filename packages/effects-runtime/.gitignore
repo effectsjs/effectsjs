@@ -1,9 +1,6 @@
-*.tsbuildinfo
-
 # OS / IDE config
 .DS_Store
 .vscode
-.idea
 
 # Logs
 logs
@@ -33,6 +30,9 @@ build/Release
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
 
+#ccm
+.ccm
+.idea
 
 # transpiled file directory
 lib
