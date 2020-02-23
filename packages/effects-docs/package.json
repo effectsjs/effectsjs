@@ -10,9 +10,9 @@
     "pug-cli": "^1.0.0-alpha6"
   },
   "scripts": {
-    "build": "pug src",
-    "serve": "httpster -d src",
-    "build:watch": "pug -w src",
+    "build": "pug effectsjs",
+    "serve": "httpster",
+    "build:watch": "pug -w effectsjs",
     "start": "run-p serve build:watch",
     "test": "echo skipped"
   }

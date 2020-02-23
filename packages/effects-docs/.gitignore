@@ -1,8 +1,8 @@
 *.html
 node_modules
 .DS_Store
-src/highlight/**/*css
-src/highlight/**/*jpg
-src/highlight/**/*png
-src/highlight/**/*md
+effectsjs/highlight/**/*css
+effectsjs/highlight/**/*jpg
+effectsjs/highlight/**/*png
+effectsjs/highlight/**/*md
 !solarized-*.css

@@ -41,5 +41,5 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
           BASE_BRANCH: master
           BRANCH: gh-pages
-          FOLDER: packages/effects-docs/src
+          FOLDER: packages/effects-docs/effectsjs
           CLEAN: true
