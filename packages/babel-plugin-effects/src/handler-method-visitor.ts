@@ -1,5 +1,7 @@
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
+  AssignmentExpression,
+  ExpressionStatement,
   Identifier,
   IfStatement,
   MemberExpression,
@@ -54,7 +56,8 @@ const makeHandlerMethod = (
   rootPath: NodePath<IfStatement | SwitchCase>,
   types: typeof BabelTypes,
   consequent: any,
-  handlerParamName: string
+  handlerParamName: string,
+  defaultAssignments: ExpressionStatement[]
 ) => {
   const handlerPropertyName = extractMemberPropertyPathName(
     rootPath,
@@ -100,6 +103,7 @@ const makeHandlerMethod = (
                     types.tryStatement(
                       types.blockStatement([
                         ...callExpressionDeclarations,
+                        ...defaultAssignments,
                         ...consequentBody
                       ]),
                       types.catchClause(
@@ -155,12 +159,15 @@ const makeHandlerMethod = (
  */
 export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
   HandlerCreationPrototype> = {
-  Identifier(path, { handlerParam }) {
-    if (path.node.name === handlerParam.name) {
+  Identifier(path, { handlerParamName }) {
+    if (path.node.name === handlerParamName) {
       path.node.name = `__${path.node.name}__`;
     }
   },
-  IfStatement(path, { types, handlerObject, handlerParam }) {
+  IfStatement(
+    path,
+    { types, handlerObject, handlerParamName, defaultAssignments }
+  ) {
     const testPath = path.get("test");
     const consequent = path.get("consequent") as any;
     const memberPropertyPath = path.get("test.right") as NodePath<
@@ -179,7 +186,8 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
         path,
         types,
         consequent,
-        handlerParam.name
+        handlerParamName,
+        defaultAssignments
       )
     );
 
@@ -189,13 +197,17 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
       path.traverse(handlerMethodVisitor, {
         types,
         handlerObject,
-        handlerParam
+        handlerParamName,
+        defaultAssignments
       });
     }
 
     path.remove();
   },
-  SwitchCase(path, { types, handlerObject, handlerParam }) {
+  SwitchCase(
+    path,
+    { types, handlerObject, handlerParamName, defaultAssignments }
+  ) {
     const memberPropertyPath = path.get("test") as NodePath<Identifier>;
     const consequent = path.get("consequent") as any;
 
@@ -209,7 +221,8 @@ export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
         path,
         types,
         consequent[0],
-        handlerParam.name
+        handlerParamName,
+        defaultAssignments
       )
     );
 
