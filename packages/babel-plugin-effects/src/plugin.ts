@@ -1,14 +1,20 @@
 import { parse } from "@babel/parser";
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
+  AssignmentExpression,
+  ExpressionStatement,
   Identifier,
   ObjectExpression,
+  ObjectPattern,
   TryStatement
 } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { handlerMethodVisitor } from "./handler-method-visitor";
 import { recallVisitor } from "./recall-visitor";
-import { fixupParentGenerator } from "./traverse-utilities";
+import {
+  collapseObjectPattern,
+  fixupParentGenerator
+} from "./traverse-utilities";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -25,12 +31,26 @@ export interface Babel {
 function createHandler(
   types: Babel["types"],
   path: NodePath,
-  handlerParam: Identifier
+  handlerParam: Identifier | ObjectPattern
 ) {
   const handlerObject = types.objectExpression([]);
+  const {
+    identifier,
+    defaultAssignments
+  }: {
+    identifier: Identifier;
+    defaultAssignments: ExpressionStatement[];
+  } = types.isObjectPattern(handlerParam)
+    ? collapseObjectPattern(handlerParam, types, path)
+    : { identifier: handlerParam, defaultAssignments: [] };
 
   path.traverse(recallVisitor, { types });
-  path.traverse(handlerMethodVisitor, { types, handlerObject, handlerParam });
+  path.traverse(handlerMethodVisitor, {
+    types,
+    handlerObject,
+    handlerParamName: identifier.name,
+    defaultAssignments
+  });
 
   return handlerObject;
 }

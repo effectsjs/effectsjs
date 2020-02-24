@@ -144,6 +144,316 @@ module.exports.test = async ({ describe, it, expect }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS destructure.js: destructure.js 1`] = `
+
+const typeDestructure = () => {
+    'use effects';
+    try{
+        return perform {type : 'sayHi'};
+    }handle({type}){
+        if(type === 'sayHi'){
+            recall 'Hello :)'
+        }
+    }
+};
+
+const propDestructure = (mutableThing) => {
+    'use effects';
+    try{
+        mutableThing += perform {type : 'addOne', data : mutableThing};
+        mutableThing += perform {type : 'addTwo', data : mutableThing};
+
+        return mutableThing;
+    }handle({type, data}){
+        switch(type){
+            case 'addOne' : return recall (data + 1);
+            case 'addTwo' : return recall (data + 2);
+        }
+    }
+};
+
+const restDestructure = () => {
+  'use effects'
+  try{
+      return perform {type : 'example', data1 : 'example 1 data 1', data2 : 'example 1 data 2'}
+  } handle({type, ...data}){
+      switch (type) {
+          case 'example': {
+              const {data1, data2} = data;
+              return recall [data1, data2];
+          }
+      }
+  }
+};
+
+const defaultAssignments = () => {
+    'use effects';
+    try{
+        return perform {type : 'getDefault'};
+    }handle({type, data = "default"}){
+        if(type === 'getDefault'){
+            recall data;
+        }
+    }
+};
+
+const defaultEffectTypes = () => {
+  'use effects';
+
+  try{
+      return perform {data : "keanu: woah!"}
+  }handle({type = 'default', data}){
+      if(type === 'default'){
+          recall null;
+      }
+  }
+};
+
+module.exports.test = ({it, expect, describe, code}) => {
+    describe('Destructuring effects handlers', () => {
+        it('Should destructure effect types in handle block', async () => {
+            const result = await typeDestructure();
+
+            expect(result).toBe('Hello :)');
+        });
+
+        it('Should destructure props from performed effects', async () => {
+           const result = await propDestructure(0);
+           expect(result).toBe(4);
+        });
+
+        it('Should handle rest props correctly during the destructure', async () =>{
+            const [data1, data2] = await restDestructure();
+
+            expect(data1).toBe('example 1 data 1');
+            expect(data2).toBe('example 1 data 2');
+        });
+
+        it('Should handle default destructure props', async () => {
+            const result = await defaultAssignments()
+
+            expect(result).toBe('default');
+        });
+
+        // TODO: this seems desireable... Underlying runtime will need to be altered in order to make it a possibility.
+        it.skip('Should handle default types', async () => {
+            const result = await defaultEffectTypes()
+
+            expect(result).toBe('keanu: woah!');
+        });
+    });
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const typeDestructure = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *sayHi(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, "Hello :)")
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            type: "sayHi"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+const propDestructure = mutableThing => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *addOne(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, __e__.data + 1)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          },
+
+          *addTwo(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, __e__.data + 2)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          mutableThing += yield performEffect({
+            type: "addOne",
+            data: mutableThing
+          });
+          mutableThing += yield performEffect({
+            type: "addTwo",
+            data: mutableThing
+          });
+          return mutableThing;
+        })()
+      );
+    })()
+  );
+};
+
+const restDestructure = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *example(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  const { data1, data2 } = __e__;
+                  return stackResume(handler, [data1, data2])
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            type: "example",
+            data1: "example 1 data 1",
+            data2: "example 1 data 2"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+const defaultAssignments = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *getDefault(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  __e__.data =
+                    typeof __e__.data !== "undefined" ? __e__.data : "default";
+                  return stackResume(handler, __e__.data)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            type: "getDefault"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+const defaultEffectTypes = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *default(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  __e__.type =
+                    typeof __e__.type !== "undefined" ? __e__.type : "default";
+                  return stackResume(handler, null)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            data: "keanu: woah!"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ it, expect, describe, code }) => {
+  describe("Destructuring effects handlers", () => {
+    it("Should destructure effect types in handle block", async () => {
+      const result = await typeDestructure();
+      expect(result).toBe("Hello :)");
+    });
+    it("Should destructure props from performed effects", async () => {
+      const result = await propDestructure(0);
+      expect(result).toBe(4);
+    });
+    it("Should handle rest props correctly during the destructure", async () => {
+      const [data1, data2] = await restDestructure();
+      expect(data1).toBe("example 1 data 1");
+      expect(data2).toBe("example 1 data 2");
+    });
+    it("Should handle default destructure props", async () => {
+      const result = await defaultAssignments();
+      expect(result).toBe("default");
+    }); // TODO: this seems desireable... Underlying runtime will need to be altered in order to make it a possibility.
+
+    it.skip("Should handle default types", async () => {
+      const result = await defaultEffectTypes();
+      expect(result).toBe("keanu: woah!");
+    });
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS errors-in-handlers.js: errors-in-handlers.js 1`] = `
 
 const ejectType = 'throwErrorHandler';

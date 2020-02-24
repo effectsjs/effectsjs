@@ -1,4 +1,9 @@
-import BabelTypes, { Identifier, ObjectExpression } from "@babel/types";
+import BabelTypes, {
+  AssignmentExpression,
+  ExpressionStatement,
+  Identifier,
+  ObjectExpression
+} from "@babel/types";
 
 export interface TypesVisitorPrototype {
   types: Babel["types"];
@@ -7,7 +12,8 @@ export interface TypesVisitorPrototype {
 
 export interface HandlerCreationPrototype {
   handlerObject: ObjectExpression;
-  handlerParam: Identifier;
+  handlerParamName: string;
+  defaultAssignments: ExpressionStatement[];
 }
 
 export interface Babel {
