@@ -1,3 +1,8 @@
+// @global
+window.effectsjsDocs = window.effectsjsDocs || {}
+const effectsjsDocs = window.effectsjsDocs
+effectsjsDocs.isEditorAutoEval = true
+
 const sleep = ms => new Promise(res => setTimeout(res, ms || 200))
 async function awaitDependencies () {
   const waitingFor = {
@@ -50,6 +55,7 @@ function maybeMonkeyPatchConsole (el) {
   window.console.warn = withTap(appendLog, unpatchedWarn)
   window.console.error = withTap(appendLog, unpatchedError)
 }
+
 async function init () {
   const dependencies = await awaitDependencies()
   const { Babel, ace } = dependencies
@@ -71,11 +77,19 @@ async function init () {
         ]
       }).code
       eval(transformed)
-    } catch (err) {
-      console.error(err)
+    } catch (error) {
+      console.error({ message: error.message, meta: 'see browser console fo more details' })
     }
   }
-  editor.on('change', evaluate)
+  editor.on('change', () => {
+    if (window.effectsjsDocs.isEditorAutoEval) evaluate()
+  })
   evaluate()
+
+  // bind handlers
+  window.document.getElementById('toggle_autoeval_control').addEventListener('input', () => {
+    window.effectsjsDocs.isEditorAutoEval = !window.effectsjsDocs.isEditorAutoEval
+  })
+  window.document.getElementById('run_control').addEventListener('click', evaluate)
 }
 init()
