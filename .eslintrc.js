@@ -4,6 +4,8 @@ module.exports = {
     "**/lib/**",
     "!.eslintrc.js",
     "*highlight*",
+    "babel.js", // babel is currently forked and submoduled.  but we need the file for the ui build!
+    "**/effects-docs/effectsjs/examples/**", // ignore until eslint-plugin :ok_hand:
     "**/effects-runtime/examples/**", // ignore until eslint-plugin :ok_hand:
     "**/effects-runtime/test/**" // ignore until eslint-plugin :ok_hand:
   ],
