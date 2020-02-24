@@ -4,16 +4,24 @@
   "author": "cdaringe <cdaringe@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "babel-loader": "^8.0.6",
     "httpster": "^1.0.4",
     "jstransformer-markdown-it": "^2.1.0",
     "npm-run-all": "^4.1.5",
-    "pug-cli": "^1.0.0-alpha6"
+    "pug-cli": "^1.0.0-alpha6",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "effects-runtime": "^0.0.1",
+    "babel-plugin-effects": "^0.0.1"
   },
   "scripts": {
-    "build": "pug effectsjs",
+    "build:effects-runtime": "webpack --config webpack.effects.runtime.js",
+    "build:babel:standalone": "cp ../../babel/packages/babel-standalone/babel.js effectsjs/",
+    "build:pug": "pug effectsjs",
+    "build": "run-s build:pug build:babel:standalone",
     "serve": "httpster",
-    "build:watch": "pug -w effectsjs",
-    "start": "run-p serve build:watch",
+    "build:pug:watch": "pug -w effectsjs",
+    "start": "run-p serve build:pug:watch build:*",
     "test": "echo skipped"
   }
 }

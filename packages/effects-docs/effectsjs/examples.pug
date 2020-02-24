@@ -1,3 +1,13 @@
 extends layout.pug
 block main
-  p weeeee
+  script(src='/effectsjs/babel.js', async)
+  script(src='/effectsjs/effects-runtime.bundle.js', async)
+  script(src='//cdnjs.cloudflare.com/ajax/libs/ace/1.4.7/ace.js', async)
+  link(rel="stylesheet", href="/effectsjs/components/editor/styles.css")
+  script
+    include ./editor.js
+  block example_title
+  .node#editor
+    block editor_text
+  .node#editorRunOutput
+  block post_editor
