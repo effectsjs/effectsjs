@@ -8,3 +8,10 @@
     bottom: 0;
     left: 0; */
 }
+
+#editorRunOutput {
+    background: rgba(39, 40, 34, 0.8);
+    color: white;
+    height: 200px;
+    padding: 16px;
+}

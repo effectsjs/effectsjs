@@ -25,13 +25,29 @@ function maybeMonkeyPatchConsole (el) {
   if (console === __unpatched_console__) return
   __unpatched_console__ = window.console
   unpatchedLog = window.console.log
-  window.console.log = function log (...args) {
-    var node = document.createElement("div")
-    node.innerHTML = `<pre>${args.map(arg => JSON.stringify(arg))}</pre>`
-    el.appendChild(node)
-    unpatchedLog(...args)
+  unpatchedInfo = window.console.info
+  unpatchedWarn = window.console.warn
+  unpatchedError = window.console.error
+  const withTap = (fn, fn2) => {
+    return (...args) => {
+      fn(...args)
+      return fn2(...args)
+    }
   }
-
+  const appendLog = (...args) => {
+    var node = document.createElement("div")
+    node.innerHTML = [
+      `<pre>`,
+      `<span class='console-date-string'>${new Date().toISOString()}: <span>`,
+      args.map(arg => JSON.stringify(arg)),
+      `</pre>`
+    ].join('')
+    el.appendChild(node)
+  }
+  window.console.log = withTap(appendLog, unpatchedLog)
+  window.console.info = withTap(appendLog, unpatchedInfo)
+  window.console.warn = withTap(appendLog, unpatchedWarn)
+  window.console.error = withTap(appendLog, unpatchedError)
 }
 async function init () {
   const dependencies = await awaitDependencies()
