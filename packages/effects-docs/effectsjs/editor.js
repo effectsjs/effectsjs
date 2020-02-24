@@ -43,6 +43,7 @@ function maybeMonkeyPatchConsole (el) {
       `</pre>`
     ].join('')
     el.appendChild(node)
+    window.virtualConsole.scrollTo(0, window.virtualConsole.scrollHeight + 100)
   }
   window.console.log = withTap(appendLog, unpatchedLog)
   window.console.info = withTap(appendLog, unpatchedInfo)
@@ -58,8 +59,8 @@ async function init () {
   editor.setTheme("ace/theme/monokai")
   editor.session.setMode("ace/mode/javascript")
   window.editor = editor
-  window.editorRunOutput = window.document.getElementById('editorRunOutput')
-  maybeMonkeyPatchConsole(window.editorRunOutput)
+  window.virtualConsole = window.document.getElementById('virtualConsole')
+  maybeMonkeyPatchConsole(window.virtualConsole)
   let text = ''
   const evaluate = () => {
     text = editor.getValue()

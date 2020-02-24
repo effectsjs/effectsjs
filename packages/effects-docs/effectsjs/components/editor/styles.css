@@ -9,9 +9,10 @@
     left: 0; */
 }
 
-#editorRunOutput {
+#virtualConsole {
     background: rgba(39, 40, 34, 0.8);
     color: white;
+    overflow-y: auto;
     height: 200px;
     padding: 16px;
 }
