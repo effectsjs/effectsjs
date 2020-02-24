@@ -4,7 +4,7 @@
   "description": "babel plugin Algebraic Effects For Javascript 🎉",
   "main": "lib/runtime.js",
   "scripts": {
-    "build:example": "./babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
+    "build:example": "../../babel/packages/babel-cli/bin/babel.js ./examples/src/ --out-dir ./examples/dist/",
     "build:source": "run-s clean compile",
     "build": "run-s build:source build:example",
     "clean": "rm -rf ./lib || true",
