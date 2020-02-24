@@ -15,7 +15,7 @@
     } handle (event) {
       switch event.type {
         case 'log': {
-          console.log(event)
+          console.log(event.message)
           recall null
         }
       }
@@ -41,6 +41,15 @@
     | `perform` | Initiates an effect. The current function halts, and later resumes when an effect handler `resume`s |
     | `handle` | `try/handle` blocks allow users to specify handlers for effect events, using well-known `try/catch`-like semantics.  `try/handle` is _not_ compatible with `try/catch` |
     | `resume` | Resumes the previously halted function, who called `perform`. |
+.node.funsies
+  include components/logo.pug
+  +logo
+.node
+  h2 Getting started
+  p There are two ways to get started:
+    ul
+      li: a(href='/effectsjs/examples.html') Try our editor and examples online, now!
+      li: a(href='/effectsjs/installation') Install effects into your javascript or typescript project
 .node.funsies
   include components/logo.pug
   +logo
