@@ -7,10 +7,11 @@ html
     script hljs.initHighlightingOnLoad()
   body
     .node.hero
-      h1(style={display: 'flex', 'flex-direction': 'row', 'align-items': 'center'})
-        | effectsjs
-        include components/logo.pug
-        +logo
+      h1
+        a(href="/effectsjs/",style={display: 'flex', 'flex-direction': 'row', 'align-items': 'center', 'text-decoration': 'none', 'color': 'black' })
+          | effectsjs
+          include components/logo.pug
+          +logo
       ul.nav
         li
           a(href='/effectsjs/') home

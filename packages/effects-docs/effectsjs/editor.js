@@ -40,12 +40,10 @@ function maybeMonkeyPatchConsole (el) {
     }
   }
   const appendLog = (...args) => {
-    var node = document.createElement("div")
+    var node = document.createElement("pre")
     node.innerHTML = [
-      `<pre>`,
       `<span class='console-date-string'>${new Date().toISOString()}: <span>`,
-      args.map(arg => JSON.stringify(arg)),
-      `</pre>`
+      args.map(arg => JSON.stringify(arg).replace(/^"/, "").replace(/"$/, "")),
     ].join('')
     el.appendChild(node)
     window.virtualConsole.scrollTo(0, window.virtualConsole.scrollHeight + 100)

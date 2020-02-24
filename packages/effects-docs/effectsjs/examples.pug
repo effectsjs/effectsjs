@@ -1,18 +1,11 @@
 extends layout.pug
 block main
-  script(src='/effectsjs/babel.js', async)
-  script(src='/effectsjs/effects-runtime.bundle.js', async)
-  script(src='//cdnjs.cloudflare.com/ajax/libs/ace/1.4.7/ace.js', async)
-  link(rel="stylesheet", href="/effectsjs/components/editor/styles.css")
-  script
-    include ./editor.js
-  block example_title
-  .node#editorOptions
-    label(for='autoeval') auto-eval
-    input#toggle_autoeval_control(type='checkbox',checked, name='autoeval')
-    div#run_control Run
-      .arrow-right
-  .node#editor
-    block editor_text
-  .node#virtualConsole
-  block post_editor
+  h2 examples
+  :markdown-it(linkify langPrefix='highlight-')
+    | Link | Title | Description |
+    |:- | :-      | :- |
+    | [get-integer](/effectsjs/examples/get-integer.html) | Get Integer | Barebones example `perform`ing and `resume`ing |
+    | [get-http-resource](/effectsjs/examples/get-http-resource.html) | Get Http Resource | Basic example demonstrating direct-style, async resource fetching |
+  .node.funsies
+    include components/logo.pug
+    +logo
