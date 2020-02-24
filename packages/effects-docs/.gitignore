@@ -6,3 +6,9 @@ effectsjs/highlight/**/*jpg
 effectsjs/highlight/**/*png
 effectsjs/highlight/**/*md
 !solarized-*.css
+
+# injected from babel submodule
+babel.js
+
+# injected during build
+*.bundle.js

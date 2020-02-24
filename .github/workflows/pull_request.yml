@@ -13,16 +13,9 @@ jobs:
         run: npm ci && npm run bootstrap
       - name: lint
         run: npm run lint
+      - name: init-babel-fork
+        run: bash scripts/init-babel.sh
       - name: build
         run: npm run build
-      - name: init-babel
-        run: |
-          set -ex
-          git submodule init
-          git submodule update
-          cd babel
-          make bootstrap
-          make build
-          cd ..
       - name: test
         run: npm run test
