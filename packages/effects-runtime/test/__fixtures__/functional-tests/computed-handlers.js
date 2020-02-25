@@ -30,7 +30,7 @@ const locallyScopedEffects = async () => {
   'use effects';
   const something = 'something';
   try{
-      return perform {type : 'something'};
+      return perform {type : something};
   }handle({type}){
       switch(type){
           case something: return recall something;
