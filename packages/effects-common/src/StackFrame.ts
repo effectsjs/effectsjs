@@ -1,5 +1,5 @@
 // Methods for managing the call stack as a linked list
-import { Handler, HandlerDefinition } from "./effects.types";
+import { Handler, HandlerDefinition, EffectType } from "./effects.types";
 import { exists, isIterator } from "./util";
 
 const ReturnFrame: unique symbol = Symbol("ReturnFrame");
@@ -20,11 +20,12 @@ export type FrameLink = StackFrame | Continuation | null;
 
 export const getHandler = (
   frame: StackFrame,
-  type: string | number
+  type: EffectType
 ): HandlerDefinition | null => {
   const handler = frame[HandlerReference];
 
   if (exists(handler)) {
+    // @ts-ignore
     return handler[type] ?? null;
   }
 
@@ -35,7 +36,7 @@ export const getReturnFrame = (frame: any): FrameLink => frame[ReturnFrame];
 
 export const isHandlerType = (
   frame: StackFrame | Continuation | null,
-  type: string | number
+  type: EffectType
 ): frame is StackFrame => {
   if (!isIterator(frame)) return false;
   return getHandler(frame, type) !== null;
@@ -57,7 +58,7 @@ export const isRootContinuation = (fn: Continuation | StackFrame) =>
 
 export const findHandlerFrame = (
   frame: StackFrame,
-  type: string | number
+  type: EffectType
 ): StackFrame | null => {
   let frameWithHandler: FrameLink = frame;
 
