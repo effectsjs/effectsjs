@@ -114,7 +114,7 @@ const main = () => {
     (function*() {
       yield withHandler(
         {
-          *throwErrorHandler(__e__, resume) {
+          *[throwErrorHandler](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -138,6 +138,180 @@ const main = () => {
 module.exports.test = async ({ describe, it, expect }) => {
   it("Should handle errors within effects", async () => {
     await expect(main()).rejects.toThrowError();
+  });
+};
+
+
+`;
+
+exports[`transformEffects Transform proposed effects keywords into working JS computed-handlers.js: computed-handlers.js 1`] = `
+
+const symbolHandler = Symbol();
+const {computedHandler} = {};
+
+const main = async (fn) => {
+    try{
+        return fn();
+    }handle({type}){
+        switch(type){
+            case symbolHandler : recall 'symbol';
+            case computedHandler : recall 'computed';
+        }
+    }
+};
+
+const performSymbolHandler = async () => {
+    'use effects';
+    main(() => {
+        return perform {type : symbolHandler}
+    });
+};
+
+const performComputedHandler = async () => {
+    'use effects';
+    main(() => {
+        return perform {type : computedHandler}
+    })
+};
+
+const locallyScopedEffects = async () => {
+  'use effects';
+  const something = 'something';
+  try{
+      return perform {type : 'something'};
+  }handle({type}){
+      switch(type){
+          case something: return recall something;
+      }
+  }
+};
+
+module.exports.test = ({describe, it, code, expect}) => {
+    describe(\`Computed props for effects handlers\`, () => {
+        it('Should behave as expected when performing a symbol handler', async () => {
+            await expect(performSymbolHandler()).resolves.toBe('symbol');
+        });
+
+        it('Should behave as expected when performing a computed handler', async () => {
+            await expect(performComputedHandler()).resolves.toBe('computed');
+        });
+
+        it('Should handle locally scoped effect types', async () => {
+            await expect(locallyScopedEffects()).resolves.toBe('something');
+        })
+    });
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const symbolHandler = Symbol();
+const { computedHandler } = {};
+
+const main = async function*(fn) {
+  return yield withHandler(
+    {
+      *[symbolHandler](__e__, resume) {
+        const result = yield function(handler) {
+          return new Promise(async (res, rej) => {
+            try {
+              return stackResume(handler, "symbol")
+                .then(res)
+                .catch(rej);
+            } catch (handlerError) {
+              rej(handlerError);
+            }
+          });
+        };
+        return yield resume(result);
+      },
+
+      *[computedHandler](__e__, resume) {
+        const result = yield function(handler) {
+          return new Promise(async (res, rej) => {
+            try {
+              return stackResume(handler, "computed")
+                .then(res)
+                .catch(rej);
+            } catch (handlerError) {
+              rej(handlerError);
+            }
+          });
+        };
+        return yield resume(result);
+      }
+    },
+    (async function*() {
+      return yield fn();
+    })()
+  );
+};
+
+const performSymbolHandler = async () => {
+  return runProgram(
+    (function*() {
+      yield main(function*() {
+        return yield performEffect({
+          type: symbolHandler
+        });
+      });
+    })()
+  );
+};
+
+const performComputedHandler = async () => {
+  return runProgram(
+    (function*() {
+      yield main(function*() {
+        return yield performEffect({
+          type: computedHandler
+        });
+      });
+    })()
+  );
+};
+
+const locallyScopedEffects = async () => {
+  return runProgram(
+    (function*() {
+      const something = "something";
+      yield withHandler(
+        {
+          *[something](__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, something)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            type: "something"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ describe, it, code, expect }) => {
+  describe(\`Computed props for effects handlers\`, () => {
+    it("Should behave as expected when performing a symbol handler", async () => {
+      await expect(performSymbolHandler()).resolves.toBe("symbol");
+    });
+    it("Should behave as expected when performing a computed handler", async () => {
+      await expect(performComputedHandler()).resolves.toBe("computed");
+    });
+    it("Should handle locally scoped effect types", async () => {
+      await expect(locallyScopedEffects()).resolves.toBe("something");
+    });
   });
 };
 
@@ -538,7 +712,7 @@ const syncEjectCase = () => {
     (function*() {
       yield withHandler(
         {
-          *throwErrorHandler(__e__, resume) {
+          *[ejectType](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -568,7 +742,7 @@ const asyncEjectCase = async () => {
     (function*() {
       yield withHandler(
         {
-          *throwErrorHandler(__e__, resume) {
+          *[ejectType](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -601,7 +775,7 @@ const continuationEjectCase = () => {
     (function*() {
       yield withHandler(
         {
-          *throwErrorHandler(__e__, resume) {
+          *[ejectType](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -959,7 +1133,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *getInteger(__e__, resume) {
+          *[getIntegerHandler](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1041,7 +1215,7 @@ const main = ({ onEffectComplete }) => {
     (function*() {
       yield withHandler(
         {
-          *getAsyncInteger(__e__, resume) {
+          *[getAsyncIntegerHandler](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1115,7 +1289,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *getInteger(__e__, resume) {
+          *[getIntegerHandler](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1257,7 +1431,7 @@ const EffectC = () => ({
 const main = function*(fn) {
   return yield withHandler(
     {
-      *typeA(__e__, resume) {
+      *[effectTypeA](__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1276,7 +1450,7 @@ const main = function*(fn) {
         return yield resume(result);
       },
 
-      *typeB(__e__, resume) {
+      *[effectTypeB](__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1295,7 +1469,7 @@ const main = function*(fn) {
         return yield resume(result);
       },
 
-      *typeC(__e__, resume) {
+      *[effectTypeC](__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1432,7 +1606,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *throwErrorHandler(__e__, resume) {
+          *[gatherBananasEffectType](__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {

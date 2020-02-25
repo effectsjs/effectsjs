@@ -10,7 +10,9 @@ export interface Handler {
   [index: number]: HandlerDefinition;
 }
 
+export type HandlerType = string | number | symbol;
+
 export interface Effect {
-  type: string | number;
+  type: HandlerType;
   data?: any;
 }

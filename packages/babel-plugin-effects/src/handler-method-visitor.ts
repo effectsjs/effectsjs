@@ -1,11 +1,15 @@
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
   AssignmentExpression,
+  BigIntLiteral,
+  BooleanLiteral,
   ExpressionStatement,
   Identifier,
   IfStatement,
   MemberExpression,
+  NumericLiteral,
   ObjectExpression,
+  StringLiteral,
   SwitchCase
 } from "@babel/types";
 import {
@@ -23,27 +27,33 @@ const isCorrectMemberPropertyPath = (
   );
 };
 
+const isLiteralProp = (
+  node: NodePath,
+  types: typeof BabelTypes
+): node is BigIntLiteral | BooleanLiteral | StringLiteral | NumericLiteral =>
+  types.isLiteral(node) &&
+  !types.isNullLiteral(node) &&
+  !types.isRegExpLiteral(node) &&
+  !types.isTemplateLiteral(node);
+
 const extractMemberPropertyPathName = (
   parentPath: NodePath,
   types: typeof BabelTypes,
   memberPropertyNode: BabelTypes.Node
-) => {
-  if (types.isStringLiteral(memberPropertyNode)) {
-    return types.identifier(memberPropertyNode.value);
+): { ident: Identifier; isComputed: boolean } => {
+  if (isLiteralProp(memberPropertyNode, types)) {
+    return {
+      ident: types.identifier(memberPropertyNode.value),
+      isComputed: false
+    };
   } else if (types.isIdentifier(memberPropertyNode)) {
     const binding = parentPath.scope.getBinding(memberPropertyNode.name) as any;
 
-    if (!binding) {
-      throw new Error(
-        `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
-      );
+    if (binding && types.isIdentifier(memberPropertyNode)) {
+      return { ident: memberPropertyNode, isComputed: true };
     }
 
-    return extractMemberPropertyPathName(
-      binding.path.parent,
-      types,
-      binding?.path.node.init
-    );
+    // I think at this point it's safe to throw.
   }
 
   throw new Error(
@@ -59,11 +69,10 @@ const makeHandlerMethod = (
   handlerParamName: string,
   defaultAssignments: ExpressionStatement[]
 ) => {
-  const handlerPropertyName = extractMemberPropertyPathName(
-    rootPath,
-    types,
-    memberPropertyPath.node
-  );
+  const {
+    ident: handlerPropertyName,
+    isComputed
+  } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
 
   // Collect all call expressions located inside of the handler (consequent block)
   const callExpressionDeclarations: Node[] = [];
@@ -143,7 +152,7 @@ const makeHandlerMethod = (
         )
       )
     ]),
-    false
+    isComputed
   );
 
   objectMethod.generator = true;

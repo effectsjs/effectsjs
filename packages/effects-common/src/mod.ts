@@ -22,7 +22,7 @@ export class UnhandledEffectError extends TypeError {
   constructor({ type }: Effect) {
     super();
 
-    this.message = `Encountered an unhandled effect :${type}`;
+    this.message = `Encountered an unhandled effect :${String(type)}`;
   }
 }
 
@@ -75,10 +75,7 @@ export const stackResume = async (
   }
 };
 
-export const runProgram = async (root: Generator) => {
-  const result = await stackResume(root, null);
-  return result;
-};
+export const runProgram = async (root: Generator) => stackResume(root, null);
 
 export const performEffect = ({ type, ...data }: Effect) => async (
   currentFrame: Generator
