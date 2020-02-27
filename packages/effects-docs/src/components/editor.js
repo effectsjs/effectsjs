@@ -157,7 +157,7 @@ function maybeMonkeyPatchConsole(onNextMsg) {
   };
   const appendLog = (level, ...args) => {
     // @warn react-events induce various non-controlled patched log calls on unmount,
-    // so filter during
+    // so filter on level string
     if (!testIsPatched(level)) return;
     let msg;
     try {
@@ -200,15 +200,12 @@ function maybeMonkeyPatchConsole(onNextMsg) {
 }
 
 let isEvaluating = false;
-let isRequestingFreshEval = false;
 let nextToEvaluate = "";
 const evaluate = src => {
   nextToEvaluate = src;
   if (isEvaluating) {
-    isRequestingFreshEval = true;
     return;
   }
-  isRequestingFreshEval = false;
   isEvaluating = true;
   window.requestAnimationFrame(async () => {
     const [babel, transformEffects, effectsRuntime] = await Promise.all([
@@ -228,7 +225,6 @@ const evaluate = src => {
       });
     } finally {
       isEvaluating = false;
-      if (isRequestingFreshEval) evaluate(nextToEvaluate);
     }
   });
 };

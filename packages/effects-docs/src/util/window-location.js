@@ -1,3 +1,6 @@
+/**
+ * getWindow for gatsby-ssr support at build time
+ */
 function getWindow() {
   if (typeof window !== `undefined`) {
     return window;
