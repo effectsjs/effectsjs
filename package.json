@@ -8,7 +8,7 @@
     "copy:nvmrc": "lerna exec -- cp ../../.nvmrc ./",
     "build": "tsc -b packages && lerna exec --scope effects-docs -- npm run build",
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
-    "format:dryrun": "prettier ./*.{js,ts} ./packages/*/{test,src}/**/*.{js,ts}",
+    "format:dryrun": "prettier './*.{js,ts}' './packages/**/*.{js,ts}'",
     "format": "npm run format:dryrun -- --write",
     "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && npm run format:dryrun -- --check",
     "test": "lerna exec npm run test"
@@ -30,6 +30,7 @@
     "del-cli": "^3.0.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react-app": "^6.2.1",
     "eslint": "^6.8.0",
     "lerna": "^3.20.2",
     "npm-run-all": "^4.1.5",

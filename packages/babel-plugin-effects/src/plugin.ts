@@ -1,7 +1,6 @@
 import { parse } from "@babel/parser";
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
-  AssignmentExpression,
   ExpressionStatement,
   Identifier,
   ObjectExpression,

@@ -1,21 +1,14 @@
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
   ArrowFunctionExpression,
-  AssignmentExpression,
-  BlockStatement,
   CallExpression,
   Identifier,
-  ObjectExpression,
   ObjectPattern,
   ObjectProperty,
-  Literal,
-  VariableDeclarator,
-  Expression,
   ExpressionStatement
 } from "@babel/types";
 import { Babel } from "./plugin";
 import { yieldCallExpressionVisitor } from "./to-generator-visitor";
-import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 
 export const hasEffectsDirective = (path: NodePath<BabelTypes.Function>) => {
   const directives = path.get("body.directives") as NodePath[];
