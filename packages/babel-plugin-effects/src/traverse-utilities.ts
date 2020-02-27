@@ -1,12 +1,21 @@
-import { NodePath } from "@babel/traverse";
+import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
   ArrowFunctionExpression,
+  AssignmentExpression,
   BlockStatement,
   CallExpression,
-  VariableDeclarator
+  Identifier,
+  ObjectExpression,
+  ObjectPattern,
+  ObjectProperty,
+  Literal,
+  VariableDeclarator,
+  Expression,
+  ExpressionStatement
 } from "@babel/types";
 import { Babel } from "./plugin";
 import { yieldCallExpressionVisitor } from "./to-generator-visitor";
+import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 
 export const hasEffectsDirective = (path: NodePath<BabelTypes.Function>) => {
   const directives = path.get("body.directives") as NodePath[];
@@ -102,4 +111,100 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
         });
     }
   }
+};
+
+export const toMemberExpressionVisitor: Visitor<{
+  objectIdentifier: Identifier;
+  propName: string;
+  types: Babel["types"];
+}> = {
+  Identifier(path, { objectIdentifier, propName, types }) {
+    if (path.node.name === propName) {
+      path.replaceWith(types.memberExpression(objectIdentifier, path.node));
+      path.skip();
+    }
+  }
+};
+
+export const renameIdentNameVisitor: Visitor<{
+  newName: string;
+  oldName: string;
+}> = {
+  Identifier(path, { newName, oldName }) {
+    if (path.node.name === oldName) {
+      path.node.name = newName;
+    }
+  }
+};
+
+// Convert a destructured default into
+// object.prop = typeof object.prop !== 'undefined' ? object.prop : 'default'
+// TODO: Double check the spec to make sure this is BTB (by the books).
+export const createDefaultAssignment = (
+  objectIdent: Identifier,
+  objectProp: ObjectProperty,
+  types: Babel["types"]
+) => {
+  if (
+    types.isRestElement(objectProp) ||
+    !types.isAssignmentPattern(objectProp.value)
+  ) {
+    throw new Error(`[Babel Plugin Effects Error]`);
+  }
+
+  return types.expressionStatement(
+    types.assignmentExpression(
+      "=",
+      types.memberExpression(objectIdent, objectProp.key),
+      types.conditionalExpression(
+        types.binaryExpression(
+          "!==",
+          types.unaryExpression(
+            "typeof",
+            types.memberExpression(objectIdent, objectProp.key),
+            true
+          ),
+          types.stringLiteral("undefined")
+        ),
+        types.memberExpression(objectIdent, objectProp.key),
+        objectProp.value.right
+      )
+    )
+  );
+};
+
+export const collapseObjectPattern = (
+  handlerParam: ObjectPattern,
+  types: Babel["types"],
+  handlerBodyPath: NodePath
+): { identifier: Identifier; defaultAssignments: ExpressionStatement[] } => {
+  const identifierName = `e`;
+  const defaultAssignments: ExpressionStatement[] = [];
+  const objectIdentifier = types.identifier(identifierName);
+
+  for (const property of handlerParam.properties) {
+    if (
+      !types.isRestElement(property) &&
+      types.isAssignmentPattern(property.value)
+    ) {
+      defaultAssignments.push(
+        createDefaultAssignment(objectIdentifier, property, types)
+      );
+    }
+
+    if (types.isRestElement(property)) {
+      handlerBodyPath.traverse(renameIdentNameVisitor, {
+        newName: identifierName,
+        oldName: (property.argument as Identifier).name
+      });
+    } else {
+      handlerBodyPath.traverse(toMemberExpressionVisitor, {
+        objectIdentifier,
+        propName: property.key.name,
+        types
+      });
+    }
+  }
+
+  return { identifier: objectIdentifier, defaultAssignments };
 };

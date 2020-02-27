@@ -350,5 +350,36 @@ describe("Effects Unit Tests", () => {
 
       stackResume(controlFrame);
     });
+
+    it("Should handle symbol-y typed effect-handles", async () => {
+      const handlerType = Symbol();
+      const expectedResult = Symbol();
+
+      const handler: Handler = {
+        *[handlerType](_, resume) {
+          return yield resume(expectedResult);
+        }
+      };
+
+      const controlFrame = (function* main() {
+        return yield performEffect({ type: handlerType });
+      })();
+
+      addHandler(controlFrame, handler);
+
+      await expect(stackResume(controlFrame)).resolves.toBe(expectedResult);
+    });
+
+    it("Should catch unhandled symbol-y typed effect-handlers", async () => {
+      await expect(
+        stackResume(
+          (function* main() {
+            return yield performEffect({ type: Symbol("oh noes") });
+          })()
+        )
+      ).rejects.toThrowError(
+        "Encountered an unhandled effect :Symbol(oh noes)"
+      );
+    });
   });
 });
