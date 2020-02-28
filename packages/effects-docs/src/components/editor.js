@@ -75,7 +75,13 @@ export default class Editor extends React.PureComponent {
            * which is too bad, because webpack should minify it.  it's so bad,
            * that we're ejecting to script loading this little bugger
            * */}
-          <script src="/effectsjs/babel.js"></script>
+          <script
+            src={
+              process.env.NODE_ENV === "development"
+                ? "/babel.js"
+                : "/effectsjs/babel.js"
+            }
+          ></script>
         </Helmet>
         <div id="top_options" className="node">
           <label htmlFor="toggle_is_fullscreen_control" children="fullscreen" />
@@ -146,19 +152,11 @@ function maybeMonkeyPatchConsole(onNextMsg) {
   unpatchedInfo = window.console.info;
   unpatchedWarn = window.console.warn;
   unpatchedError = window.console.error;
-  const testIsPatched = level =>
-    level === "info" ||
-    level === "warn" ||
-    level === "error" ||
-    level === "log";
   const withTap = (fn, fn2) => (...args) => {
     fn(...args);
     return fn2(...args);
   };
   const appendLog = (level, ...args) => {
-    // @warn react-events induce various non-controlled patched log calls on unmount,
-    // so filter on level string
-    if (!testIsPatched(level)) return;
     let msg;
     try {
       msg = args.map(arg =>

@@ -38,7 +38,7 @@ const Examples = () => {
               <td>{i + 1}</td>
               <td>
                 <Link
-                  to={`examples/${withoutExampleSuffix(
+                  to={`/examples/${withoutExampleSuffix(
                     basename.replace(".js", "")
                   )}`}
                 >
