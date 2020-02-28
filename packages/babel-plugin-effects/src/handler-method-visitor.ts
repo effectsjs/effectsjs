@@ -1,6 +1,5 @@
 import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, {
-  AssignmentExpression,
   BigIntLiteral,
   BooleanLiteral,
   ExpressionStatement,
@@ -8,7 +7,6 @@ import BabelTypes, {
   IfStatement,
   MemberExpression,
   NumericLiteral,
-  ObjectExpression,
   StringLiteral,
   SwitchCase
 } from "@babel/types";

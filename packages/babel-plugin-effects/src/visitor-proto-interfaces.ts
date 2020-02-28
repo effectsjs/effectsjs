@@ -1,7 +1,5 @@
 import BabelTypes, {
-  AssignmentExpression,
   ExpressionStatement,
-  Identifier,
   ObjectExpression
 } from "@babel/types";
 

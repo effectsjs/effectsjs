@@ -1,11 +1,11 @@
 body {
   font-family: 'Ubuntu Mono', monospace, sans-serif;
   margin: auto;
-  max-width: 800;
+  max-width: 800px;
 }
 
 /* layout */
-.node:not(:first-child) {
+.node:not(:first-child):not(.full-width) {
   padding-left: 8px;
 }
 
@@ -16,6 +16,13 @@ ul.nav, .nav li {
 }
 
 /* hero */
+#banner {
+  align-items: center;
+  color: black;
+  display: flex;
+  flex-direction: row;
+  text-decoration: none;
+}
 .hero {
   display: flex;
   padding: 8px;
@@ -30,20 +37,6 @@ ul.nav, .nav li {
 .hero h1 {
   padding: 0;
   margin: 0;
-}
-
-.hero svg {
-  margin-left: 8px;
-}
-.hero path {
-  /* stroke: white; */
-  stroke-dasharray: 100;
-  animation: dash 1.8s linear infinite;
-}
-@keyframes dash {
-  to {
-    stroke-dashoffset: 200;
-  }
 }
 
 .funsies {
