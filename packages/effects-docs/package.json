@@ -27,7 +27,7 @@
   "scripts": {
     "build:babel:standalone": "cp ../../babel/packages/babel-standalone/babel.js static/",
     "prebuild": "node scripts/reduce-highlight.js",
-    "build": "run-s build:babel:standalone && gatsby build --prefix-paths",
+    "build": "run-s build:babel:standalone && gatsby build",
     "postbuild": "echo 'effects.js.org' > public/CNAME",
     "clean": "gatsby clean",
     "serve": "gatsby serve",

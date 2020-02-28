@@ -76,13 +76,7 @@ export default class Editor extends React.PureComponent {
            * which is too bad, because webpack should minify it.  it's so bad,
            * that we're ejecting to script loading this little bugger
            * */}
-          <script
-            src={
-              process.env.NODE_ENV === "development"
-                ? "/babel.js"
-                : "/effectsjs/babel.js"
-            }
-          ></script>
+          <script src="/babel.js"></script>
         </Helmet>
         <div id="top_options" className="node">
           <label htmlFor="toggle_is_fullscreen_control" children="fullscreen" />

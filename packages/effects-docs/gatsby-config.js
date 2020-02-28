@@ -4,7 +4,6 @@ module.exports = {
     description: `Algebraic Effects in Javascript`,
     author: `@cdaringe`
   },
-  pathPrefix: "/effectsjs",
   plugins: [
     `gatsby-plugin-react-helmet`,
     {
