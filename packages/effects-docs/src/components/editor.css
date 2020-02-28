@@ -44,6 +44,18 @@
   width: 100%;
 }
 
+#editor_container #editor_downloading_status {
+  background: #656565;
+  min-height: 400px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#editor_container #editor_downloading_status path {
+  stroke: white;
+}
+
 #editor_container.fullscreen #editor {
   position: fixed;
   top: 30px;

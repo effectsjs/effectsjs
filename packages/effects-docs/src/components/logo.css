@@ -1,0 +1,19 @@
+svg.effectsjs-logo.animated {
+  margin-left: 8px;
+}
+svg.effectsjs-logo.spin {
+  animation: spin 6s linear infinite;
+}
+.effectsjs-logo.animated path {
+  /* stroke: white; */
+  stroke-dasharray: 100;
+  animation: dash 1.8s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 200;
+  }
+}
+
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

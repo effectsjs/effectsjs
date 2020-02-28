@@ -25,7 +25,7 @@ const Layout = ({ children }) => {
       <div className="node hero">
         <Link to="/" id="banner">
           <h1 children="effectsjs" />
-          <Logo />
+          <Logo animated />
         </Link>
         <ul className="nav">
           <li children={<Link to="/">home</Link>} />

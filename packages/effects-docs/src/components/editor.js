@@ -1,4 +1,5 @@
 import "./editor.css";
+import { EditorLoading } from "./editor-loading";
 import { parseCurrentQuery, setQuery } from "../util/window-location.js";
 import Helmet from "react-helmet";
 import React from "react";
@@ -66,7 +67,7 @@ export default class Editor extends React.PureComponent {
   };
   render() {
     const { logs, isAutoEval, src, isFullScreen } = this.state;
-    const AceEditor = this.AceEditor || (() => <h3>Downloading editor...</h3>);
+    const AceEditor = this.AceEditor || EditorLoading;
     return (
       <div id="editor_container" className={isFullScreen ? "fullscreen" : ""}>
         <Helmet>

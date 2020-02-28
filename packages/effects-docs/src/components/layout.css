@@ -39,20 +39,6 @@ ul.nav, .nav li {
   margin: 0;
 }
 
-.hero svg {
-  margin-left: 8px;
-}
-.hero path {
-  /* stroke: white; */
-  stroke-dasharray: 100;
-  animation: dash 1.8s linear infinite;
-}
-@keyframes dash {
-  to {
-    stroke-dashoffset: 200;
-  }
-}
-
 .funsies {
   margin: 16px 0;
   background-color: #fdf6e3;

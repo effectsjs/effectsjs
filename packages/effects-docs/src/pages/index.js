@@ -56,7 +56,7 @@ const IndexPage = () => {
         <ul>
           <li
             children={
-              <Link to="/examples.html">
+              <Link to="/examples">
                 Try our editor and examples online, now!
               </Link>
             }
@@ -64,7 +64,8 @@ const IndexPage = () => {
           <li
             children={
               <Link to="/installation">
-                Install effects into your javascript or typescript project
+                (pending) Install effects into your javascript or typescript
+                project
               </Link>
             }
           />
