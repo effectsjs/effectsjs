@@ -202,7 +202,10 @@ const evaluate = src => {
   isEvaluating = true;
   window.requestAnimationFrame(async () => {
     const [babel, transformEffects, effectsRuntime] = await Promise.all([
-      window.Babel || window.babel,
+      (async () => {
+        while (!window.Babel) await new Promise(res => setTimeout(res, 30));
+        return window.Babel;
+      })(),
       transformEffectsP,
       effectsRuntimeP
     ]);
