@@ -24,10 +24,8 @@ const syncEjectCase = () => {
     'use effects';
     try{
         perform EjectEffect();
-    }handle(e){
-        if(e.type === ejectType){
-            syncEject();
-        }
+    }handle ejectType with (e){
+        syncEject();
     }
 };
 
@@ -35,10 +33,8 @@ const asyncEjectCase = async () => {
     'use effects';
     try{
         perform EjectEffect();
-    }handle(e){
-        if(e.type === ejectType){
-            await asyncEject();
-        }
+    }handle ejectType with (e){
+        await asyncEject();
     }
 };
 
@@ -46,10 +42,8 @@ const continuationEjectCase = () => {
   'use effects';
   try{
 
-  }handle(e){
-      if(e.type === ejectType){
-          continuationEject();
-      }
+  }handle ejectType with (e){
+      continuationEject();
   }
 };
 

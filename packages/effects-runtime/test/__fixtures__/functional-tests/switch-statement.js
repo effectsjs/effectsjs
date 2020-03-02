@@ -21,12 +21,12 @@ const cHandler = () => {
 const main = (fn) => {
     try{
         return fn();
-    }handle(e){
-        switch(e){
-            case effectTypeA : return aHandler();
-            case effectTypeB : return bHandler();
-            case effectTypeC : return cHandler();
-        }
+    }handle effectTypeA with (e) {
+        aHandler();
+    }handle effectTypeB with (e) {
+        bHandler();
+    }handle effectTypeC with (e) {
+        cHandler();
     }
 };
 

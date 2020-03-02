@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`transformEffects Transform proposed effects keywords into working JS async-parent-functions.js: async-parent-functions.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 1. Transform Effects: 1. Transform Effects 1`] = `
 
 const entry = () => {
   try{
       throw new Error('error')
-  }handle default with (e){
+  }handle(e){
 
   }
 };
@@ -38,19 +38,7 @@ module.exports.test = ({it, expect, code}) => {
 
 const entry = function*() {
   return yield withHandler(
-    {
-      *[__defaultEffectHandler__](__e__, resume) {
-        const result = yield function(handler) {
-          return new Promise(async (res, rej) => {
-            try {
-            } catch (handlerError) {
-              rej(handlerError);
-            }
-          });
-        };
-        return yield resume(result);
-      }
-    },
+    {},
     (async function*() {
       throw new Error("error");
     })()
@@ -89,7 +77,7 @@ module.exports.test = ({ it, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS captured-continuation-error-handling.js: captured-continuation-error-handling.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 2. Transform Effects: 2. Transform Effects 1`] = `
 
 const throwErrorHandler = 'throwErrorHandler';
 
@@ -99,8 +87,10 @@ const main = () => {
     'use effects';
     try{
         perform ThrowErrorEffect();
-    }handle throwErrorHandler with (e){
-        throw new Error('I am an error')
+    }handle(e){
+        if(e.type === throwErrorHandler){
+            throw new Error('I am an error')
+        }
     }
 
 };
@@ -124,7 +114,7 @@ const main = () => {
     (function*() {
       yield withHandler(
         {
-          *[throwErrorHandler](__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -154,361 +144,135 @@ module.exports.test = async ({ describe, it, expect }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS computed-handlers.js: computed-handlers.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 3. Transform Effects: 3. Transform Effects 1`] = `
 
-const symbolHandler = Symbol();
-const {computedHandler} = {};
+const {performance} = require('perf_hooks');
 
-const main = async (fn) => {
-    try{
-        return fn();
-    }handle symbolHandler with (_) {
-        recall 'symbol';
-    }handle computedHandler with (_){
-        recall 'computed';
-    }
-};
-
-const performSymbolHandler = async () => {
-    'use effects';
-    main(() => {
-        return perform {type : symbolHandler}
-    });
-};
-
-const performComputedHandler = async () => {
-    'use effects';
-    main(() => {
-        return perform {type : computedHandler}
-    })
-};
-
-const locallyScopedEffects = async () => {
-  'use effects';
-  const something = 'something';
-  try{
-      return perform {type : something};
-  }handle something with (_){
-      recall something;
+class Mutex{
+  constructor(initialValue) {
+      this.data = initialValue;
+      this.lock = Promise.resolve();
   }
-};
 
-module.exports.test = ({describe, it, code, expect}) => {
-    describe(\`Computed props for effects handlers\`, () => {
-        it('Should behave as expected when performing a symbol handler', async () => {
-            await expect(performSymbolHandler()).resolves.toBe('symbol');
-        });
+  async take(){
+      await this.lock;
 
-        it('Should behave as expected when performing a computed handler', async () => {
-            await expect(performComputedHandler()).resolves.toBe('computed');
-        });
-
-        it('Should handle locally scoped effect types', async () => {
-            await expect(locallyScopedEffects()).resolves.toBe('something');
-        })
-    });
-};
-
-      ↓ ↓ ↓ ↓ ↓ ↓
-
-const symbolHandler = Symbol();
-const { computedHandler } = {};
-
-const main = async function*(fn) {
-  return yield withHandler(
-    {
-      *[symbolHandler](_____, resume) {
-        const result = yield function(handler) {
-          return new Promise(async (res, rej) => {
-            try {
-              return stackResume(handler, "symbol")
-                .then(res)
-                .catch(rej);
-            } catch (handlerError) {
-              rej(handlerError);
-            }
-          });
-        };
-        return yield resume(result);
-      },
-
-      *[computedHandler](_____, resume) {
-        const result = yield function(handler) {
-          return new Promise(async (res, rej) => {
-            try {
-              return stackResume(handler, "computed")
-                .then(res)
-                .catch(rej);
-            } catch (handlerError) {
-              rej(handlerError);
-            }
-          });
-        };
-        return yield resume(result);
-      }
-    },
-    (async function*() {
-      return yield fn();
-    })()
-  );
-};
-
-const performSymbolHandler = async () => {
-  return runProgram(
-    (function*() {
-      yield main(function*() {
-        return yield performEffect({
-          type: symbolHandler
-        });
+      let res;
+      this.lock = new Promise(_res => {
+          res = _res;
       });
-    })()
-  );
-};
-
-const performComputedHandler = async () => {
-  return runProgram(
-    (function*() {
-      yield main(function*() {
-        return yield performEffect({
-          type: computedHandler
-        });
-      });
-    })()
-  );
-};
-
-const locallyScopedEffects = async () => {
-  return runProgram(
-    (function*() {
-      const something = "something";
-      yield withHandler(
-        {
-          *[something](_____, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  return stackResume(handler, something)
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          }
-        },
-        (async function*() {
-          return yield performEffect({
-            type: something
-          });
-        })()
-      );
-    })()
-  );
-};
-
-module.exports.test = ({ describe, it, code, expect }) => {
-  describe(\`Computed props for effects handlers\`, () => {
-    it("Should behave as expected when performing a symbol handler", async () => {
-      await expect(performSymbolHandler()).resolves.toBe("symbol");
-    });
-    it("Should behave as expected when performing a computed handler", async () => {
-      await expect(performComputedHandler()).resolves.toBe("computed");
-    });
-    it("Should handle locally scoped effect types", async () => {
-      await expect(locallyScopedEffects()).resolves.toBe("something");
-    });
-  });
-};
 
 
-`;
-
-exports[`transformEffects Transform proposed effects keywords into working JS default-handlers.js: default-handlers.js 1`] = `
-
-const effectType = Symbol();
-
-const main = async (data) => {
-    'use effects';
-  try{
-      let result = perform {type: effectType, data};
-      console.log(result)
-      result += perform {data : result};
-      console.log(result);
-
-      return result;
-  } handle effectType with ({data}){
-      recall (data + 1);
-  } handle default with ({data}){
-      recall (data * 2);
+      return (value) => {
+          console.log('resolving with', value);
+          this.data = value;
+          res();
+      };
   }
+}
+
+const someSingletonMutex = new Mutex({});
+
+
+const mainConcurrent = () => {
+    'use effects';
+    try{
+        perform {type : 'effect'};
+        return performance.now();
+    }handle(e){
+        if(e.type === 'effect'){
+            setTimeout(() => {
+                recall null;
+            }, 15);
+        }
+    }
 };
 
+const accessData = async (value) => {
+    const release = await someSingletonMutex.take();
 
-module.exports.test = ({it, expect, code}) => {
-    it('Should handle a non-explicitly declared effect when a default effect handler when present', async () => {
-        console.log(code)
-        const result = await main(1);
+    setTimeout(() => {
+        release(value);
+        recall null;
+    }, 15);
+};
 
-        expect(result).toBe(6);
+const mainMutex = async (value) => {
+    'use effects';
+    try{
+        perform({type : 'setData', data :value});
+        return performance.now();
+    }handle(e){
+        if(e.type === 'setData'){
+            await accessData(e.data)
+        }
+    }
+};
+
+module.exports.test = ({expect, it}) => {
+    it('Should call entries concurrently', async () => {
+        const [t1, t2] = await Promise.all([
+            mainConcurrent(),
+            mainConcurrent()
+        ]);
+
+        expect(Math.abs(t1 - t2)).toBeLessThan(1);
+    });
+
+    it('Should perform as expected with locked resources', async () => {
+        const [t1, t2] = await Promise.all([
+            mainMutex('A'),
+            new Promise(res => setTimeout(() => {
+                res(mainMutex('B'))
+            }, 1))
+        ]);
+
+        expect(t2).toBeGreaterThan(t1);
+        expect(t2-t1).toBeGreaterThan(15);
+        expect(someSingletonMutex.data).toBe('B')
     });
 };
 
       ↓ ↓ ↓ ↓ ↓ ↓
 
-const effectType = Symbol();
+const { performance } = require("perf_hooks");
 
-const main = async data => {
-  return runProgram(
-    (function*() {
-      yield withHandler(
-        {
-          *[effectType](__e__, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  return stackResume(handler, __e__.data + 1)
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          },
-
-          *[__defaultEffectHandler__](__e__, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  return stackResume(handler, __e__.data * 2)
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          }
-        },
-        (async function*() {
-          let result = yield performEffect({
-            type: effectType,
-            data
-          });
-          console.log(result);
-          result += yield performEffect({
-            data: result
-          });
-          console.log(result);
-          return result;
-        })()
-      );
-    })()
-  );
-};
-
-module.exports.test = ({ it, expect, code }) => {
-  it("Should handle a non-explicitly declared effect when a default effect handler when present", async () => {
-    console.log(code);
-    const result = await main(1);
-    expect(result).toBe(6);
-  });
-};
-
-
-`;
-
-exports[`transformEffects Transform proposed effects keywords into working JS destructure.js: destructure.js 1`] = `
-
-const typeDestructure = () => {
-    'use effects';
-    try{
-        return perform {type : 'sayHi'};
-    }handle 'sayHi' with (e){
-        recall 'Hello :)'
-    }
-};
-
-const propDestructure = (mutableThing) => {
-    'use effects';
-    try{
-        mutableThing += perform {type : 'addOne', data : mutableThing};
-        mutableThing += perform {type : 'addTwo', data : mutableThing};
-
-        return mutableThing;
-    }handle 'addOne' with ({data}) {
-        recall(data + 1);
-    }handle 'addTwo' with ({data}) {
-        recall(data + 2);
-    }
-};
-
-const restDestructure = () => {
-  'use effects'
-  try{
-      return perform {type : 'example', data1 : 'example 1 data 1', data2 : 'example 1 data 2'}
-  } handle 'example' with ({...data}){
-      const {data1, data2} = data;
-      recall [data1, data2];
+class Mutex {
+  constructor(initialValue) {
+    this.data = initialValue;
+    this.lock = Promise.resolve();
   }
-};
 
-const defaultAssignments = () => {
-    'use effects';
-    try{
-        return perform {type : 'getDefault'};
-    }handle 'getDefault' with ({data = "default"}){
-        recall data;
-    }
-};
-
-module.exports.test = ({it, expect, describe, code}) => {
-    describe('Destructuring effects handlers', () => {
-        it('Should destructure effect types in handle block', async () => {
-            const result = await typeDestructure();
-
-            expect(result).toBe('Hello :)');
-        });
-
-        it('Should destructure props from performed effects', async () => {
-            console.log(code);
-            const result = await propDestructure(0);
-           expect(result).toBe(4);
-        });
-
-        it('Should handle rest props correctly during the destructure', async () =>{
-            const [data1, data2] = await restDestructure();
-
-            expect(data1).toBe('example 1 data 1');
-            expect(data2).toBe('example 1 data 2');
-        });
-
-        it('Should handle default destructure props', async () => {
-            const result = await defaultAssignments()
-
-            expect(result).toBe('default');
-        });
+  async take() {
+    await this.lock;
+    let res;
+    this.lock = new Promise(_res => {
+      res = _res;
     });
-};
+    return value => {
+      console.log("resolving with", value);
+      this.data = value;
+      res();
+    };
+  }
+}
 
-      ↓ ↓ ↓ ↓ ↓ ↓
+const someSingletonMutex = new Mutex({});
 
-const typeDestructure = () => {
+const mainConcurrent = () => {
   return runProgram(
     (function*() {
       yield withHandler(
         {
-          *sayHi(__e__, resume) {
+          *effect(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
-                  return stackResume(handler, "Hello :)")
-                    .then(res)
-                    .catch(rej);
+                  setTimeout(() => {
+                    return stackResume(handler, null)
+                      .then(res)
+                      .catch(rej);
+                  }, 15);
                 } catch (handlerError) {
                   rej(handlerError);
                 }
@@ -518,42 +282,36 @@ const typeDestructure = () => {
           }
         },
         (async function*() {
-          return yield performEffect({
-            type: "sayHi"
+          yield performEffect({
+            type: "effect"
           });
+          return performance.now();
         })()
       );
     })()
   );
 };
 
-const propDestructure = mutableThing => {
+const mainMutex = async value => {
   return runProgram(
     (function*() {
       yield withHandler(
         {
-          *addOne(__e__, resume) {
+          *setData(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
-                  return stackResume(handler, __e__.data + 1)
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          },
+                  const accessData = async value => {
+                    const release = await someSingletonMutex.take();
+                    setTimeout(() => {
+                      release(value);
+                      return stackResume(handler, null)
+                        .then(res)
+                        .catch(rej);
+                    }, 15);
+                  };
 
-          *addTwo(__e__, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  return stackResume(handler, __e__.data + 2)
-                    .then(res)
-                    .catch(rej);
+                  await accessData(__e__.data);
                 } catch (handlerError) {
                   rej(handlerError);
                 }
@@ -563,113 +321,41 @@ const propDestructure = mutableThing => {
           }
         },
         (async function*() {
-          mutableThing += yield performEffect({
-            type: "addOne",
-            data: mutableThing
+          yield performEffect({
+            type: "setData",
+            data: value
           });
-          mutableThing += yield performEffect({
-            type: "addTwo",
-            data: mutableThing
-          });
-          return mutableThing;
+          return performance.now();
         })()
       );
     })()
   );
 };
 
-const restDestructure = () => {
-  return runProgram(
-    (function*() {
-      yield withHandler(
-        {
-          *example(__e__, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  const { data1, data2 } = __e__;
-                  return stackResume(handler, [data1, data2])
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          }
-        },
-        (async function*() {
-          return yield performEffect({
-            type: "example",
-            data1: "example 1 data 1",
-            data2: "example 1 data 2"
-          });
-        })()
-      );
-    })()
-  );
-};
-
-const defaultAssignments = () => {
-  return runProgram(
-    (function*() {
-      yield withHandler(
-        {
-          *getDefault(__e__, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  __e__.data =
-                    typeof __e__.data !== "undefined" ? __e__.data : "default";
-                  return stackResume(handler, __e__.data)
-                    .then(res)
-                    .catch(rej);
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          }
-        },
-        (async function*() {
-          return yield performEffect({
-            type: "getDefault"
-          });
-        })()
-      );
-    })()
-  );
-};
-
-module.exports.test = ({ it, expect, describe, code }) => {
-  describe("Destructuring effects handlers", () => {
-    it("Should destructure effect types in handle block", async () => {
-      const result = await typeDestructure();
-      expect(result).toBe("Hello :)");
-    });
-    it("Should destructure props from performed effects", async () => {
-      console.log(code);
-      const result = await propDestructure(0);
-      expect(result).toBe(4);
-    });
-    it("Should handle rest props correctly during the destructure", async () => {
-      const [data1, data2] = await restDestructure();
-      expect(data1).toBe("example 1 data 1");
-      expect(data2).toBe("example 1 data 2");
-    });
-    it("Should handle default destructure props", async () => {
-      const result = await defaultAssignments();
-      expect(result).toBe("default");
-    });
+module.exports.test = ({ expect, it }) => {
+  it("Should call entries concurrently", async () => {
+    const [t1, t2] = await Promise.all([mainConcurrent(), mainConcurrent()]);
+    expect(Math.abs(t1 - t2)).toBeLessThan(1);
+  });
+  it("Should perform as expected with locked resources", async () => {
+    const [t1, t2] = await Promise.all([
+      mainMutex("A"),
+      new Promise(res =>
+        setTimeout(() => {
+          res(mainMutex("B"));
+        }, 1)
+      )
+    ]);
+    expect(t2).toBeGreaterThan(t1);
+    expect(t2 - t1).toBeGreaterThan(15);
+    expect(someSingletonMutex.data).toBe("B");
   });
 };
 
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS errors-in-handlers.js: errors-in-handlers.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 4. Transform Effects: 4. Transform Effects 1`] = `
 
 const ejectType = 'throwErrorHandler';
 const EjectEffect = () => ({type : ejectType});
@@ -697,8 +383,10 @@ const syncEjectCase = () => {
     'use effects';
     try{
         perform EjectEffect();
-    }handle ejectType with (e){
-        syncEject();
+    }handle(e){
+        if(e.type === ejectType){
+            syncEject();
+        }
     }
 };
 
@@ -706,8 +394,10 @@ const asyncEjectCase = async () => {
     'use effects';
     try{
         perform EjectEffect();
-    }handle ejectType with (e){
-        await asyncEject();
+    }handle(e){
+        if(e.type === ejectType){
+            await asyncEject();
+        }
     }
 };
 
@@ -715,8 +405,10 @@ const continuationEjectCase = () => {
   'use effects';
   try{
 
-  }handle ejectType with (e){
-      continuationEject();
+  }handle(e){
+      if(e.type === ejectType){
+          continuationEject();
+      }
   }
 };
 
@@ -747,7 +439,7 @@ const syncEjectCase = () => {
     (function*() {
       yield withHandler(
         {
-          *[ejectType](__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -777,7 +469,7 @@ const asyncEjectCase = async () => {
     (function*() {
       yield withHandler(
         {
-          *[ejectType](__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -810,7 +502,7 @@ const continuationEjectCase = () => {
     (function*() {
       yield withHandler(
         {
-          *[ejectType](__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -850,21 +542,25 @@ module.exports.test = async ({ it, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS nesting-handlers.js: nesting-handlers.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 5. Transform Effects: 5. Transform Effects 1`] = `
 
 const mainEffectHandler = (input) => {
     try{
        return input()
-    }handle 'main' with (e){
-        recall {value : "main"}
+    }handle(e){
+        if(e.type === 'main'){
+            recall {value : "main"}
+        }
     }
 };
 
 const childEffectHandler = (input) => {
     try{
         return input();
-    }handle 'child' with (e){
-        recall {value : "child"}
+    }handle(e){
+        if(e.type === 'child'){
+            recall {value : "child"}
+        }
     }
 };
 
@@ -1023,13 +719,15 @@ module.exports.test = ({ it, expect }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS normal-functions.js: normal-functions.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 6. Transform Effects: 6. Transform Effects 1`] = `
 
 const mainEffectHandler = (input) => {
     try{
         return input()
-    }handle 'main' with (e){
-        recall {value : "main"}
+    }handle(e){
+        if(e.type === 'main'){
+            recall {value : "main"}
+        }
     }
 };
 
@@ -1113,7 +811,7 @@ module.exports.test = ({ it, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS perform-async-get-integer-control-flow.js: perform-async-get-integer-control-flow.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 7. Transform Effects: 7. Transform Effects 1`] = `
 
 const getIntegerHandler = 'getInteger';
 
@@ -1125,8 +823,10 @@ const main = async () => {
     'use effects';
     try{
         return await asyncChild();
-    }handle getIntegerHandler with (e){
-        recall expectation;
+    }handle(e){
+        if(e.type === getIntegerHandler){
+            recall expectation;
+        }
     }
 };
 
@@ -1160,7 +860,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *[getIntegerHandler](__e__, resume) {
+          *getInteger(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1199,7 +899,7 @@ module.exports.test = ({ it, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS perform-async-get-integer-handler.js: perform-async-get-integer-handler.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 8. Transform Effects: 8. Transform Effects 1`] = `
 
 const getAsyncIntegerHandler = 'getAsyncInteger';
 
@@ -1213,10 +913,12 @@ const main = ({onEffectComplete}) => {
         const result = perform GetAsyncIntegerEffect();
 
         onEffectComplete(result);
-    }handle getAsyncIntegerHandler with (e){
-        setTimeout(() => {
-            recall expectation;
-        }, 50)
+    }handle(e){
+        if(e.type === getAsyncIntegerHandler){
+            setTimeout(() => {
+                recall expectation;
+            }, 50)
+        }
     }
 };
 
@@ -1240,7 +942,7 @@ const main = ({ onEffectComplete }) => {
     (function*() {
       yield withHandler(
         {
-          *[getAsyncIntegerHandler](__e__, resume) {
+          *getAsyncInteger(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1274,7 +976,7 @@ module.exports = {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS perform-get-integer.js: perform-get-integer.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 9. Transform Effects: 9. Transform Effects 1`] = `
 
 const getIntegerHandler = 'getInteger';
 
@@ -1286,8 +988,10 @@ const main = async () => {
         const integer = perform GetIntegerEffect();
 
         return integer
-    }handle getIntegerHandler with (e){
-        recall 5;
+    }handle(e){
+        if(e.type === getIntegerHandler){
+            recall 5;
+        }
     }
 }
 
@@ -1312,7 +1016,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *[getIntegerHandler](__e__, resume) {
+          *getInteger(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {
@@ -1346,7 +1050,7 @@ module.exports.test = ({ it, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS switch-statement.js: switch-statement.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 10. Transform Effects: 10. Transform Effects 1`] = `
 
 const effectTypeA = 'typeA';
 const effectTypeB = 'typeB';
@@ -1371,12 +1075,12 @@ const cHandler = () => {
 const main = (fn) => {
     try{
         return fn();
-    }handle effectTypeA with (e) {
-        aHandler();
-    }handle effectTypeB with (e) {
-        bHandler();
-    }handle effectTypeC with (e) {
-        cHandler();
+    }handle(e){
+        switch(e){
+            case effectTypeA : return aHandler();
+            case effectTypeB : return bHandler();
+            case effectTypeC : return cHandler();
+        }
     }
 };
 
@@ -1454,7 +1158,7 @@ const EffectC = () => ({
 const main = function*(fn) {
   return yield withHandler(
     {
-      *[effectTypeA](__e__, resume) {
+      *typeA(__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1464,7 +1168,7 @@ const main = function*(fn) {
                   .catch(rej);
               };
 
-              aHandler();
+              return aHandler();
             } catch (handlerError) {
               rej(handlerError);
             }
@@ -1473,7 +1177,7 @@ const main = function*(fn) {
         return yield resume(result);
       },
 
-      *[effectTypeB](__e__, resume) {
+      *typeB(__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1483,7 +1187,7 @@ const main = function*(fn) {
                   .catch(rej);
               };
 
-              bHandler();
+              return bHandler();
             } catch (handlerError) {
               rej(handlerError);
             }
@@ -1492,7 +1196,7 @@ const main = function*(fn) {
         return yield resume(result);
       },
 
-      *[effectTypeC](__e__, resume) {
+      *typeC(__e__, resume) {
         const result = yield function(handler) {
           return new Promise(async (res, rej) => {
             try {
@@ -1502,7 +1206,7 @@ const main = function*(fn) {
                   .catch(rej);
               };
 
-              cHandler();
+              return cHandler();
             } catch (handlerError) {
               rej(handlerError);
             }
@@ -1583,7 +1287,7 @@ module.exports.test = ({ it, describe, expect, code }) => {
 
 `;
 
-exports[`transformEffects Transform proposed effects keywords into working JS throwing-errors-from-timers.js: throwing-errors-from-timers.js 1`] = `
+exports[`transformEffects Transform proposed effects keywords into working JS 11. Transform Effects: 11. Transform Effects 1`] = `
 
 const gatherBananasEffectType = 'throwErrorHandler';
 const GatherBananasEffect = () => ({type : gatherBananasEffectType});
@@ -1602,8 +1306,10 @@ const main = async () => {
         if(someBananas === 'A Bunch Of Bananas'){
             throw new Error('I wanted Plantains!');
         }
-    }handle gatherBananasEffectType with (e){
-        gatherBananasHandler();
+    }handle(e){
+        if(e.type === gatherBananasEffectType){
+            gatherBananasHandler();
+        }
     }
 
 };
@@ -1627,7 +1333,7 @@ const main = async () => {
     (function*() {
       yield withHandler(
         {
-          *[gatherBananasEffectType](__e__, resume) {
+          *throwErrorHandler(__e__, resume) {
             const result = yield function(handler) {
               return new Promise(async (res, rej) => {
                 try {

@@ -3,7 +3,8 @@ import {
   runProgram,
   performEffect,
   withHandler,
-  UnhandledEffectError
+  UnhandledEffectError,
+    DefaultEffectHandler
 } from "../src/runtime";
 import { Handler } from "effects-common";
 import {
@@ -223,6 +224,26 @@ describe("Effects Unit Tests", () => {
       await expect(performContinuation(mockFrame())).rejects.toThrowError(
         UnhandledEffectError
       );
+    });
+
+    it('Should perform a default effect handler', async () => {
+      const handlerSpy = jest.fn();
+      const handler : Handler = {
+        *[DefaultEffectHandler](_, resume){
+          handlerSpy();
+          resume();
+        }
+      };
+
+      const controlFrame = (function*(){
+        yield performEffect({type : undefined});
+      })();
+
+      addHandler(controlFrame, handler);
+
+      await stackResume(controlFrame);
+
+      expect(handlerSpy).toHaveBeenCalledTimes(1);
     });
 
     it("Should call an effect handler", async () => {

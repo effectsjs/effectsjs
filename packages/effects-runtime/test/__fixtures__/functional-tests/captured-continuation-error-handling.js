@@ -6,10 +6,8 @@ const main = () => {
     'use effects';
     try{
         perform ThrowErrorEffect();
-    }handle(e){
-        if(e.type === throwErrorHandler){
-            throw new Error('I am an error')
-        }
+    }handle throwErrorHandler with (e){
+        throw new Error('I am an error')
     }
 
 };

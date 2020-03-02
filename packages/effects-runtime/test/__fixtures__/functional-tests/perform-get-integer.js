@@ -8,10 +8,8 @@ const main = async () => {
         const integer = perform GetIntegerEffect();
 
         return integer
-    }handle(e){
-        if(e.type === getIntegerHandler){
-            recall 5;
-        }
+    }handle getIntegerHandler with (e){
+        recall 5;
     }
 }
 

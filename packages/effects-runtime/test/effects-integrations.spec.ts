@@ -6,7 +6,8 @@ import {
   performEffect,
   runProgram,
   stackResume,
-  withHandler
+  withHandler,
+  DefaultEffectHandler
 } from "../src/runtime";
 import { Handler } from "effects-common";
 
@@ -280,4 +281,101 @@ describe("Effect Integrations", () => {
       runProgram(withHandler(handler, parent()));
     }).not.toThrow();
   });
+
+  test(`Should execute default effects handlers correctly`, async () => {
+    const specifiedEffectResult = Symbol();
+    const defaultEffectResult = Symbol();
+
+    const handler : Handler = {
+      *effect1(data, resume){
+        return yield resume(specifiedEffectResult);
+      },
+      *[DefaultEffectHandler](data, resume){
+        return yield resume(defaultEffectResult);
+      }
+    };
+
+    function* main(){
+      return [
+          yield performEffect({type : 'effect1'}),
+          yield performEffect({type : undefined})
+      ]
+    }
+
+    const [result1, result2] = await runProgram(withHandler(handler, main()));
+
+    expect(result1).toBe(specifiedEffectResult);
+    expect(result2).toBe(defaultEffectResult);
+
+  });
+
+  test('default handler in parent child hierarchies', async () => {
+    const defaultEffectResult = Symbol();
+    const specifiedEffectResult = Symbol();
+
+    const handler : Handler = {
+      *[DefaultEffectHandler](data, resume){
+        return yield resume(defaultEffectResult);
+      }
+    };
+
+    const childHandler : Handler = {
+      *effect(data, resume){
+        return yield resume(specifiedEffectResult)
+      }
+    };
+
+    function* parent(){
+      return yield withHandler(childHandler, child());
+    }
+
+    function* child() {
+      return [
+          yield performEffect({type : undefined}),
+          yield performEffect({type : 'effect'})
+      ]
+    }
+
+    const [result1, result2] = await runProgram(withHandler(handler, parent()));
+
+    expect(result1).toBe(defaultEffectResult);
+    expect(result2).toBe(specifiedEffectResult);
+  });
+
+  test('default handler specifies boundaries between child -> parent hierarchies', async () => {
+    const parentEffectResult = Symbol();
+    const childEffectResult = Symbol();
+
+    const parentHandler : Handler = {
+      *parentEffect(data, resume){
+        return yield resume(parentEffectResult)
+      }
+    };
+
+    const childHandler : Handler = {
+      *[DefaultEffectHandler](data, resume){
+        return yield resume(childEffectResult)
+      }
+    };
+
+    const program = withHandler(
+        parentHandler,
+        function*(){
+          return yield withHandler(
+              childHandler,
+              function* () {
+                return [
+                    yield performEffect({type : 'parentEffect'}),
+                    yield performEffect({type : 'non-exist'})
+                ]
+              }()
+          )
+        }()
+    );
+
+    const [result1, result2] = await runProgram(program);
+
+    expect(result1).toBe(childEffectResult);
+    expect(result2).toBe(childEffectResult);
+  })
 });

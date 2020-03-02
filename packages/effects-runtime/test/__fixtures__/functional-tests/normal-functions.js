@@ -2,10 +2,8 @@
 const mainEffectHandler = (input) => {
     try{
         return input()
-    }handle(e){
-        if(e.type === 'main'){
-            recall {value : "main"}
-        }
+    }handle 'main' with (e){
+        recall {value : "main"}
     }
 };
 
