@@ -12,13 +12,13 @@ const FUNCTIONAL_TEST_DIRECTORY = path.resolve(
 const readAndParseFile = textFixtureBaseName => {
   const filename = path.resolve(FUNCTIONAL_TEST_DIRECTORY, textFixtureBaseName);
   const file = `require('../lib/prelude-polyfill');\n ${readFileSync(
-      filename,
-      "utf8"
+    filename,
+    "utf8"
   )}`;
 
-  try{
+  try {
     return transform(file).code;
-  }catch(e){
+  } catch (e) {
     throw new Error(`${filename} failed to parse with ${e.message}`);
   }
 };

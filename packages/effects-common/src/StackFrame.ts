@@ -21,13 +21,13 @@ export type FrameLink = StackFrame | Continuation | null;
 export const getHandler = (
   frame: StackFrame,
   type: EffectType,
-  defaultType : EffectType | null = null
+  defaultType: EffectType | null = null
 ): HandlerDefinition | null => {
   const handler = frame[HandlerReference];
 
   if (exists(handler)) {
     // @ts-ignore
-    return exists(handler[type]) ? handler[type] :  handler[defaultType] ?? null;
+    return exists(handler[type]) ? handler[type] : handler[defaultType] ?? null;
   }
 
   return null;
@@ -62,11 +62,11 @@ export const findHandlerFrame = (
   type: EffectType,
   defaultType: EffectType | null = null
 ): StackFrame | null => {
-
   let frameWithHandler: FrameLink = frame;
 
   while (exists(frameWithHandler) && !isHandlerType(frameWithHandler, type)) {
-    if(exists(defaultType) && isHandlerType(frameWithHandler, defaultType)) break;
+    if (exists(defaultType) && isHandlerType(frameWithHandler, defaultType))
+      break;
     frameWithHandler = getReturnFrame(frameWithHandler);
   }
 

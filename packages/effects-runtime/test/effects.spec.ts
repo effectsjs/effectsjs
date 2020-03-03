@@ -4,7 +4,7 @@ import {
   performEffect,
   withHandler,
   UnhandledEffectError,
-    DefaultEffectHandler
+  DefaultEffectHandler
 } from "../src/runtime";
 import { Handler } from "effects-common";
 import {
@@ -226,17 +226,17 @@ describe("Effects Unit Tests", () => {
       );
     });
 
-    it('Should perform a default effect handler', async () => {
+    it("Should perform a default effect handler", async () => {
       const handlerSpy = jest.fn();
-      const handler : Handler = {
-        *[DefaultEffectHandler](_, resume){
+      const handler: Handler = {
+        *[DefaultEffectHandler](_, resume) {
           handlerSpy();
           resume();
         }
       };
 
-      const controlFrame = (function*(){
-        yield performEffect({type : undefined});
+      const controlFrame = (function*() {
+        yield performEffect({ type: undefined });
       })();
 
       addHandler(controlFrame, handler);

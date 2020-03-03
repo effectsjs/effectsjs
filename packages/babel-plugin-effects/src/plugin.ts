@@ -1,14 +1,9 @@
 import { parse } from "@babel/parser";
 import { NodePath, Visitor } from "@babel/traverse";
-import BabelTypes, {
-  ObjectExpression,
-  TryStatement
-} from "@babel/types";
+import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
-import {followHandlerDefinitions} from "./handler-method-visitor";
-import {
-  fixupParentGenerator
-} from "./traverse-utilities";
+import { followHandlerDefinitions } from "./handler-method-visitor";
+import { fixupParentGenerator } from "./traverse-utilities";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -22,10 +17,7 @@ export interface Babel {
   types: typeof BabelTypes;
 }
 
-function createHandler(
-  types: Babel["types"],
-  path: NodePath
-) {
+function createHandler(types: Babel["types"], path: NodePath) {
   const handlerObject = types.objectExpression([]);
 
   followHandlerDefinitions(path, handlerObject, types);
@@ -82,10 +74,9 @@ export default function transformEffects({ types }: Babel): Plugin {
           const handlerType = path.node.handler?.type;
 
           // @ts-ignore
-          if (handlerType !== "HandleClause" || !handlerBody)
-            return;
+          if (handlerType !== "HandleClause" || !handlerBody) return;
 
-          const handler = createHandler(types, path.get('handler'));
+          const handler = createHandler(types, path.get("handler"));
           const withHandlerExpression = createWithHandlerInvocation(
             types,
             path,

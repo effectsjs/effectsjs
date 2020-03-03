@@ -1,19 +1,19 @@
 import { NodePath } from "@babel/traverse";
 import BabelTypes, {
-    BigIntLiteral,
-    BooleanLiteral,
-    ExpressionStatement,
-    Identifier,
-    IfStatement,
-    MemberExpression,
-    NumericLiteral, ObjectExpression, ObjectPattern,
-    StringLiteral,
-    SwitchCase
+  BigIntLiteral,
+  BooleanLiteral,
+  ExpressionStatement,
+  Identifier,
+  IfStatement,
+  MemberExpression,
+  NumericLiteral,
+  ObjectExpression,
+  ObjectPattern,
+  StringLiteral,
+  SwitchCase
 } from "@babel/types";
-import {collapseObjectPattern} from "./traverse-utilities";
-import {recallVisitor} from "./recall-visitor";
-
-
+import { collapseObjectPattern } from "./traverse-utilities";
+import { recallVisitor } from "./recall-visitor";
 
 const isLiteralProp = (
   node: NodePath,
@@ -40,13 +40,15 @@ const extractMemberPropertyPathName = (
     if (binding && types.isIdentifier(memberPropertyNode)) {
       return { ident: memberPropertyNode, isComputed: true };
     }
-
-  }else if(parentPath.get('defaultMatcher').node){
-    return { ident: types.identifier('__defaultEffectHandler__'), isComputed : true}
+  } else if (parentPath.get("defaultMatcher").node) {
+    return {
+      ident: types.identifier("__defaultEffectHandler__"),
+      isComputed: true
+    };
   }
 
   throw new Error(
-      `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
+    `[Babel Effects Transform Error] - Failed to construct handler. Could not find a valid definition for handler name`
   );
 };
 
@@ -153,36 +155,43 @@ const makeHandlerMethod = (
 // For now, cannot traverse the HandlerClause node like it was a normal AST node
 // without further customization of the babel fork.
 export const followHandlerDefinitions = (
-    handlerPath : NodePath<any>,
-    handlerObject : ObjectExpression,
-    types : typeof BabelTypes
+  handlerPath: NodePath<any>,
+  handlerObject: ObjectExpression,
+  types: typeof BabelTypes
 ) => {
-    const handlerBody = handlerPath.get('body');
-    const handlerParam = handlerPath.get('param').node as Identifier|ObjectPattern;
+  const handlerBody = handlerPath.get("body");
+  const handlerParam = handlerPath.get("param").node as
+    | Identifier
+    | ObjectPattern;
 
-    const {
-        identifier,
-        defaultAssignments
-    }: {
-        identifier: Identifier;
-        defaultAssignments: ExpressionStatement[];
-    } = types.isObjectPattern(handlerParam)
-        ? collapseObjectPattern(handlerParam, types, handlerBody)
-        : { identifier: types.identifier(`__${handlerParam.name}__`), defaultAssignments: [] };
+  const {
+    identifier,
+    defaultAssignments
+  }: {
+    identifier: Identifier;
+    defaultAssignments: ExpressionStatement[];
+  } = types.isObjectPattern(handlerParam)
+    ? collapseObjectPattern(handlerParam, types, handlerBody)
+    : {
+        identifier: types.identifier(`__${handlerParam.name}__`),
+        defaultAssignments: []
+      };
 
-    handlerBody.traverse(recallVisitor, { types });
+  handlerBody.traverse(recallVisitor, { types });
 
-
-    handlerObject.properties.push(
-      makeHandlerMethod(
-          handlerPath.get('effectMatcher'),
-          handlerPath,
-          types,
-          handlerPath.get('body'),
-          identifier.name,
-          defaultAssignments
-      )
-    );
-    const alternatePath = handlerPath.node.alternate ? handlerPath.get('alternate.handler') : null;
-    if(alternatePath) followHandlerDefinitions(alternatePath, handlerObject, types);
+  handlerObject.properties.push(
+    makeHandlerMethod(
+      handlerPath.get("effectMatcher"),
+      handlerPath,
+      types,
+      handlerPath.get("body"),
+      identifier.name,
+      defaultAssignments
+    )
+  );
+  const alternatePath = handlerPath.node.alternate
+    ? handlerPath.get("alternate.handler")
+    : null;
+  if (alternatePath)
+    followHandlerDefinitions(alternatePath, handlerObject, types);
 };

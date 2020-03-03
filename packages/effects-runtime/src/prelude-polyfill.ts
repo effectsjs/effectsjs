@@ -1,4 +1,10 @@
-import { stackResume, withHandler, runProgram, performEffect, DefaultEffectHandler } from "./runtime";
+import {
+  stackResume,
+  withHandler,
+  runProgram,
+  performEffect,
+  DefaultEffectHandler
+} from "./runtime";
 
 // @ts-ignore
 global.stackResume = stackResume;

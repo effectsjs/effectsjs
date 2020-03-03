@@ -114,10 +114,10 @@ export const toMemberExpressionVisitor: Visitor<{
   Identifier(path, { objectIdentifierName, propName, types }) {
     if (path.node.name === propName) {
       path.replaceWith(
-          types.memberExpression(
-              types.identifier(objectIdentifierName),
-              path.node
-          )
+        types.memberExpression(
+          types.identifier(objectIdentifierName),
+          path.node
+        )
       );
       path.skip();
     }
@@ -197,7 +197,7 @@ export const collapseObjectPattern = (
       });
     } else {
       handlerBodyPath.traverse(toMemberExpressionVisitor, {
-        objectIdentifierName : objectIdentifier.name,
+        objectIdentifierName: objectIdentifier.name,
         propName: property.key.name,
         types
       });
