@@ -41376,6 +41376,13 @@
         case types._try:
           return this.parseTryStatement(node);
 
+        case types.handle:
+          if (context !== "try") {
+            this.raise(this.state.start, "Received handle clause without a precedent try");
+          }
+
+          return this.parseHandleMatcher(node);
+
         case types._const:
         case types._var:
           kind = kind || this.state.value;
@@ -41796,11 +41803,7 @@
         this.scope.exit();
         node.handler = this.finishNode(clause, "CatchClause");
       } else if (this.match(types.handle)) {
-        var _clause = parseCatchHandleClause();
-
-        _clause.body = this.parseBlock(false, true);
-        this.scope.exit();
-        node.handler = this.finishNode(_clause, "HandleClause");
+        this.parseHandleMatcher(node);
       }
 
       node.finalizer = this.eat(types._finally) ? this.parseBlock() : null;
@@ -41812,6 +41815,49 @@
       return this.finishNode(node, "TryStatement");
     };
 
+    _proto.parseHandleMatcher = function parseHandleMatcher(node) {
+      var _this3 = this;
+
+      this.next();
+
+      var parseHandleClause = function parseHandleClause() {
+        var clause = _this3.startNode();
+
+        clause.effectMatcher = _this3.eat(types._default) ? null : _this3.parseExpression();
+        clause.defaultMatcher = !clause.effectMatcher;
+
+        if (!_this3.eat(types._with)) {
+          _this3.raise(node.start, "Missing with Clause for Handler Statement");
+        }
+
+        if (_this3.match(types.parenL)) {
+          _this3.expect(types.parenL);
+
+          clause.param = _this3.parseBindingAtom();
+          var simple = clause.param.type === "Identifier";
+
+          _this3.scope.enter(simple ? SCOPE_SIMPLE_CATCH : 0);
+
+          _this3.checkLVal(clause.param, BIND_LEXICAL, null, "catch clause");
+
+          _this3.expect(types.parenR);
+        } else {
+          clause.param = null;
+
+          _this3.scope.enter(SCOPE_OTHER);
+        }
+
+        return clause;
+      };
+
+      var clause = parseHandleClause();
+      clause.body = this.parseBlock(false, true);
+      clause.alternate = this.match(types.handle) ? this.parseStatement("try") : null;
+      this.scope.exit();
+      node.handler = this.finishNode(clause, "HandleClause");
+      return node;
+    };
+
     _proto.parseVarStatement = function parseVarStatement(node, kind) {
       this.next();
       this.parseVar(node, false, kind);
@@ -41820,20 +41866,20 @@
     };
 
     _proto.parseWhileStatement = function parseWhileStatement(node) {
-      var _this3 = this;
+      var _this4 = this;
 
       this.next();
       node.test = this.parseHeaderExpression();
       this.state.labels.push(loopLabel);
       node.body = this.withTopicForbiddingContext(function () {
-        return _this3.parseStatement("while");
+        return _this4.parseStatement("while");
       });
       this.state.labels.pop();
       return this.finishNode(node, "WhileStatement");
     };
 
     _proto.parseWithStatement = function parseWithStatement(node) {
-      var _this4 = this;
+      var _this5 = this;
 
       if (this.state.strict) {
         this.raise(this.state.start, "'with' in strict mode");
@@ -41842,7 +41888,7 @@
       this.next();
       node.object = this.parseHeaderExpression();
       node.body = this.withTopicForbiddingContext(function () {
-        return _this4.parseStatement("with");
+        return _this5.parseStatement("with");
       });
       return this.finishNode(node, "WithStatement");
     };
@@ -41964,7 +42010,7 @@
     };
 
     _proto.parseFor = function parseFor(node, init) {
-      var _this5 = this;
+      var _this6 = this;
 
       node.init = init;
       this.expect(types.semi);
@@ -41973,7 +42019,7 @@
       node.update = this.match(types.parenR) ? null : this.parseExpression();
       this.expect(types.parenR);
       node.body = this.withTopicForbiddingContext(function () {
-        return _this5.parseStatement("for");
+        return _this6.parseStatement("for");
       });
       this.scope.exit();
       this.state.labels.pop();
@@ -41981,7 +42027,7 @@
     };
 
     _proto.parseForIn = function parseForIn(node, init, awaitAt) {
-      var _this6 = this;
+      var _this7 = this;
 
       var isForIn = this.match(types._in);
       this.next();
@@ -42002,7 +42048,7 @@
       node.right = isForIn ? this.parseExpression() : this.parseMaybeAssign();
       this.expect(types.parenR);
       node.body = this.withTopicForbiddingContext(function () {
-        return _this6.parseStatement("for");
+        return _this7.parseStatement("for");
       });
       this.scope.exit();
       this.state.labels.pop();
@@ -42045,7 +42091,7 @@
     };
 
     _proto.parseFunction = function parseFunction(node, statement, isAsync) {
-      var _this7 = this;
+      var _this8 = this;
 
       if (statement === void 0) {
         statement = FUNC_NO_FLAGS;
@@ -42086,7 +42132,7 @@
 
       this.parseFunctionParams(node);
       this.withTopicForbiddingContext(function () {
-        _this7.parseFunctionBodyAndFinish(node, isStatement ? "FunctionDeclaration" : "FunctionExpression");
+        _this8.parseFunctionBodyAndFinish(node, isStatement ? "FunctionDeclaration" : "FunctionExpression");
       });
       this.scope.exit();
 
@@ -42144,7 +42190,7 @@
     };
 
     _proto.parseClassBody = function parseClassBody(constructorAllowsSuper) {
-      var _this8 = this;
+      var _this9 = this;
 
       this.state.classLevel++;
       var state = {
@@ -42155,34 +42201,34 @@
       classBody.body = [];
       this.expect(types.braceL);
       this.withTopicForbiddingContext(function () {
-        while (!_this8.eat(types.braceR)) {
-          if (_this8.eat(types.semi)) {
+        while (!_this9.eat(types.braceR)) {
+          if (_this9.eat(types.semi)) {
             if (decorators.length > 0) {
-              throw _this8.raise(_this8.state.lastTokEnd, "Decorators must not be followed by a semicolon");
+              throw _this9.raise(_this9.state.lastTokEnd, "Decorators must not be followed by a semicolon");
             }
 
             continue;
           }
 
-          if (_this8.match(types.at)) {
-            decorators.push(_this8.parseDecorator());
+          if (_this9.match(types.at)) {
+            decorators.push(_this9.parseDecorator());
             continue;
           }
 
-          var member = _this8.startNode();
+          var member = _this9.startNode();
 
           if (decorators.length) {
             member.decorators = decorators;
 
-            _this8.resetStartLocationFromNode(member, decorators[0]);
+            _this9.resetStartLocationFromNode(member, decorators[0]);
 
             decorators = [];
           }
 
-          _this8.parseClassMember(classBody, member, state, constructorAllowsSuper);
+          _this9.parseClassMember(classBody, member, state, constructorAllowsSuper);
 
           if (member.kind === "constructor" && member.decorators && member.decorators.length > 0) {
-            _this8.raise(member.start, "Decorators can't be used with a constructor. Did you mean '@dec class { ... }'?");
+            _this9.raise(member.start, "Decorators can't be used with a constructor. Did you mean '@dec class { ... }'?");
           }
         }
       });
