@@ -49,7 +49,6 @@ module.exports.test = ({it, expect, describe, code}) => {
         });
 
         it('Should destructure props from performed effects', async () => {
-            console.log(code);
             const result = await propDestructure(0);
            expect(result).toBe(4);
         });

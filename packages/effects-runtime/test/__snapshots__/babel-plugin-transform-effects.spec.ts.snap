@@ -333,9 +333,7 @@ const main = async (data) => {
     'use effects';
   try{
       let result = perform {type: effectType, data};
-      console.log(result)
       result += perform {data : result};
-      console.log(result);
 
       return result;
   } handle effectType with ({data}){
@@ -348,7 +346,6 @@ const main = async (data) => {
 
 module.exports.test = ({it, expect, code}) => {
     it('Should handle a non-explicitly declared effect when a default effect handler when present', async () => {
-        console.log(code)
         const result = await main(1);
 
         expect(result).toBe(6);
@@ -399,11 +396,9 @@ const main = async data => {
             type: effectType,
             data
           });
-          console.log(result);
           result += yield performEffect({
             data: result
           });
-          console.log(result);
           return result;
         })()
       );
@@ -413,7 +408,6 @@ const main = async data => {
 
 module.exports.test = ({ it, expect, code }) => {
   it("Should handle a non-explicitly declared effect when a default effect handler when present", async () => {
-    console.log(code);
     const result = await main(1);
     expect(result).toBe(6);
   });
@@ -475,7 +469,6 @@ module.exports.test = ({it, expect, describe, code}) => {
         });
 
         it('Should destructure props from performed effects', async () => {
-            console.log(code);
             const result = await propDestructure(0);
            expect(result).toBe(4);
         });
@@ -650,7 +643,6 @@ module.exports.test = ({ it, expect, describe, code }) => {
       expect(result).toBe("Hello :)");
     });
     it("Should destructure props from performed effects", async () => {
-      console.log(code);
       const result = await propDestructure(0);
       expect(result).toBe(4);
     });
