@@ -2,7 +2,7 @@
 const entry = () => {
   try{
       throw new Error('error')
-  }handle(e){
+  }handle default with (e){
 
   }
 };

@@ -4,11 +4,10 @@ const {computedHandler} = {};
 const main = async (fn) => {
     try{
         return fn();
-    }handle({type}){
-        switch(type){
-            case symbolHandler : recall 'symbol';
-            case computedHandler : recall 'computed';
-        }
+    }handle symbolHandler with (_) {
+        recall 'symbol';
+    }handle computedHandler with (_){
+        recall 'computed';
     }
 };
 
@@ -31,10 +30,8 @@ const locallyScopedEffects = async () => {
   const something = 'something';
   try{
       return perform {type : something};
-  }handle({type}){
-      switch(type){
-          case something: return recall something;
-      }
+  }handle something with (_){
+      recall something;
   }
 };
 

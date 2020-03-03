@@ -8,10 +8,8 @@ const main = async () => {
     'use effects';
     try{
         return await asyncChild();
-    }handle(e){
-        if(e.type === getIntegerHandler){
-            recall expectation;
-        }
+    }handle getIntegerHandler with (e){
+        recall expectation;
     }
 };
 

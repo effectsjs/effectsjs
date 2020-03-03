@@ -14,6 +14,10 @@ const {
   util: { exists, isContinuation, isIterator }
 } = common;
 
+export const DefaultEffectHandler: unique symbol = Symbol(
+  "DefaultEffectHandler"
+);
+
 export class UnhandledEffectError extends TypeError {
   constructor({ type }: Effect) {
     super();
@@ -79,14 +83,22 @@ export const runProgram = async (root: Generator) => {
 export const performEffect = ({ type, ...data }: Effect) => async (
   currentFrame: Generator
 ) => {
-  const frameWithEffectHandler = findHandlerFrame(currentFrame, type);
+  const frameWithEffectHandler = findHandlerFrame(
+    currentFrame,
+    type,
+    DefaultEffectHandler
+  );
 
   if (!exists(frameWithEffectHandler)) {
     throw new UnhandledEffectError({ type });
   }
 
   // This is a GeneratorFunction, it will create the handler frame
-  const handlerFrameCreator = getHandler(frameWithEffectHandler, type);
+  const handlerFrameCreator = getHandler(
+    frameWithEffectHandler,
+    type,
+    DefaultEffectHandler
+  );
 
   // TODO: [minor] Set up a type-guard on getHandler, or findHandlerFrame to indicate that at this point the handlerFrame must exist.
   if (!exists(handlerFrameCreator)) {

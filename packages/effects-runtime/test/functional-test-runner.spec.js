@@ -16,7 +16,11 @@ const readAndParseFile = textFixtureBaseName => {
     "utf8"
   )}`;
 
-  return transform(file).code;
+  try {
+    return transform(file).code;
+  } catch (e) {
+    throw new Error(`${filename} failed to parse with ${e.message}`);
+  }
 };
 
 const evaluateModule = code => nodeEval(code, "testFixtureModule");

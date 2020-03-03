@@ -1,19 +1,9 @@
 import { parse } from "@babel/parser";
 import { NodePath, Visitor } from "@babel/traverse";
-import BabelTypes, {
-  ExpressionStatement,
-  Identifier,
-  ObjectExpression,
-  ObjectPattern,
-  TryStatement
-} from "@babel/types";
+import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
-import { handlerMethodVisitor } from "./handler-method-visitor";
-import { recallVisitor } from "./recall-visitor";
-import {
-  collapseObjectPattern,
-  fixupParentGenerator
-} from "./traverse-utilities";
+import { followHandlerDefinitions } from "./handler-method-visitor";
+import { fixupParentGenerator } from "./traverse-utilities";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -27,29 +17,10 @@ export interface Babel {
   types: typeof BabelTypes;
 }
 
-function createHandler(
-  types: Babel["types"],
-  path: NodePath,
-  handlerParam: Identifier | ObjectPattern
-) {
+function createHandler(types: Babel["types"], path: NodePath) {
   const handlerObject = types.objectExpression([]);
-  const {
-    identifier,
-    defaultAssignments
-  }: {
-    identifier: Identifier;
-    defaultAssignments: ExpressionStatement[];
-  } = types.isObjectPattern(handlerParam)
-    ? collapseObjectPattern(handlerParam, types, path)
-    : { identifier: handlerParam, defaultAssignments: [] };
 
-  path.traverse(recallVisitor, { types });
-  path.traverse(handlerMethodVisitor, {
-    types,
-    handlerObject,
-    handlerParamName: identifier.name,
-    defaultAssignments
-  });
+  followHandlerDefinitions(path, handlerObject, types);
 
   return handlerObject;
 }
@@ -100,14 +71,12 @@ export default function transformEffects({ types }: Babel): Plugin {
       TryStatement: {
         enter(path) {
           const handlerBody = path.get("handler.body") as any;
-          const handlerParam = path.get("handler.param") as any;
           const handlerType = path.node.handler?.type;
 
           // @ts-ignore
-          if (handlerType !== "HandleClause" || !handlerBody || !handlerParam)
-            return;
+          if (handlerType !== "HandleClause" || !handlerBody) return;
 
-          const handler = createHandler(types, handlerBody, handlerParam.node);
+          const handler = createHandler(types, path.get("handler"));
           const withHandlerExpression = createWithHandlerInvocation(
             types,
             path,

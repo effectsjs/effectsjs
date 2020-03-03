@@ -1,4 +1,4 @@
-import { NodePath, Visitor } from "@babel/traverse";
+import { NodePath } from "@babel/traverse";
 import BabelTypes, {
   BigIntLiteral,
   BooleanLiteral,
@@ -7,23 +7,13 @@ import BabelTypes, {
   IfStatement,
   MemberExpression,
   NumericLiteral,
+  ObjectExpression,
+  ObjectPattern,
   StringLiteral,
   SwitchCase
 } from "@babel/types";
-import {
-  TypesVisitorPrototype,
-  HandlerCreationPrototype
-} from "./visitor-proto-interfaces";
-
-const isCorrectMemberPropertyPath = (
-  types: typeof BabelTypes,
-  memberPropertyNode: BabelTypes.Node
-) => {
-  return (
-    types.isIdentifier(memberPropertyNode) ||
-    types.isStringLiteral(memberPropertyNode)
-  );
-};
+import { collapseObjectPattern } from "./traverse-utilities";
+import { recallVisitor } from "./recall-visitor";
 
 const isLiteralProp = (
   node: NodePath,
@@ -50,8 +40,11 @@ const extractMemberPropertyPathName = (
     if (binding && types.isIdentifier(memberPropertyNode)) {
       return { ident: memberPropertyNode, isComputed: true };
     }
-
-    // I think at this point it's safe to throw.
+  } else if (parentPath.get("defaultMatcher").node) {
+    return {
+      ident: types.identifier("__defaultEffectHandler__"),
+      isComputed: true
+    };
   }
 
   throw new Error(
@@ -61,7 +54,7 @@ const extractMemberPropertyPathName = (
 
 const makeHandlerMethod = (
   memberPropertyPath: NodePath<MemberExpression | Identifier>,
-  rootPath: NodePath<IfStatement | SwitchCase>,
+  rootPath: NodePath<IfStatement | SwitchCase | any>,
   types: typeof BabelTypes,
   consequent: any,
   handlerParamName: string,
@@ -139,7 +132,7 @@ const makeHandlerMethod = (
   const objectMethod = types.objectMethod(
     "method",
     handlerPropertyName ? handlerPropertyName : memberPropertyPath.node,
-    [types.identifier(`__${handlerParamName}__`), types.identifier("resume")],
+    [types.identifier(`${handlerParamName}`), types.identifier("resume")],
     types.blockStatement([
       resultContinuation,
       types.returnStatement(
@@ -158,81 +151,47 @@ const makeHandlerMethod = (
   return objectMethod;
 };
 
-/**
- * From within a handle block,
- *
- * Visit each if statement and determine whether or not the test statement conforms to the expected definition for
- * an effects handler.
- */
-export const handlerMethodVisitor: Visitor<TypesVisitorPrototype &
-  HandlerCreationPrototype> = {
-  Identifier(path, { handlerParamName }) {
-    if (path.node.name === handlerParamName) {
-      path.node.name = `__${path.node.name}__`;
-    }
-  },
-  IfStatement(
-    path,
-    { types, handlerObject, handlerParamName, defaultAssignments }
-  ) {
-    const testPath = path.get("test");
-    const consequent = path.get("consequent") as any;
-    const memberPropertyPath = path.get("test.right") as NodePath<
-      MemberExpression
-    >;
+// Annoying:
+// For now, cannot traverse the HandlerClause node like it was a normal AST node
+// without further customization of the babel fork.
+export const followHandlerDefinitions = (
+  handlerPath: NodePath<any>,
+  handlerObject: ObjectExpression,
+  types: typeof BabelTypes
+) => {
+  const handlerBody = handlerPath.get("body");
+  const handlerParam = handlerPath.get("param").node as
+    | Identifier
+    | ObjectPattern;
 
-    if (!types.isBinaryExpression(testPath.node)) return;
-    if (!["==", "==="].includes(testPath.node.operator)) return;
-    if (!types.isMemberExpression(testPath.node.left)) return;
-    if (!memberPropertyPath) return;
-    if (!isCorrectMemberPropertyPath(types, memberPropertyPath.node)) return;
+  const {
+    identifier,
+    defaultAssignments
+  }: {
+    identifier: Identifier;
+    defaultAssignments: ExpressionStatement[];
+  } = types.isObjectPattern(handlerParam)
+    ? collapseObjectPattern(handlerParam, types, handlerBody)
+    : {
+        identifier: types.identifier(`__${handlerParam.name}__`),
+        defaultAssignments: []
+      };
 
-    handlerObject.properties.push(
-      makeHandlerMethod(
-        memberPropertyPath,
-        path,
-        types,
-        consequent,
-        handlerParamName,
-        defaultAssignments
-      )
-    );
+  handlerBody.traverse(recallVisitor, { types });
 
-    const alternate = path.get("alternate");
-
-    if (alternate) {
-      path.traverse(handlerMethodVisitor, {
-        types,
-        handlerObject,
-        handlerParamName,
-        defaultAssignments
-      });
-    }
-
-    path.remove();
-  },
-  SwitchCase(
-    path,
-    { types, handlerObject, handlerParamName, defaultAssignments }
-  ) {
-    const memberPropertyPath = path.get("test") as NodePath<Identifier>;
-    const consequent = path.get("consequent") as any;
-
-    consequent.forEach(x => x.traverse(handlerMethodVisitor, { ...this }));
-
-    if (!memberPropertyPath) return;
-
-    handlerObject.properties.push(
-      makeHandlerMethod(
-        memberPropertyPath,
-        path,
-        types,
-        consequent[0],
-        handlerParamName,
-        defaultAssignments
-      )
-    );
-
-    path.remove();
-  }
+  handlerObject.properties.push(
+    makeHandlerMethod(
+      handlerPath.get("effectMatcher"),
+      handlerPath,
+      types,
+      handlerPath.get("body"),
+      identifier.name,
+      defaultAssignments
+    )
+  );
+  const alternatePath = handlerPath.node.alternate
+    ? handlerPath.get("alternate.handler")
+    : null;
+  if (alternatePath)
+    followHandlerDefinitions(alternatePath, handlerObject, types);
 };

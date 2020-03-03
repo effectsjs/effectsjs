@@ -107,13 +107,18 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
 };
 
 export const toMemberExpressionVisitor: Visitor<{
-  objectIdentifier: Identifier;
+  objectIdentifierName: string;
   propName: string;
   types: Babel["types"];
 }> = {
-  Identifier(path, { objectIdentifier, propName, types }) {
+  Identifier(path, { objectIdentifierName, propName, types }) {
     if (path.node.name === propName) {
-      path.replaceWith(types.memberExpression(objectIdentifier, path.node));
+      path.replaceWith(
+        types.memberExpression(
+          types.identifier(objectIdentifierName),
+          path.node
+        )
+      );
       path.skip();
     }
   }
@@ -171,7 +176,7 @@ export const collapseObjectPattern = (
   types: Babel["types"],
   handlerBodyPath: NodePath
 ): { identifier: Identifier; defaultAssignments: ExpressionStatement[] } => {
-  const identifierName = `e`;
+  const identifierName = `__e__`;
   const defaultAssignments: ExpressionStatement[] = [];
   const objectIdentifier = types.identifier(identifierName);
 
@@ -192,7 +197,7 @@ export const collapseObjectPattern = (
       });
     } else {
       handlerBodyPath.traverse(toMemberExpressionVisitor, {
-        objectIdentifier,
+        objectIdentifierName: objectIdentifier.name,
         propName: property.key.name,
         types
       });

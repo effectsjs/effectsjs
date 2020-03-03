@@ -15,10 +15,8 @@ const main = async () => {
         if(someBananas === 'A Bunch Of Bananas'){
             throw new Error('I wanted Plantains!');
         }
-    }handle(e){
-        if(e.type === gatherBananasEffectType){
-            gatherBananasHandler();
-        }
+    }handle gatherBananasEffectType with (e){
+        gatherBananasHandler();
     }
 
 };

@@ -10,12 +10,10 @@ const main = ({onEffectComplete}) => {
         const result = perform GetAsyncIntegerEffect();
 
         onEffectComplete(result);
-    }handle(e){
-        if(e.type === getAsyncIntegerHandler){
-            setTimeout(() => {
-                recall expectation;
-            }, 50)
-        }
+    }handle getAsyncIntegerHandler with (e){
+        setTimeout(() => {
+            recall expectation;
+        }, 50)
     }
 };
 
