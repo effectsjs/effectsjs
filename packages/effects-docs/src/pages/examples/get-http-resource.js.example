@@ -2,11 +2,10 @@ function main () {
   'use effects'
   try {
     analyzePage() // observe, _not_ async!
-  } handle (evt) {
-    switch (evt.type) {
-      case 'get_page_size': getPageSize(evt.payload.url).then(size => { recall size })
-      case 'flush_analysis': flushAnalysis(evt.payload).then(metadata => { recall metadata })
-    }
+  } handle 'get_page_size' with (evt) {
+    getPageSize(evt.payload.url).then(size => { recall size });
+  } handle 'flush_analysis' with (evt) {
+    flushAnalysis(evt.payload).then(metadata => { recall metadata });
   }
 }
 
