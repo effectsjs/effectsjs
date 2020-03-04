@@ -12,7 +12,10 @@ import BabelTypes, {
   StringLiteral,
   SwitchCase
 } from "@babel/types";
-import { collapseObjectPattern } from "./traverse-utilities";
+import {
+  collapseObjectPattern,
+  renameIdentNameVisitor
+} from "./traverse-utilities";
 import { recallVisitor } from "./recall-visitor";
 
 const isLiteralProp = (
@@ -164,6 +167,13 @@ export const followHandlerDefinitions = (
     | Identifier
     | ObjectPattern;
 
+  const oldIdentName = types.isIdentifier(handlerParam)
+    ? handlerParam.name
+    : null;
+  const newIdentName = types.isIdentifier(handlerParam)
+    ? `__${handlerParam.name}__`
+    : null;
+
   const {
     identifier,
     defaultAssignments
@@ -173,9 +183,16 @@ export const followHandlerDefinitions = (
   } = types.isObjectPattern(handlerParam)
     ? collapseObjectPattern(handlerParam, types, handlerBody)
     : {
-        identifier: types.identifier(`__${handlerParam.name}__`),
+        identifier: types.identifier(newIdentName),
         defaultAssignments: []
       };
+
+  if (oldIdentName) {
+    handlerBody.traverse(renameIdentNameVisitor, {
+      newName: newIdentName,
+      oldName: oldIdentName
+    });
+  }
 
   handlerBody.traverse(recallVisitor, { types });
 

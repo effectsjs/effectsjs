@@ -1,12 +1,8 @@
 'use effects'
 try {
   await work()
-} handle (event) {
-  switch event.type {
-    case 'log': {
-      console.log(event.message)
-      recall null
-    }
+} handle 'log' with ({message}) {
+      console.log(message)
   }
 }
 

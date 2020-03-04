@@ -325,6 +325,163 @@ module.exports.test = ({ describe, it, code, expect }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS data-passing.js: data-passing.js 1`] = `
+
+const main = () => {
+    'use effects';
+    try{
+        return perform {type : 'effect', data : 'data'}
+    }handle 'effect' with (e){
+        recall e.data
+    }
+};
+
+const dynamicEffect = (effect) => {
+    'use effects';
+    try{
+        return perform effect;
+    }handle 'effectA' with (e){
+        recall 'effectA';
+    }handle 'effectB' with (e){
+        if(e.data === 1){
+            recall true;
+        } else {
+            recall false;
+        }
+    }
+}
+module.exports.test = ({it, expect}) => {
+    it('Should pass data into handler variable', async () => {
+        const result = await main();
+
+        expect(result).toBe('data');
+    });
+
+    it('Should respond to dynamic effect passing', async () => {
+        const result = await dynamicEffect({type : 'effectA'});
+
+        expect(result).toBe('effectA');
+    });
+
+    it('Should recall dynamically', async () => {
+        const resultA = await dynamicEffect({type : 'effectB', data : 1});
+        const resultB = await dynamicEffect({type : 'effectB', data : 2});
+
+        expect(resultA).toBe(true);
+        expect(resultB).toBe(false);
+    })
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const main = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *effect(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, __e__.data)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect({
+            type: "effect",
+            data: "data"
+          });
+        })()
+      );
+    })()
+  );
+};
+
+const dynamicEffect = effect => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *effectA(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, "effectA")
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          },
+
+          *effectB(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  if (__e__.data === 1) {
+                    return stackResume(handler, true)
+                      .then(res)
+                      .catch(rej);
+                  } else {
+                    return stackResume(handler, false)
+                      .then(res)
+                      .catch(rej);
+                  }
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield performEffect(effect);
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ it, expect }) => {
+  it("Should pass data into handler variable", async () => {
+    const result = await main();
+    expect(result).toBe("data");
+  });
+  it("Should respond to dynamic effect passing", async () => {
+    const result = await dynamicEffect({
+      type: "effectA"
+    });
+    expect(result).toBe("effectA");
+  });
+  it("Should recall dynamically", async () => {
+    const resultA = await dynamicEffect({
+      type: "effectB",
+      data: 1
+    });
+    const resultB = await dynamicEffect({
+      type: "effectB",
+      data: 2
+    });
+    expect(resultA).toBe(true);
+    expect(resultB).toBe(false);
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS default-handlers.js: default-handlers.js 1`] = `
 
 const effectType = Symbol();
