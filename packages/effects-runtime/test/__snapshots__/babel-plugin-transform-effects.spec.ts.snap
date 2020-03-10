@@ -999,6 +999,126 @@ module.exports.test = async ({ it, expect, code }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS hello-world-multi-perform.js: hello-world-multi-perform.js 1`] = `
+
+function main () {
+  'use effects'
+  try {
+    return getMessage({
+      numberOfPersons: 7700000000
+    })
+  } handle 'get_greeting' with (evt) {
+    recall 'Hello'
+  } handle 'get_audience' with ({ payload: { numberOfPersons } }) {
+    if (numberOfPersons > 7e7) recall 'world'
+    else if (numberOfPersons > 1) recall 'friends'
+    else if (numberOfPersons === 1) recall 'friend'
+    else recall 'no one'
+  }
+}
+
+function getMessage ({ numberOfPersons }) {
+  const greeting = perform { type: 'get_greeting' }
+  return \`\${greeting}, \${getAudience({ numberOfPersons })}!\`
+}
+
+function getAudience ({ numberOfPersons }) {
+  perform { type: 'get_audience', payload: numberOfPersons }
+}
+
+module.exports.test = ({it, expect}) => {
+  it('Should create hello-world from multiple-performs', async () => {
+      const result = await main();
+      expect(result).toBe('Hello, world!');
+  });
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+function main() {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *get_greeting(__evt__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, "Hello")
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          },
+
+          *get_audience(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  if (numberOfPersons > 7e7)
+                    return stackResume(handler, "world")
+                      .then(res)
+                      .catch(rej);
+                  else if (numberOfPersons > 1)
+                    return stackResume(handler, "friends")
+                      .then(res)
+                      .catch(rej);
+                  else if (numberOfPersons === 1)
+                    return stackResume(handler, "friend")
+                      .then(res)
+                      .catch(rej);
+                  else
+                    return stackResume(handler, "no one")
+                      .then(res)
+                      .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield getMessage({
+            numberOfPersons: 7700000000
+          });
+        })()
+      );
+    })()
+  );
+}
+
+function* getMessage({ numberOfPersons }) {
+  const greeting = yield performEffect({
+    type: "get_greeting"
+  });
+  return \`\${greeting}, \${yield getAudience({
+    numberOfPersons
+  })}!\`;
+}
+
+function* getAudience({ numberOfPersons }) {
+  yield performEffect({
+    type: "get_audience",
+    payload: numberOfPersons
+  });
+}
+
+module.exports.test = ({ it, expect }) => {
+  it("Should create hello-world from multiple-performs", async () => {
+    const result = await main();
+    expect(result).toBe("Hello, world!");
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS nesting-handlers.js: nesting-handlers.js 1`] = `
 
 const mainEffectHandler = (input) => {

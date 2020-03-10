@@ -1,0 +1,27 @@
+function main () {
+  'use effects'
+  try {
+    const message = getMessage({
+      numberOfPersons: 7700000000
+    })
+    console.log(message)
+  } handle 'get_greeting' with (evt) {
+    recall 'Hello'
+  } handle 'get_audience' with ({ payload: { numberOfPersons } }) {
+    if (numberOfPersons > 7e7) recall 'world'
+    if (numberOfPersons > 1) recall 'friends'
+    if (numberOfPersons === 1) recall 'friend'
+    if (true) recall 'no one'
+  }
+}
+
+function getMessage ({ numberOfPersons }) {
+  const greeting = perform { type: 'get_greeting' }
+  return `${greeting}, ${getAudience({ numberOfPersons })}!`
+}
+
+function getAudience ({ numberOfPersons }) {
+  perform { type: 'get_audience', payload: numberOfPersons }
+}
+
+main()
