@@ -213,7 +213,7 @@ const evaluate = src => {
       const transformed = babel.transform(nextToEvaluate, {
         plugins: [transformEffects]
       }).code;
-      await Promise.resolve(eval(transformed)); // eslint-disable-line
+      new Function(`use strict;${transformed}`)();
     } catch (error) {
       console.error({
         message: error.message,
