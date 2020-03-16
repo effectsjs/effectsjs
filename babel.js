@@ -58903,14 +58903,6 @@
         var first = _char.charCodeAt(0);
 
         if (hasUnicodeFlag) {
-          if (_char === '}') {
-            bail("unescaped or unmatched closing brace");
-          }
-
-          if (_char === ']') {
-            bail("unescaped or unmatched closing bracket");
-          }
-
           var second;
 
           if (_char.length === 1 && first >= 0xD800 && first <= 0xDBFF) {
@@ -59116,7 +59108,7 @@
           return anchor;
         }
 
-        var atom = parseAtom();
+        var atom = parseAtomAndExtendedAtom();
 
         if (!atom) {
           bail('Expected atom');
@@ -59221,10 +59213,12 @@
         return quantifier;
       }
 
-      function parseAtom() {
+      function parseAtomAndExtendedAtom() {
         var res;
 
-        if (res = matchReg(/^[^^$\\.*+?(){[|]/)) {
+        if (res = matchReg(/^[^^$\\.*+?()[\]{}|]/)) {
+          return createCharacter(res);
+        } else if (!hasUnicodeFlag && (res = matchReg(/^(?:]|})/))) {
           return createCharacter(res);
         } else if (match('.')) {
           return createDot();
@@ -60625,7 +60619,7 @@
 
   var unicodeCanonicalPropertyNamesEcmascript = new Set(['General_Category', 'Script', 'Script_Extensions', 'Alphabetic', 'Any', 'ASCII', 'ASCII_Hex_Digit', 'Assigned', 'Bidi_Control', 'Bidi_Mirrored', 'Case_Ignorable', 'Cased', 'Changes_When_Casefolded', 'Changes_When_Casemapped', 'Changes_When_Lowercased', 'Changes_When_NFKC_Casefolded', 'Changes_When_Titlecased', 'Changes_When_Uppercased', 'Dash', 'Default_Ignorable_Code_Point', 'Deprecated', 'Diacritic', 'Emoji', 'Emoji_Component', 'Emoji_Modifier', 'Emoji_Modifier_Base', 'Emoji_Presentation', 'Extended_Pictographic', 'Extender', 'Grapheme_Base', 'Grapheme_Extend', 'Hex_Digit', 'ID_Continue', 'ID_Start', 'Ideographic', 'IDS_Binary_Operator', 'IDS_Trinary_Operator', 'Join_Control', 'Logical_Order_Exception', 'Lowercase', 'Math', 'Noncharacter_Code_Point', 'Pattern_Syntax', 'Pattern_White_Space', 'Quotation_Mark', 'Radical', 'Regional_Indicator', 'Sentence_Terminal', 'Soft_Dotted', 'Terminal_Punctuation', 'Unified_Ideograph', 'Uppercase', 'Variation_Selector', 'White_Space', 'XID_Continue', 'XID_Start']);
 
-  var unicodePropertyAliasesEcmascript = new Map([['scx', 'Script_Extensions'], ['sc', 'Script'], ['gc', 'General_Category'], ['AHex', 'ASCII_Hex_Digit'], ['Alpha', 'Alphabetic'], ['Bidi_C', 'Bidi_Control'], ['Bidi_M', 'Bidi_Mirrored'], ['Cased', 'Cased'], ['CI', 'Case_Ignorable'], ['CWCF', 'Changes_When_Casefolded'], ['CWCM', 'Changes_When_Casemapped'], ['CWKCF', 'Changes_When_NFKC_Casefolded'], ['CWL', 'Changes_When_Lowercased'], ['CWT', 'Changes_When_Titlecased'], ['CWU', 'Changes_When_Uppercased'], ['Dash', 'Dash'], ['Dep', 'Deprecated'], ['DI', 'Default_Ignorable_Code_Point'], ['Dia', 'Diacritic'], ['Ext', 'Extender'], ['Gr_Base', 'Grapheme_Base'], ['Gr_Ext', 'Grapheme_Extend'], ['Hex', 'Hex_Digit'], ['IDC', 'ID_Continue'], ['Ideo', 'Ideographic'], ['IDS', 'ID_Start'], ['IDSB', 'IDS_Binary_Operator'], ['IDST', 'IDS_Trinary_Operator'], ['Join_C', 'Join_Control'], ['LOE', 'Logical_Order_Exception'], ['Lower', 'Lowercase'], ['Math', 'Math'], ['NChar', 'Noncharacter_Code_Point'], ['Pat_Syn', 'Pattern_Syntax'], ['Pat_WS', 'Pattern_White_Space'], ['QMark', 'Quotation_Mark'], ['Radical', 'Radical'], ['RI', 'Regional_Indicator'], ['SD', 'Soft_Dotted'], ['STerm', 'Sentence_Terminal'], ['Term', 'Terminal_Punctuation'], ['UIdeo', 'Unified_Ideograph'], ['Upper', 'Uppercase'], ['VS', 'Variation_Selector'], ['WSpace', 'White_Space'], ['space', 'White_Space'], ['XIDC', 'XID_Continue'], ['XIDS', 'XID_Start']]);
+  var unicodePropertyAliasesEcmascript = new Map([['scx', 'Script_Extensions'], ['sc', 'Script'], ['gc', 'General_Category'], ['AHex', 'ASCII_Hex_Digit'], ['Alpha', 'Alphabetic'], ['Bidi_C', 'Bidi_Control'], ['Bidi_M', 'Bidi_Mirrored'], ['Cased', 'Cased'], ['CI', 'Case_Ignorable'], ['CWCF', 'Changes_When_Casefolded'], ['CWCM', 'Changes_When_Casemapped'], ['CWKCF', 'Changes_When_NFKC_Casefolded'], ['CWL', 'Changes_When_Lowercased'], ['CWT', 'Changes_When_Titlecased'], ['CWU', 'Changes_When_Uppercased'], ['Dash', 'Dash'], ['Dep', 'Deprecated'], ['DI', 'Default_Ignorable_Code_Point'], ['Dia', 'Diacritic'], ['EBase', 'Emoji_Modifier_Base'], ['EComp', 'Emoji_Component'], ['EMod', 'Emoji_Modifier'], ['Emoji', 'Emoji'], ['EPres', 'Emoji_Presentation'], ['Ext', 'Extender'], ['ExtPict', 'Extended_Pictographic'], ['Gr_Base', 'Grapheme_Base'], ['Gr_Ext', 'Grapheme_Extend'], ['Hex', 'Hex_Digit'], ['IDC', 'ID_Continue'], ['Ideo', 'Ideographic'], ['IDS', 'ID_Start'], ['IDSB', 'IDS_Binary_Operator'], ['IDST', 'IDS_Trinary_Operator'], ['Join_C', 'Join_Control'], ['LOE', 'Logical_Order_Exception'], ['Lower', 'Lowercase'], ['Math', 'Math'], ['NChar', 'Noncharacter_Code_Point'], ['Pat_Syn', 'Pattern_Syntax'], ['Pat_WS', 'Pattern_White_Space'], ['QMark', 'Quotation_Mark'], ['Radical', 'Radical'], ['RI', 'Regional_Indicator'], ['SD', 'Soft_Dotted'], ['STerm', 'Sentence_Terminal'], ['Term', 'Terminal_Punctuation'], ['UIdeo', 'Unified_Ideograph'], ['Upper', 'Uppercase'], ['VS', 'Variation_Selector'], ['WSpace', 'White_Space'], ['space', 'White_Space'], ['XIDC', 'XID_Continue'], ['XIDS', 'XID_Start']]);
 
   var matchProperty = function matchProperty(property) {
     if (unicodeCanonicalPropertyNamesEcmascript.has(property)) {
@@ -60641,7 +60635,7 @@
 
   var unicodeMatchPropertyEcmascript = matchProperty;
 
-  var mappings = new Map([['General_Category', new Map([['C', 'Other'], ['Cc', 'Control'], ['cntrl', 'Control'], ['Cf', 'Format'], ['Cn', 'Unassigned'], ['Co', 'Private_Use'], ['Cs', 'Surrogate'], ['L', 'Letter'], ['LC', 'Cased_Letter'], ['Ll', 'Lowercase_Letter'], ['Lm', 'Modifier_Letter'], ['Lo', 'Other_Letter'], ['Lt', 'Titlecase_Letter'], ['Lu', 'Uppercase_Letter'], ['M', 'Mark'], ['Combining_Mark', 'Mark'], ['Mc', 'Spacing_Mark'], ['Me', 'Enclosing_Mark'], ['Mn', 'Nonspacing_Mark'], ['N', 'Number'], ['Nd', 'Decimal_Number'], ['digit', 'Decimal_Number'], ['Nl', 'Letter_Number'], ['No', 'Other_Number'], ['P', 'Punctuation'], ['punct', 'Punctuation'], ['Pc', 'Connector_Punctuation'], ['Pd', 'Dash_Punctuation'], ['Pe', 'Close_Punctuation'], ['Pf', 'Final_Punctuation'], ['Pi', 'Initial_Punctuation'], ['Po', 'Other_Punctuation'], ['Ps', 'Open_Punctuation'], ['S', 'Symbol'], ['Sc', 'Currency_Symbol'], ['Sk', 'Modifier_Symbol'], ['Sm', 'Math_Symbol'], ['So', 'Other_Symbol'], ['Z', 'Separator'], ['Zl', 'Line_Separator'], ['Zp', 'Paragraph_Separator'], ['Zs', 'Space_Separator'], ['Other', 'Other'], ['Control', 'Control'], ['Format', 'Format'], ['Unassigned', 'Unassigned'], ['Private_Use', 'Private_Use'], ['Surrogate', 'Surrogate'], ['Letter', 'Letter'], ['Cased_Letter', 'Cased_Letter'], ['Lowercase_Letter', 'Lowercase_Letter'], ['Modifier_Letter', 'Modifier_Letter'], ['Other_Letter', 'Other_Letter'], ['Titlecase_Letter', 'Titlecase_Letter'], ['Uppercase_Letter', 'Uppercase_Letter'], ['Mark', 'Mark'], ['Spacing_Mark', 'Spacing_Mark'], ['Enclosing_Mark', 'Enclosing_Mark'], ['Nonspacing_Mark', 'Nonspacing_Mark'], ['Number', 'Number'], ['Decimal_Number', 'Decimal_Number'], ['Letter_Number', 'Letter_Number'], ['Other_Number', 'Other_Number'], ['Punctuation', 'Punctuation'], ['Connector_Punctuation', 'Connector_Punctuation'], ['Dash_Punctuation', 'Dash_Punctuation'], ['Close_Punctuation', 'Close_Punctuation'], ['Final_Punctuation', 'Final_Punctuation'], ['Initial_Punctuation', 'Initial_Punctuation'], ['Other_Punctuation', 'Other_Punctuation'], ['Open_Punctuation', 'Open_Punctuation'], ['Symbol', 'Symbol'], ['Currency_Symbol', 'Currency_Symbol'], ['Modifier_Symbol', 'Modifier_Symbol'], ['Math_Symbol', 'Math_Symbol'], ['Other_Symbol', 'Other_Symbol'], ['Separator', 'Separator'], ['Line_Separator', 'Line_Separator'], ['Paragraph_Separator', 'Paragraph_Separator'], ['Space_Separator', 'Space_Separator']])], ['Script', new Map([['Adlm', 'Adlam'], ['Aghb', 'Caucasian_Albanian'], ['Ahom', 'Ahom'], ['Arab', 'Arabic'], ['Armi', 'Imperial_Aramaic'], ['Armn', 'Armenian'], ['Avst', 'Avestan'], ['Bali', 'Balinese'], ['Bamu', 'Bamum'], ['Bass', 'Bassa_Vah'], ['Batk', 'Batak'], ['Beng', 'Bengali'], ['Bhks', 'Bhaiksuki'], ['Bopo', 'Bopomofo'], ['Brah', 'Brahmi'], ['Brai', 'Braille'], ['Bugi', 'Buginese'], ['Buhd', 'Buhid'], ['Cakm', 'Chakma'], ['Cans', 'Canadian_Aboriginal'], ['Cari', 'Carian'], ['Cham', 'Cham'], ['Cher', 'Cherokee'], ['Copt', 'Coptic'], ['Qaac', 'Coptic'], ['Cprt', 'Cypriot'], ['Cyrl', 'Cyrillic'], ['Deva', 'Devanagari'], ['Dogr', 'Dogra'], ['Dsrt', 'Deseret'], ['Dupl', 'Duployan'], ['Egyp', 'Egyptian_Hieroglyphs'], ['Elba', 'Elbasan'], ['Elym', 'Elymaic'], ['Ethi', 'Ethiopic'], ['Geor', 'Georgian'], ['Glag', 'Glagolitic'], ['Gong', 'Gunjala_Gondi'], ['Gonm', 'Masaram_Gondi'], ['Goth', 'Gothic'], ['Gran', 'Grantha'], ['Grek', 'Greek'], ['Gujr', 'Gujarati'], ['Guru', 'Gurmukhi'], ['Hang', 'Hangul'], ['Hani', 'Han'], ['Hano', 'Hanunoo'], ['Hatr', 'Hatran'], ['Hebr', 'Hebrew'], ['Hira', 'Hiragana'], ['Hluw', 'Anatolian_Hieroglyphs'], ['Hmng', 'Pahawh_Hmong'], ['Hmnp', 'Nyiakeng_Puachue_Hmong'], ['Hrkt', 'Katakana_Or_Hiragana'], ['Hung', 'Old_Hungarian'], ['Ital', 'Old_Italic'], ['Java', 'Javanese'], ['Kali', 'Kayah_Li'], ['Kana', 'Katakana'], ['Khar', 'Kharoshthi'], ['Khmr', 'Khmer'], ['Khoj', 'Khojki'], ['Knda', 'Kannada'], ['Kthi', 'Kaithi'], ['Lana', 'Tai_Tham'], ['Laoo', 'Lao'], ['Latn', 'Latin'], ['Lepc', 'Lepcha'], ['Limb', 'Limbu'], ['Lina', 'Linear_A'], ['Linb', 'Linear_B'], ['Lisu', 'Lisu'], ['Lyci', 'Lycian'], ['Lydi', 'Lydian'], ['Mahj', 'Mahajani'], ['Maka', 'Makasar'], ['Mand', 'Mandaic'], ['Mani', 'Manichaean'], ['Marc', 'Marchen'], ['Medf', 'Medefaidrin'], ['Mend', 'Mende_Kikakui'], ['Merc', 'Meroitic_Cursive'], ['Mero', 'Meroitic_Hieroglyphs'], ['Mlym', 'Malayalam'], ['Modi', 'Modi'], ['Mong', 'Mongolian'], ['Mroo', 'Mro'], ['Mtei', 'Meetei_Mayek'], ['Mult', 'Multani'], ['Mymr', 'Myanmar'], ['Nand', 'Nandinagari'], ['Narb', 'Old_North_Arabian'], ['Nbat', 'Nabataean'], ['Newa', 'Newa'], ['Nkoo', 'Nko'], ['Nshu', 'Nushu'], ['Ogam', 'Ogham'], ['Olck', 'Ol_Chiki'], ['Orkh', 'Old_Turkic'], ['Orya', 'Oriya'], ['Osge', 'Osage'], ['Osma', 'Osmanya'], ['Palm', 'Palmyrene'], ['Pauc', 'Pau_Cin_Hau'], ['Perm', 'Old_Permic'], ['Phag', 'Phags_Pa'], ['Phli', 'Inscriptional_Pahlavi'], ['Phlp', 'Psalter_Pahlavi'], ['Phnx', 'Phoenician'], ['Plrd', 'Miao'], ['Prti', 'Inscriptional_Parthian'], ['Rjng', 'Rejang'], ['Rohg', 'Hanifi_Rohingya'], ['Runr', 'Runic'], ['Samr', 'Samaritan'], ['Sarb', 'Old_South_Arabian'], ['Saur', 'Saurashtra'], ['Sgnw', 'SignWriting'], ['Shaw', 'Shavian'], ['Shrd', 'Sharada'], ['Sidd', 'Siddham'], ['Sind', 'Khudawadi'], ['Sinh', 'Sinhala'], ['Sogd', 'Sogdian'], ['Sogo', 'Old_Sogdian'], ['Sora', 'Sora_Sompeng'], ['Soyo', 'Soyombo'], ['Sund', 'Sundanese'], ['Sylo', 'Syloti_Nagri'], ['Syrc', 'Syriac'], ['Tagb', 'Tagbanwa'], ['Takr', 'Takri'], ['Tale', 'Tai_Le'], ['Talu', 'New_Tai_Lue'], ['Taml', 'Tamil'], ['Tang', 'Tangut'], ['Tavt', 'Tai_Viet'], ['Telu', 'Telugu'], ['Tfng', 'Tifinagh'], ['Tglg', 'Tagalog'], ['Thaa', 'Thaana'], ['Thai', 'Thai'], ['Tibt', 'Tibetan'], ['Tirh', 'Tirhuta'], ['Ugar', 'Ugaritic'], ['Vaii', 'Vai'], ['Wara', 'Warang_Citi'], ['Wcho', 'Wancho'], ['Xpeo', 'Old_Persian'], ['Xsux', 'Cuneiform'], ['Yiii', 'Yi'], ['Zanb', 'Zanabazar_Square'], ['Zinh', 'Inherited'], ['Qaai', 'Inherited'], ['Zyyy', 'Common'], ['Zzzz', 'Unknown'], ['Adlam', 'Adlam'], ['Caucasian_Albanian', 'Caucasian_Albanian'], ['Arabic', 'Arabic'], ['Imperial_Aramaic', 'Imperial_Aramaic'], ['Armenian', 'Armenian'], ['Avestan', 'Avestan'], ['Balinese', 'Balinese'], ['Bamum', 'Bamum'], ['Bassa_Vah', 'Bassa_Vah'], ['Batak', 'Batak'], ['Bengali', 'Bengali'], ['Bhaiksuki', 'Bhaiksuki'], ['Bopomofo', 'Bopomofo'], ['Brahmi', 'Brahmi'], ['Braille', 'Braille'], ['Buginese', 'Buginese'], ['Buhid', 'Buhid'], ['Chakma', 'Chakma'], ['Canadian_Aboriginal', 'Canadian_Aboriginal'], ['Carian', 'Carian'], ['Cherokee', 'Cherokee'], ['Coptic', 'Coptic'], ['Cypriot', 'Cypriot'], ['Cyrillic', 'Cyrillic'], ['Devanagari', 'Devanagari'], ['Dogra', 'Dogra'], ['Deseret', 'Deseret'], ['Duployan', 'Duployan'], ['Egyptian_Hieroglyphs', 'Egyptian_Hieroglyphs'], ['Elbasan', 'Elbasan'], ['Elymaic', 'Elymaic'], ['Ethiopic', 'Ethiopic'], ['Georgian', 'Georgian'], ['Glagolitic', 'Glagolitic'], ['Gunjala_Gondi', 'Gunjala_Gondi'], ['Masaram_Gondi', 'Masaram_Gondi'], ['Gothic', 'Gothic'], ['Grantha', 'Grantha'], ['Greek', 'Greek'], ['Gujarati', 'Gujarati'], ['Gurmukhi', 'Gurmukhi'], ['Hangul', 'Hangul'], ['Han', 'Han'], ['Hanunoo', 'Hanunoo'], ['Hatran', 'Hatran'], ['Hebrew', 'Hebrew'], ['Hiragana', 'Hiragana'], ['Anatolian_Hieroglyphs', 'Anatolian_Hieroglyphs'], ['Pahawh_Hmong', 'Pahawh_Hmong'], ['Nyiakeng_Puachue_Hmong', 'Nyiakeng_Puachue_Hmong'], ['Katakana_Or_Hiragana', 'Katakana_Or_Hiragana'], ['Old_Hungarian', 'Old_Hungarian'], ['Old_Italic', 'Old_Italic'], ['Javanese', 'Javanese'], ['Kayah_Li', 'Kayah_Li'], ['Katakana', 'Katakana'], ['Kharoshthi', 'Kharoshthi'], ['Khmer', 'Khmer'], ['Khojki', 'Khojki'], ['Kannada', 'Kannada'], ['Kaithi', 'Kaithi'], ['Tai_Tham', 'Tai_Tham'], ['Lao', 'Lao'], ['Latin', 'Latin'], ['Lepcha', 'Lepcha'], ['Limbu', 'Limbu'], ['Linear_A', 'Linear_A'], ['Linear_B', 'Linear_B'], ['Lycian', 'Lycian'], ['Lydian', 'Lydian'], ['Mahajani', 'Mahajani'], ['Makasar', 'Makasar'], ['Mandaic', 'Mandaic'], ['Manichaean', 'Manichaean'], ['Marchen', 'Marchen'], ['Medefaidrin', 'Medefaidrin'], ['Mende_Kikakui', 'Mende_Kikakui'], ['Meroitic_Cursive', 'Meroitic_Cursive'], ['Meroitic_Hieroglyphs', 'Meroitic_Hieroglyphs'], ['Malayalam', 'Malayalam'], ['Mongolian', 'Mongolian'], ['Mro', 'Mro'], ['Meetei_Mayek', 'Meetei_Mayek'], ['Multani', 'Multani'], ['Myanmar', 'Myanmar'], ['Nandinagari', 'Nandinagari'], ['Old_North_Arabian', 'Old_North_Arabian'], ['Nabataean', 'Nabataean'], ['Nko', 'Nko'], ['Nushu', 'Nushu'], ['Ogham', 'Ogham'], ['Ol_Chiki', 'Ol_Chiki'], ['Old_Turkic', 'Old_Turkic'], ['Oriya', 'Oriya'], ['Osage', 'Osage'], ['Osmanya', 'Osmanya'], ['Palmyrene', 'Palmyrene'], ['Pau_Cin_Hau', 'Pau_Cin_Hau'], ['Old_Permic', 'Old_Permic'], ['Phags_Pa', 'Phags_Pa'], ['Inscriptional_Pahlavi', 'Inscriptional_Pahlavi'], ['Psalter_Pahlavi', 'Psalter_Pahlavi'], ['Phoenician', 'Phoenician'], ['Miao', 'Miao'], ['Inscriptional_Parthian', 'Inscriptional_Parthian'], ['Rejang', 'Rejang'], ['Hanifi_Rohingya', 'Hanifi_Rohingya'], ['Runic', 'Runic'], ['Samaritan', 'Samaritan'], ['Old_South_Arabian', 'Old_South_Arabian'], ['Saurashtra', 'Saurashtra'], ['SignWriting', 'SignWriting'], ['Shavian', 'Shavian'], ['Sharada', 'Sharada'], ['Siddham', 'Siddham'], ['Khudawadi', 'Khudawadi'], ['Sinhala', 'Sinhala'], ['Sogdian', 'Sogdian'], ['Old_Sogdian', 'Old_Sogdian'], ['Sora_Sompeng', 'Sora_Sompeng'], ['Soyombo', 'Soyombo'], ['Sundanese', 'Sundanese'], ['Syloti_Nagri', 'Syloti_Nagri'], ['Syriac', 'Syriac'], ['Tagbanwa', 'Tagbanwa'], ['Takri', 'Takri'], ['Tai_Le', 'Tai_Le'], ['New_Tai_Lue', 'New_Tai_Lue'], ['Tamil', 'Tamil'], ['Tangut', 'Tangut'], ['Tai_Viet', 'Tai_Viet'], ['Telugu', 'Telugu'], ['Tifinagh', 'Tifinagh'], ['Tagalog', 'Tagalog'], ['Thaana', 'Thaana'], ['Tibetan', 'Tibetan'], ['Tirhuta', 'Tirhuta'], ['Ugaritic', 'Ugaritic'], ['Vai', 'Vai'], ['Warang_Citi', 'Warang_Citi'], ['Wancho', 'Wancho'], ['Old_Persian', 'Old_Persian'], ['Cuneiform', 'Cuneiform'], ['Yi', 'Yi'], ['Zanabazar_Square', 'Zanabazar_Square'], ['Inherited', 'Inherited'], ['Common', 'Common'], ['Unknown', 'Unknown']])], ['Script_Extensions', new Map([['Adlm', 'Adlam'], ['Aghb', 'Caucasian_Albanian'], ['Ahom', 'Ahom'], ['Arab', 'Arabic'], ['Armi', 'Imperial_Aramaic'], ['Armn', 'Armenian'], ['Avst', 'Avestan'], ['Bali', 'Balinese'], ['Bamu', 'Bamum'], ['Bass', 'Bassa_Vah'], ['Batk', 'Batak'], ['Beng', 'Bengali'], ['Bhks', 'Bhaiksuki'], ['Bopo', 'Bopomofo'], ['Brah', 'Brahmi'], ['Brai', 'Braille'], ['Bugi', 'Buginese'], ['Buhd', 'Buhid'], ['Cakm', 'Chakma'], ['Cans', 'Canadian_Aboriginal'], ['Cari', 'Carian'], ['Cham', 'Cham'], ['Cher', 'Cherokee'], ['Copt', 'Coptic'], ['Qaac', 'Coptic'], ['Cprt', 'Cypriot'], ['Cyrl', 'Cyrillic'], ['Deva', 'Devanagari'], ['Dogr', 'Dogra'], ['Dsrt', 'Deseret'], ['Dupl', 'Duployan'], ['Egyp', 'Egyptian_Hieroglyphs'], ['Elba', 'Elbasan'], ['Elym', 'Elymaic'], ['Ethi', 'Ethiopic'], ['Geor', 'Georgian'], ['Glag', 'Glagolitic'], ['Gong', 'Gunjala_Gondi'], ['Gonm', 'Masaram_Gondi'], ['Goth', 'Gothic'], ['Gran', 'Grantha'], ['Grek', 'Greek'], ['Gujr', 'Gujarati'], ['Guru', 'Gurmukhi'], ['Hang', 'Hangul'], ['Hani', 'Han'], ['Hano', 'Hanunoo'], ['Hatr', 'Hatran'], ['Hebr', 'Hebrew'], ['Hira', 'Hiragana'], ['Hluw', 'Anatolian_Hieroglyphs'], ['Hmng', 'Pahawh_Hmong'], ['Hmnp', 'Nyiakeng_Puachue_Hmong'], ['Hrkt', 'Katakana_Or_Hiragana'], ['Hung', 'Old_Hungarian'], ['Ital', 'Old_Italic'], ['Java', 'Javanese'], ['Kali', 'Kayah_Li'], ['Kana', 'Katakana'], ['Khar', 'Kharoshthi'], ['Khmr', 'Khmer'], ['Khoj', 'Khojki'], ['Knda', 'Kannada'], ['Kthi', 'Kaithi'], ['Lana', 'Tai_Tham'], ['Laoo', 'Lao'], ['Latn', 'Latin'], ['Lepc', 'Lepcha'], ['Limb', 'Limbu'], ['Lina', 'Linear_A'], ['Linb', 'Linear_B'], ['Lisu', 'Lisu'], ['Lyci', 'Lycian'], ['Lydi', 'Lydian'], ['Mahj', 'Mahajani'], ['Maka', 'Makasar'], ['Mand', 'Mandaic'], ['Mani', 'Manichaean'], ['Marc', 'Marchen'], ['Medf', 'Medefaidrin'], ['Mend', 'Mende_Kikakui'], ['Merc', 'Meroitic_Cursive'], ['Mero', 'Meroitic_Hieroglyphs'], ['Mlym', 'Malayalam'], ['Modi', 'Modi'], ['Mong', 'Mongolian'], ['Mroo', 'Mro'], ['Mtei', 'Meetei_Mayek'], ['Mult', 'Multani'], ['Mymr', 'Myanmar'], ['Nand', 'Nandinagari'], ['Narb', 'Old_North_Arabian'], ['Nbat', 'Nabataean'], ['Newa', 'Newa'], ['Nkoo', 'Nko'], ['Nshu', 'Nushu'], ['Ogam', 'Ogham'], ['Olck', 'Ol_Chiki'], ['Orkh', 'Old_Turkic'], ['Orya', 'Oriya'], ['Osge', 'Osage'], ['Osma', 'Osmanya'], ['Palm', 'Palmyrene'], ['Pauc', 'Pau_Cin_Hau'], ['Perm', 'Old_Permic'], ['Phag', 'Phags_Pa'], ['Phli', 'Inscriptional_Pahlavi'], ['Phlp', 'Psalter_Pahlavi'], ['Phnx', 'Phoenician'], ['Plrd', 'Miao'], ['Prti', 'Inscriptional_Parthian'], ['Rjng', 'Rejang'], ['Rohg', 'Hanifi_Rohingya'], ['Runr', 'Runic'], ['Samr', 'Samaritan'], ['Sarb', 'Old_South_Arabian'], ['Saur', 'Saurashtra'], ['Sgnw', 'SignWriting'], ['Shaw', 'Shavian'], ['Shrd', 'Sharada'], ['Sidd', 'Siddham'], ['Sind', 'Khudawadi'], ['Sinh', 'Sinhala'], ['Sogd', 'Sogdian'], ['Sogo', 'Old_Sogdian'], ['Sora', 'Sora_Sompeng'], ['Soyo', 'Soyombo'], ['Sund', 'Sundanese'], ['Sylo', 'Syloti_Nagri'], ['Syrc', 'Syriac'], ['Tagb', 'Tagbanwa'], ['Takr', 'Takri'], ['Tale', 'Tai_Le'], ['Talu', 'New_Tai_Lue'], ['Taml', 'Tamil'], ['Tang', 'Tangut'], ['Tavt', 'Tai_Viet'], ['Telu', 'Telugu'], ['Tfng', 'Tifinagh'], ['Tglg', 'Tagalog'], ['Thaa', 'Thaana'], ['Thai', 'Thai'], ['Tibt', 'Tibetan'], ['Tirh', 'Tirhuta'], ['Ugar', 'Ugaritic'], ['Vaii', 'Vai'], ['Wara', 'Warang_Citi'], ['Wcho', 'Wancho'], ['Xpeo', 'Old_Persian'], ['Xsux', 'Cuneiform'], ['Yiii', 'Yi'], ['Zanb', 'Zanabazar_Square'], ['Zinh', 'Inherited'], ['Qaai', 'Inherited'], ['Zyyy', 'Common'], ['Zzzz', 'Unknown'], ['Adlam', 'Adlam'], ['Caucasian_Albanian', 'Caucasian_Albanian'], ['Arabic', 'Arabic'], ['Imperial_Aramaic', 'Imperial_Aramaic'], ['Armenian', 'Armenian'], ['Avestan', 'Avestan'], ['Balinese', 'Balinese'], ['Bamum', 'Bamum'], ['Bassa_Vah', 'Bassa_Vah'], ['Batak', 'Batak'], ['Bengali', 'Bengali'], ['Bhaiksuki', 'Bhaiksuki'], ['Bopomofo', 'Bopomofo'], ['Brahmi', 'Brahmi'], ['Braille', 'Braille'], ['Buginese', 'Buginese'], ['Buhid', 'Buhid'], ['Chakma', 'Chakma'], ['Canadian_Aboriginal', 'Canadian_Aboriginal'], ['Carian', 'Carian'], ['Cherokee', 'Cherokee'], ['Coptic', 'Coptic'], ['Cypriot', 'Cypriot'], ['Cyrillic', 'Cyrillic'], ['Devanagari', 'Devanagari'], ['Dogra', 'Dogra'], ['Deseret', 'Deseret'], ['Duployan', 'Duployan'], ['Egyptian_Hieroglyphs', 'Egyptian_Hieroglyphs'], ['Elbasan', 'Elbasan'], ['Elymaic', 'Elymaic'], ['Ethiopic', 'Ethiopic'], ['Georgian', 'Georgian'], ['Glagolitic', 'Glagolitic'], ['Gunjala_Gondi', 'Gunjala_Gondi'], ['Masaram_Gondi', 'Masaram_Gondi'], ['Gothic', 'Gothic'], ['Grantha', 'Grantha'], ['Greek', 'Greek'], ['Gujarati', 'Gujarati'], ['Gurmukhi', 'Gurmukhi'], ['Hangul', 'Hangul'], ['Han', 'Han'], ['Hanunoo', 'Hanunoo'], ['Hatran', 'Hatran'], ['Hebrew', 'Hebrew'], ['Hiragana', 'Hiragana'], ['Anatolian_Hieroglyphs', 'Anatolian_Hieroglyphs'], ['Pahawh_Hmong', 'Pahawh_Hmong'], ['Nyiakeng_Puachue_Hmong', 'Nyiakeng_Puachue_Hmong'], ['Katakana_Or_Hiragana', 'Katakana_Or_Hiragana'], ['Old_Hungarian', 'Old_Hungarian'], ['Old_Italic', 'Old_Italic'], ['Javanese', 'Javanese'], ['Kayah_Li', 'Kayah_Li'], ['Katakana', 'Katakana'], ['Kharoshthi', 'Kharoshthi'], ['Khmer', 'Khmer'], ['Khojki', 'Khojki'], ['Kannada', 'Kannada'], ['Kaithi', 'Kaithi'], ['Tai_Tham', 'Tai_Tham'], ['Lao', 'Lao'], ['Latin', 'Latin'], ['Lepcha', 'Lepcha'], ['Limbu', 'Limbu'], ['Linear_A', 'Linear_A'], ['Linear_B', 'Linear_B'], ['Lycian', 'Lycian'], ['Lydian', 'Lydian'], ['Mahajani', 'Mahajani'], ['Makasar', 'Makasar'], ['Mandaic', 'Mandaic'], ['Manichaean', 'Manichaean'], ['Marchen', 'Marchen'], ['Medefaidrin', 'Medefaidrin'], ['Mende_Kikakui', 'Mende_Kikakui'], ['Meroitic_Cursive', 'Meroitic_Cursive'], ['Meroitic_Hieroglyphs', 'Meroitic_Hieroglyphs'], ['Malayalam', 'Malayalam'], ['Mongolian', 'Mongolian'], ['Mro', 'Mro'], ['Meetei_Mayek', 'Meetei_Mayek'], ['Multani', 'Multani'], ['Myanmar', 'Myanmar'], ['Nandinagari', 'Nandinagari'], ['Old_North_Arabian', 'Old_North_Arabian'], ['Nabataean', 'Nabataean'], ['Nko', 'Nko'], ['Nushu', 'Nushu'], ['Ogham', 'Ogham'], ['Ol_Chiki', 'Ol_Chiki'], ['Old_Turkic', 'Old_Turkic'], ['Oriya', 'Oriya'], ['Osage', 'Osage'], ['Osmanya', 'Osmanya'], ['Palmyrene', 'Palmyrene'], ['Pau_Cin_Hau', 'Pau_Cin_Hau'], ['Old_Permic', 'Old_Permic'], ['Phags_Pa', 'Phags_Pa'], ['Inscriptional_Pahlavi', 'Inscriptional_Pahlavi'], ['Psalter_Pahlavi', 'Psalter_Pahlavi'], ['Phoenician', 'Phoenician'], ['Miao', 'Miao'], ['Inscriptional_Parthian', 'Inscriptional_Parthian'], ['Rejang', 'Rejang'], ['Hanifi_Rohingya', 'Hanifi_Rohingya'], ['Runic', 'Runic'], ['Samaritan', 'Samaritan'], ['Old_South_Arabian', 'Old_South_Arabian'], ['Saurashtra', 'Saurashtra'], ['SignWriting', 'SignWriting'], ['Shavian', 'Shavian'], ['Sharada', 'Sharada'], ['Siddham', 'Siddham'], ['Khudawadi', 'Khudawadi'], ['Sinhala', 'Sinhala'], ['Sogdian', 'Sogdian'], ['Old_Sogdian', 'Old_Sogdian'], ['Sora_Sompeng', 'Sora_Sompeng'], ['Soyombo', 'Soyombo'], ['Sundanese', 'Sundanese'], ['Syloti_Nagri', 'Syloti_Nagri'], ['Syriac', 'Syriac'], ['Tagbanwa', 'Tagbanwa'], ['Takri', 'Takri'], ['Tai_Le', 'Tai_Le'], ['New_Tai_Lue', 'New_Tai_Lue'], ['Tamil', 'Tamil'], ['Tangut', 'Tangut'], ['Tai_Viet', 'Tai_Viet'], ['Telugu', 'Telugu'], ['Tifinagh', 'Tifinagh'], ['Tagalog', 'Tagalog'], ['Thaana', 'Thaana'], ['Tibetan', 'Tibetan'], ['Tirhuta', 'Tirhuta'], ['Ugaritic', 'Ugaritic'], ['Vai', 'Vai'], ['Warang_Citi', 'Warang_Citi'], ['Wancho', 'Wancho'], ['Old_Persian', 'Old_Persian'], ['Cuneiform', 'Cuneiform'], ['Yi', 'Yi'], ['Zanabazar_Square', 'Zanabazar_Square'], ['Inherited', 'Inherited'], ['Common', 'Common'], ['Unknown', 'Unknown']])]]);
+  var mappings = new Map([['General_Category', new Map([['C', 'Other'], ['Cc', 'Control'], ['cntrl', 'Control'], ['Cf', 'Format'], ['Cn', 'Unassigned'], ['Co', 'Private_Use'], ['Cs', 'Surrogate'], ['L', 'Letter'], ['LC', 'Cased_Letter'], ['Ll', 'Lowercase_Letter'], ['Lm', 'Modifier_Letter'], ['Lo', 'Other_Letter'], ['Lt', 'Titlecase_Letter'], ['Lu', 'Uppercase_Letter'], ['M', 'Mark'], ['Combining_Mark', 'Mark'], ['Mc', 'Spacing_Mark'], ['Me', 'Enclosing_Mark'], ['Mn', 'Nonspacing_Mark'], ['N', 'Number'], ['Nd', 'Decimal_Number'], ['digit', 'Decimal_Number'], ['Nl', 'Letter_Number'], ['No', 'Other_Number'], ['P', 'Punctuation'], ['punct', 'Punctuation'], ['Pc', 'Connector_Punctuation'], ['Pd', 'Dash_Punctuation'], ['Pe', 'Close_Punctuation'], ['Pf', 'Final_Punctuation'], ['Pi', 'Initial_Punctuation'], ['Po', 'Other_Punctuation'], ['Ps', 'Open_Punctuation'], ['S', 'Symbol'], ['Sc', 'Currency_Symbol'], ['Sk', 'Modifier_Symbol'], ['Sm', 'Math_Symbol'], ['So', 'Other_Symbol'], ['Z', 'Separator'], ['Zl', 'Line_Separator'], ['Zp', 'Paragraph_Separator'], ['Zs', 'Space_Separator'], ['Other', 'Other'], ['Control', 'Control'], ['Format', 'Format'], ['Unassigned', 'Unassigned'], ['Private_Use', 'Private_Use'], ['Surrogate', 'Surrogate'], ['Letter', 'Letter'], ['Cased_Letter', 'Cased_Letter'], ['Lowercase_Letter', 'Lowercase_Letter'], ['Modifier_Letter', 'Modifier_Letter'], ['Other_Letter', 'Other_Letter'], ['Titlecase_Letter', 'Titlecase_Letter'], ['Uppercase_Letter', 'Uppercase_Letter'], ['Mark', 'Mark'], ['Spacing_Mark', 'Spacing_Mark'], ['Enclosing_Mark', 'Enclosing_Mark'], ['Nonspacing_Mark', 'Nonspacing_Mark'], ['Number', 'Number'], ['Decimal_Number', 'Decimal_Number'], ['Letter_Number', 'Letter_Number'], ['Other_Number', 'Other_Number'], ['Punctuation', 'Punctuation'], ['Connector_Punctuation', 'Connector_Punctuation'], ['Dash_Punctuation', 'Dash_Punctuation'], ['Close_Punctuation', 'Close_Punctuation'], ['Final_Punctuation', 'Final_Punctuation'], ['Initial_Punctuation', 'Initial_Punctuation'], ['Other_Punctuation', 'Other_Punctuation'], ['Open_Punctuation', 'Open_Punctuation'], ['Symbol', 'Symbol'], ['Currency_Symbol', 'Currency_Symbol'], ['Modifier_Symbol', 'Modifier_Symbol'], ['Math_Symbol', 'Math_Symbol'], ['Other_Symbol', 'Other_Symbol'], ['Separator', 'Separator'], ['Line_Separator', 'Line_Separator'], ['Paragraph_Separator', 'Paragraph_Separator'], ['Space_Separator', 'Space_Separator']])], ['Script', new Map([['Adlm', 'Adlam'], ['Aghb', 'Caucasian_Albanian'], ['Ahom', 'Ahom'], ['Arab', 'Arabic'], ['Armi', 'Imperial_Aramaic'], ['Armn', 'Armenian'], ['Avst', 'Avestan'], ['Bali', 'Balinese'], ['Bamu', 'Bamum'], ['Bass', 'Bassa_Vah'], ['Batk', 'Batak'], ['Beng', 'Bengali'], ['Bhks', 'Bhaiksuki'], ['Bopo', 'Bopomofo'], ['Brah', 'Brahmi'], ['Brai', 'Braille'], ['Bugi', 'Buginese'], ['Buhd', 'Buhid'], ['Cakm', 'Chakma'], ['Cans', 'Canadian_Aboriginal'], ['Cari', 'Carian'], ['Cham', 'Cham'], ['Cher', 'Cherokee'], ['Chrs', 'Chorasmian'], ['Copt', 'Coptic'], ['Qaac', 'Coptic'], ['Cprt', 'Cypriot'], ['Cyrl', 'Cyrillic'], ['Deva', 'Devanagari'], ['Diak', 'Dives_Akuru'], ['Dogr', 'Dogra'], ['Dsrt', 'Deseret'], ['Dupl', 'Duployan'], ['Egyp', 'Egyptian_Hieroglyphs'], ['Elba', 'Elbasan'], ['Elym', 'Elymaic'], ['Ethi', 'Ethiopic'], ['Geor', 'Georgian'], ['Glag', 'Glagolitic'], ['Gong', 'Gunjala_Gondi'], ['Gonm', 'Masaram_Gondi'], ['Goth', 'Gothic'], ['Gran', 'Grantha'], ['Grek', 'Greek'], ['Gujr', 'Gujarati'], ['Guru', 'Gurmukhi'], ['Hang', 'Hangul'], ['Hani', 'Han'], ['Hano', 'Hanunoo'], ['Hatr', 'Hatran'], ['Hebr', 'Hebrew'], ['Hira', 'Hiragana'], ['Hluw', 'Anatolian_Hieroglyphs'], ['Hmng', 'Pahawh_Hmong'], ['Hmnp', 'Nyiakeng_Puachue_Hmong'], ['Hrkt', 'Katakana_Or_Hiragana'], ['Hung', 'Old_Hungarian'], ['Ital', 'Old_Italic'], ['Java', 'Javanese'], ['Kali', 'Kayah_Li'], ['Kana', 'Katakana'], ['Khar', 'Kharoshthi'], ['Khmr', 'Khmer'], ['Khoj', 'Khojki'], ['Kits', 'Khitan_Small_Script'], ['Knda', 'Kannada'], ['Kthi', 'Kaithi'], ['Lana', 'Tai_Tham'], ['Laoo', 'Lao'], ['Latn', 'Latin'], ['Lepc', 'Lepcha'], ['Limb', 'Limbu'], ['Lina', 'Linear_A'], ['Linb', 'Linear_B'], ['Lisu', 'Lisu'], ['Lyci', 'Lycian'], ['Lydi', 'Lydian'], ['Mahj', 'Mahajani'], ['Maka', 'Makasar'], ['Mand', 'Mandaic'], ['Mani', 'Manichaean'], ['Marc', 'Marchen'], ['Medf', 'Medefaidrin'], ['Mend', 'Mende_Kikakui'], ['Merc', 'Meroitic_Cursive'], ['Mero', 'Meroitic_Hieroglyphs'], ['Mlym', 'Malayalam'], ['Modi', 'Modi'], ['Mong', 'Mongolian'], ['Mroo', 'Mro'], ['Mtei', 'Meetei_Mayek'], ['Mult', 'Multani'], ['Mymr', 'Myanmar'], ['Nand', 'Nandinagari'], ['Narb', 'Old_North_Arabian'], ['Nbat', 'Nabataean'], ['Newa', 'Newa'], ['Nkoo', 'Nko'], ['Nshu', 'Nushu'], ['Ogam', 'Ogham'], ['Olck', 'Ol_Chiki'], ['Orkh', 'Old_Turkic'], ['Orya', 'Oriya'], ['Osge', 'Osage'], ['Osma', 'Osmanya'], ['Palm', 'Palmyrene'], ['Pauc', 'Pau_Cin_Hau'], ['Perm', 'Old_Permic'], ['Phag', 'Phags_Pa'], ['Phli', 'Inscriptional_Pahlavi'], ['Phlp', 'Psalter_Pahlavi'], ['Phnx', 'Phoenician'], ['Plrd', 'Miao'], ['Prti', 'Inscriptional_Parthian'], ['Rjng', 'Rejang'], ['Rohg', 'Hanifi_Rohingya'], ['Runr', 'Runic'], ['Samr', 'Samaritan'], ['Sarb', 'Old_South_Arabian'], ['Saur', 'Saurashtra'], ['Sgnw', 'SignWriting'], ['Shaw', 'Shavian'], ['Shrd', 'Sharada'], ['Sidd', 'Siddham'], ['Sind', 'Khudawadi'], ['Sinh', 'Sinhala'], ['Sogd', 'Sogdian'], ['Sogo', 'Old_Sogdian'], ['Sora', 'Sora_Sompeng'], ['Soyo', 'Soyombo'], ['Sund', 'Sundanese'], ['Sylo', 'Syloti_Nagri'], ['Syrc', 'Syriac'], ['Tagb', 'Tagbanwa'], ['Takr', 'Takri'], ['Tale', 'Tai_Le'], ['Talu', 'New_Tai_Lue'], ['Taml', 'Tamil'], ['Tang', 'Tangut'], ['Tavt', 'Tai_Viet'], ['Telu', 'Telugu'], ['Tfng', 'Tifinagh'], ['Tglg', 'Tagalog'], ['Thaa', 'Thaana'], ['Thai', 'Thai'], ['Tibt', 'Tibetan'], ['Tirh', 'Tirhuta'], ['Ugar', 'Ugaritic'], ['Vaii', 'Vai'], ['Wara', 'Warang_Citi'], ['Wcho', 'Wancho'], ['Xpeo', 'Old_Persian'], ['Xsux', 'Cuneiform'], ['Yezi', 'Yezidi'], ['Yiii', 'Yi'], ['Zanb', 'Zanabazar_Square'], ['Zinh', 'Inherited'], ['Qaai', 'Inherited'], ['Zyyy', 'Common'], ['Zzzz', 'Unknown'], ['Adlam', 'Adlam'], ['Caucasian_Albanian', 'Caucasian_Albanian'], ['Arabic', 'Arabic'], ['Imperial_Aramaic', 'Imperial_Aramaic'], ['Armenian', 'Armenian'], ['Avestan', 'Avestan'], ['Balinese', 'Balinese'], ['Bamum', 'Bamum'], ['Bassa_Vah', 'Bassa_Vah'], ['Batak', 'Batak'], ['Bengali', 'Bengali'], ['Bhaiksuki', 'Bhaiksuki'], ['Bopomofo', 'Bopomofo'], ['Brahmi', 'Brahmi'], ['Braille', 'Braille'], ['Buginese', 'Buginese'], ['Buhid', 'Buhid'], ['Chakma', 'Chakma'], ['Canadian_Aboriginal', 'Canadian_Aboriginal'], ['Carian', 'Carian'], ['Cherokee', 'Cherokee'], ['Chorasmian', 'Chorasmian'], ['Coptic', 'Coptic'], ['Cypriot', 'Cypriot'], ['Cyrillic', 'Cyrillic'], ['Devanagari', 'Devanagari'], ['Dives_Akuru', 'Dives_Akuru'], ['Dogra', 'Dogra'], ['Deseret', 'Deseret'], ['Duployan', 'Duployan'], ['Egyptian_Hieroglyphs', 'Egyptian_Hieroglyphs'], ['Elbasan', 'Elbasan'], ['Elymaic', 'Elymaic'], ['Ethiopic', 'Ethiopic'], ['Georgian', 'Georgian'], ['Glagolitic', 'Glagolitic'], ['Gunjala_Gondi', 'Gunjala_Gondi'], ['Masaram_Gondi', 'Masaram_Gondi'], ['Gothic', 'Gothic'], ['Grantha', 'Grantha'], ['Greek', 'Greek'], ['Gujarati', 'Gujarati'], ['Gurmukhi', 'Gurmukhi'], ['Hangul', 'Hangul'], ['Han', 'Han'], ['Hanunoo', 'Hanunoo'], ['Hatran', 'Hatran'], ['Hebrew', 'Hebrew'], ['Hiragana', 'Hiragana'], ['Anatolian_Hieroglyphs', 'Anatolian_Hieroglyphs'], ['Pahawh_Hmong', 'Pahawh_Hmong'], ['Nyiakeng_Puachue_Hmong', 'Nyiakeng_Puachue_Hmong'], ['Katakana_Or_Hiragana', 'Katakana_Or_Hiragana'], ['Old_Hungarian', 'Old_Hungarian'], ['Old_Italic', 'Old_Italic'], ['Javanese', 'Javanese'], ['Kayah_Li', 'Kayah_Li'], ['Katakana', 'Katakana'], ['Kharoshthi', 'Kharoshthi'], ['Khmer', 'Khmer'], ['Khojki', 'Khojki'], ['Khitan_Small_Script', 'Khitan_Small_Script'], ['Kannada', 'Kannada'], ['Kaithi', 'Kaithi'], ['Tai_Tham', 'Tai_Tham'], ['Lao', 'Lao'], ['Latin', 'Latin'], ['Lepcha', 'Lepcha'], ['Limbu', 'Limbu'], ['Linear_A', 'Linear_A'], ['Linear_B', 'Linear_B'], ['Lycian', 'Lycian'], ['Lydian', 'Lydian'], ['Mahajani', 'Mahajani'], ['Makasar', 'Makasar'], ['Mandaic', 'Mandaic'], ['Manichaean', 'Manichaean'], ['Marchen', 'Marchen'], ['Medefaidrin', 'Medefaidrin'], ['Mende_Kikakui', 'Mende_Kikakui'], ['Meroitic_Cursive', 'Meroitic_Cursive'], ['Meroitic_Hieroglyphs', 'Meroitic_Hieroglyphs'], ['Malayalam', 'Malayalam'], ['Mongolian', 'Mongolian'], ['Mro', 'Mro'], ['Meetei_Mayek', 'Meetei_Mayek'], ['Multani', 'Multani'], ['Myanmar', 'Myanmar'], ['Nandinagari', 'Nandinagari'], ['Old_North_Arabian', 'Old_North_Arabian'], ['Nabataean', 'Nabataean'], ['Nko', 'Nko'], ['Nushu', 'Nushu'], ['Ogham', 'Ogham'], ['Ol_Chiki', 'Ol_Chiki'], ['Old_Turkic', 'Old_Turkic'], ['Oriya', 'Oriya'], ['Osage', 'Osage'], ['Osmanya', 'Osmanya'], ['Palmyrene', 'Palmyrene'], ['Pau_Cin_Hau', 'Pau_Cin_Hau'], ['Old_Permic', 'Old_Permic'], ['Phags_Pa', 'Phags_Pa'], ['Inscriptional_Pahlavi', 'Inscriptional_Pahlavi'], ['Psalter_Pahlavi', 'Psalter_Pahlavi'], ['Phoenician', 'Phoenician'], ['Miao', 'Miao'], ['Inscriptional_Parthian', 'Inscriptional_Parthian'], ['Rejang', 'Rejang'], ['Hanifi_Rohingya', 'Hanifi_Rohingya'], ['Runic', 'Runic'], ['Samaritan', 'Samaritan'], ['Old_South_Arabian', 'Old_South_Arabian'], ['Saurashtra', 'Saurashtra'], ['SignWriting', 'SignWriting'], ['Shavian', 'Shavian'], ['Sharada', 'Sharada'], ['Siddham', 'Siddham'], ['Khudawadi', 'Khudawadi'], ['Sinhala', 'Sinhala'], ['Sogdian', 'Sogdian'], ['Old_Sogdian', 'Old_Sogdian'], ['Sora_Sompeng', 'Sora_Sompeng'], ['Soyombo', 'Soyombo'], ['Sundanese', 'Sundanese'], ['Syloti_Nagri', 'Syloti_Nagri'], ['Syriac', 'Syriac'], ['Tagbanwa', 'Tagbanwa'], ['Takri', 'Takri'], ['Tai_Le', 'Tai_Le'], ['New_Tai_Lue', 'New_Tai_Lue'], ['Tamil', 'Tamil'], ['Tangut', 'Tangut'], ['Tai_Viet', 'Tai_Viet'], ['Telugu', 'Telugu'], ['Tifinagh', 'Tifinagh'], ['Tagalog', 'Tagalog'], ['Thaana', 'Thaana'], ['Tibetan', 'Tibetan'], ['Tirhuta', 'Tirhuta'], ['Ugaritic', 'Ugaritic'], ['Vai', 'Vai'], ['Warang_Citi', 'Warang_Citi'], ['Wancho', 'Wancho'], ['Old_Persian', 'Old_Persian'], ['Cuneiform', 'Cuneiform'], ['Yezidi', 'Yezidi'], ['Yi', 'Yi'], ['Zanabazar_Square', 'Zanabazar_Square'], ['Inherited', 'Inherited'], ['Common', 'Common'], ['Unknown', 'Unknown']])], ['Script_Extensions', new Map([['Adlm', 'Adlam'], ['Aghb', 'Caucasian_Albanian'], ['Ahom', 'Ahom'], ['Arab', 'Arabic'], ['Armi', 'Imperial_Aramaic'], ['Armn', 'Armenian'], ['Avst', 'Avestan'], ['Bali', 'Balinese'], ['Bamu', 'Bamum'], ['Bass', 'Bassa_Vah'], ['Batk', 'Batak'], ['Beng', 'Bengali'], ['Bhks', 'Bhaiksuki'], ['Bopo', 'Bopomofo'], ['Brah', 'Brahmi'], ['Brai', 'Braille'], ['Bugi', 'Buginese'], ['Buhd', 'Buhid'], ['Cakm', 'Chakma'], ['Cans', 'Canadian_Aboriginal'], ['Cari', 'Carian'], ['Cham', 'Cham'], ['Cher', 'Cherokee'], ['Chrs', 'Chorasmian'], ['Copt', 'Coptic'], ['Qaac', 'Coptic'], ['Cprt', 'Cypriot'], ['Cyrl', 'Cyrillic'], ['Deva', 'Devanagari'], ['Diak', 'Dives_Akuru'], ['Dogr', 'Dogra'], ['Dsrt', 'Deseret'], ['Dupl', 'Duployan'], ['Egyp', 'Egyptian_Hieroglyphs'], ['Elba', 'Elbasan'], ['Elym', 'Elymaic'], ['Ethi', 'Ethiopic'], ['Geor', 'Georgian'], ['Glag', 'Glagolitic'], ['Gong', 'Gunjala_Gondi'], ['Gonm', 'Masaram_Gondi'], ['Goth', 'Gothic'], ['Gran', 'Grantha'], ['Grek', 'Greek'], ['Gujr', 'Gujarati'], ['Guru', 'Gurmukhi'], ['Hang', 'Hangul'], ['Hani', 'Han'], ['Hano', 'Hanunoo'], ['Hatr', 'Hatran'], ['Hebr', 'Hebrew'], ['Hira', 'Hiragana'], ['Hluw', 'Anatolian_Hieroglyphs'], ['Hmng', 'Pahawh_Hmong'], ['Hmnp', 'Nyiakeng_Puachue_Hmong'], ['Hrkt', 'Katakana_Or_Hiragana'], ['Hung', 'Old_Hungarian'], ['Ital', 'Old_Italic'], ['Java', 'Javanese'], ['Kali', 'Kayah_Li'], ['Kana', 'Katakana'], ['Khar', 'Kharoshthi'], ['Khmr', 'Khmer'], ['Khoj', 'Khojki'], ['Kits', 'Khitan_Small_Script'], ['Knda', 'Kannada'], ['Kthi', 'Kaithi'], ['Lana', 'Tai_Tham'], ['Laoo', 'Lao'], ['Latn', 'Latin'], ['Lepc', 'Lepcha'], ['Limb', 'Limbu'], ['Lina', 'Linear_A'], ['Linb', 'Linear_B'], ['Lisu', 'Lisu'], ['Lyci', 'Lycian'], ['Lydi', 'Lydian'], ['Mahj', 'Mahajani'], ['Maka', 'Makasar'], ['Mand', 'Mandaic'], ['Mani', 'Manichaean'], ['Marc', 'Marchen'], ['Medf', 'Medefaidrin'], ['Mend', 'Mende_Kikakui'], ['Merc', 'Meroitic_Cursive'], ['Mero', 'Meroitic_Hieroglyphs'], ['Mlym', 'Malayalam'], ['Modi', 'Modi'], ['Mong', 'Mongolian'], ['Mroo', 'Mro'], ['Mtei', 'Meetei_Mayek'], ['Mult', 'Multani'], ['Mymr', 'Myanmar'], ['Nand', 'Nandinagari'], ['Narb', 'Old_North_Arabian'], ['Nbat', 'Nabataean'], ['Newa', 'Newa'], ['Nkoo', 'Nko'], ['Nshu', 'Nushu'], ['Ogam', 'Ogham'], ['Olck', 'Ol_Chiki'], ['Orkh', 'Old_Turkic'], ['Orya', 'Oriya'], ['Osge', 'Osage'], ['Osma', 'Osmanya'], ['Palm', 'Palmyrene'], ['Pauc', 'Pau_Cin_Hau'], ['Perm', 'Old_Permic'], ['Phag', 'Phags_Pa'], ['Phli', 'Inscriptional_Pahlavi'], ['Phlp', 'Psalter_Pahlavi'], ['Phnx', 'Phoenician'], ['Plrd', 'Miao'], ['Prti', 'Inscriptional_Parthian'], ['Rjng', 'Rejang'], ['Rohg', 'Hanifi_Rohingya'], ['Runr', 'Runic'], ['Samr', 'Samaritan'], ['Sarb', 'Old_South_Arabian'], ['Saur', 'Saurashtra'], ['Sgnw', 'SignWriting'], ['Shaw', 'Shavian'], ['Shrd', 'Sharada'], ['Sidd', 'Siddham'], ['Sind', 'Khudawadi'], ['Sinh', 'Sinhala'], ['Sogd', 'Sogdian'], ['Sogo', 'Old_Sogdian'], ['Sora', 'Sora_Sompeng'], ['Soyo', 'Soyombo'], ['Sund', 'Sundanese'], ['Sylo', 'Syloti_Nagri'], ['Syrc', 'Syriac'], ['Tagb', 'Tagbanwa'], ['Takr', 'Takri'], ['Tale', 'Tai_Le'], ['Talu', 'New_Tai_Lue'], ['Taml', 'Tamil'], ['Tang', 'Tangut'], ['Tavt', 'Tai_Viet'], ['Telu', 'Telugu'], ['Tfng', 'Tifinagh'], ['Tglg', 'Tagalog'], ['Thaa', 'Thaana'], ['Thai', 'Thai'], ['Tibt', 'Tibetan'], ['Tirh', 'Tirhuta'], ['Ugar', 'Ugaritic'], ['Vaii', 'Vai'], ['Wara', 'Warang_Citi'], ['Wcho', 'Wancho'], ['Xpeo', 'Old_Persian'], ['Xsux', 'Cuneiform'], ['Yezi', 'Yezidi'], ['Yiii', 'Yi'], ['Zanb', 'Zanabazar_Square'], ['Zinh', 'Inherited'], ['Qaai', 'Inherited'], ['Zyyy', 'Common'], ['Zzzz', 'Unknown'], ['Adlam', 'Adlam'], ['Caucasian_Albanian', 'Caucasian_Albanian'], ['Arabic', 'Arabic'], ['Imperial_Aramaic', 'Imperial_Aramaic'], ['Armenian', 'Armenian'], ['Avestan', 'Avestan'], ['Balinese', 'Balinese'], ['Bamum', 'Bamum'], ['Bassa_Vah', 'Bassa_Vah'], ['Batak', 'Batak'], ['Bengali', 'Bengali'], ['Bhaiksuki', 'Bhaiksuki'], ['Bopomofo', 'Bopomofo'], ['Brahmi', 'Brahmi'], ['Braille', 'Braille'], ['Buginese', 'Buginese'], ['Buhid', 'Buhid'], ['Chakma', 'Chakma'], ['Canadian_Aboriginal', 'Canadian_Aboriginal'], ['Carian', 'Carian'], ['Cherokee', 'Cherokee'], ['Chorasmian', 'Chorasmian'], ['Coptic', 'Coptic'], ['Cypriot', 'Cypriot'], ['Cyrillic', 'Cyrillic'], ['Devanagari', 'Devanagari'], ['Dives_Akuru', 'Dives_Akuru'], ['Dogra', 'Dogra'], ['Deseret', 'Deseret'], ['Duployan', 'Duployan'], ['Egyptian_Hieroglyphs', 'Egyptian_Hieroglyphs'], ['Elbasan', 'Elbasan'], ['Elymaic', 'Elymaic'], ['Ethiopic', 'Ethiopic'], ['Georgian', 'Georgian'], ['Glagolitic', 'Glagolitic'], ['Gunjala_Gondi', 'Gunjala_Gondi'], ['Masaram_Gondi', 'Masaram_Gondi'], ['Gothic', 'Gothic'], ['Grantha', 'Grantha'], ['Greek', 'Greek'], ['Gujarati', 'Gujarati'], ['Gurmukhi', 'Gurmukhi'], ['Hangul', 'Hangul'], ['Han', 'Han'], ['Hanunoo', 'Hanunoo'], ['Hatran', 'Hatran'], ['Hebrew', 'Hebrew'], ['Hiragana', 'Hiragana'], ['Anatolian_Hieroglyphs', 'Anatolian_Hieroglyphs'], ['Pahawh_Hmong', 'Pahawh_Hmong'], ['Nyiakeng_Puachue_Hmong', 'Nyiakeng_Puachue_Hmong'], ['Katakana_Or_Hiragana', 'Katakana_Or_Hiragana'], ['Old_Hungarian', 'Old_Hungarian'], ['Old_Italic', 'Old_Italic'], ['Javanese', 'Javanese'], ['Kayah_Li', 'Kayah_Li'], ['Katakana', 'Katakana'], ['Kharoshthi', 'Kharoshthi'], ['Khmer', 'Khmer'], ['Khojki', 'Khojki'], ['Khitan_Small_Script', 'Khitan_Small_Script'], ['Kannada', 'Kannada'], ['Kaithi', 'Kaithi'], ['Tai_Tham', 'Tai_Tham'], ['Lao', 'Lao'], ['Latin', 'Latin'], ['Lepcha', 'Lepcha'], ['Limbu', 'Limbu'], ['Linear_A', 'Linear_A'], ['Linear_B', 'Linear_B'], ['Lycian', 'Lycian'], ['Lydian', 'Lydian'], ['Mahajani', 'Mahajani'], ['Makasar', 'Makasar'], ['Mandaic', 'Mandaic'], ['Manichaean', 'Manichaean'], ['Marchen', 'Marchen'], ['Medefaidrin', 'Medefaidrin'], ['Mende_Kikakui', 'Mende_Kikakui'], ['Meroitic_Cursive', 'Meroitic_Cursive'], ['Meroitic_Hieroglyphs', 'Meroitic_Hieroglyphs'], ['Malayalam', 'Malayalam'], ['Mongolian', 'Mongolian'], ['Mro', 'Mro'], ['Meetei_Mayek', 'Meetei_Mayek'], ['Multani', 'Multani'], ['Myanmar', 'Myanmar'], ['Nandinagari', 'Nandinagari'], ['Old_North_Arabian', 'Old_North_Arabian'], ['Nabataean', 'Nabataean'], ['Nko', 'Nko'], ['Nushu', 'Nushu'], ['Ogham', 'Ogham'], ['Ol_Chiki', 'Ol_Chiki'], ['Old_Turkic', 'Old_Turkic'], ['Oriya', 'Oriya'], ['Osage', 'Osage'], ['Osmanya', 'Osmanya'], ['Palmyrene', 'Palmyrene'], ['Pau_Cin_Hau', 'Pau_Cin_Hau'], ['Old_Permic', 'Old_Permic'], ['Phags_Pa', 'Phags_Pa'], ['Inscriptional_Pahlavi', 'Inscriptional_Pahlavi'], ['Psalter_Pahlavi', 'Psalter_Pahlavi'], ['Phoenician', 'Phoenician'], ['Miao', 'Miao'], ['Inscriptional_Parthian', 'Inscriptional_Parthian'], ['Rejang', 'Rejang'], ['Hanifi_Rohingya', 'Hanifi_Rohingya'], ['Runic', 'Runic'], ['Samaritan', 'Samaritan'], ['Old_South_Arabian', 'Old_South_Arabian'], ['Saurashtra', 'Saurashtra'], ['SignWriting', 'SignWriting'], ['Shavian', 'Shavian'], ['Sharada', 'Sharada'], ['Siddham', 'Siddham'], ['Khudawadi', 'Khudawadi'], ['Sinhala', 'Sinhala'], ['Sogdian', 'Sogdian'], ['Old_Sogdian', 'Old_Sogdian'], ['Sora_Sompeng', 'Sora_Sompeng'], ['Soyombo', 'Soyombo'], ['Sundanese', 'Sundanese'], ['Syloti_Nagri', 'Syloti_Nagri'], ['Syriac', 'Syriac'], ['Tagbanwa', 'Tagbanwa'], ['Takri', 'Takri'], ['Tai_Le', 'Tai_Le'], ['New_Tai_Lue', 'New_Tai_Lue'], ['Tamil', 'Tamil'], ['Tangut', 'Tangut'], ['Tai_Viet', 'Tai_Viet'], ['Telugu', 'Telugu'], ['Tifinagh', 'Tifinagh'], ['Tagalog', 'Tagalog'], ['Thaana', 'Thaana'], ['Tibetan', 'Tibetan'], ['Tirhuta', 'Tirhuta'], ['Ugaritic', 'Ugaritic'], ['Vai', 'Vai'], ['Warang_Citi', 'Warang_Citi'], ['Wancho', 'Wancho'], ['Old_Persian', 'Old_Persian'], ['Cuneiform', 'Cuneiform'], ['Yezidi', 'Yezidi'], ['Yi', 'Yi'], ['Zanabazar_Square', 'Zanabazar_Square'], ['Inherited', 'Inherited'], ['Common', 'Common'], ['Unknown', 'Unknown']])]]);
 
   var matchPropertyValue = function matchPropertyValue(property, value) {
     var aliasToValue = mappings.get(property);
@@ -60885,7 +60879,10 @@
         break;
 
       case 'unicodePropertyEscape':
-        update(item, getUnicodePropertyEscapeSet(item.value, item.negative).toString(regenerateOptions));
+        if (config$1.unicodePropertyEscape) {
+          update(item, getUnicodePropertyEscapeSet(item.value, item.negative).toString(regenerateOptions));
+        }
+
         break;
 
       case 'characterClassEscape':
@@ -60897,7 +60894,7 @@
           groups.lastIndex++;
         }
 
-        if (item.name) {
+        if (item.name && config$1.namedGroup) {
           var name = item.name.value;
 
           if (groups.names[name]) {
@@ -60978,20 +60975,24 @@
     'ignoreCase': false,
     'unicode': false,
     'dotAll': false,
-    'useUnicodeFlag': false
+    'useUnicodeFlag': false,
+    'unicodePropertyEscape': false,
+    'namedGroup': false
   };
 
   var rewritePattern = function rewritePattern(pattern, flags, options) {
+    config$1.unicode = flags && flags.includes('u');
     var regjsparserFeatures = {
-      'unicodePropertyEscape': options && options.unicodePropertyEscape,
-      'namedGroups': options && options.namedGroup,
+      'unicodePropertyEscape': config$1.unicode,
+      'namedGroups': true,
       'lookbehind': options && options.lookbehind
     };
     config$1.ignoreCase = flags && flags.includes('i');
-    config$1.unicode = flags && flags.includes('u');
     var supportDotAllFlag = options && options.dotAllFlag;
     config$1.dotAll = supportDotAllFlag && flags && flags.includes('s');
+    config$1.namedGroup = options && options.namedGroup;
     config$1.useUnicodeFlag = options && options.useUnicodeFlag;
+    config$1.unicodePropertyEscape = options && options.unicodePropertyEscape;
     var regenerateOptions = {
       'hasUnicodeFlag': config$1.useUnicodeFlag,
       'bmpOnly': !config$1.unicode
@@ -71331,6 +71332,96 @@
     };
   });
 
+  var _typeof_1 = createCommonjsModule(function (module) {
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      module.exports = _typeof = function _typeof(obj) {
+        return typeof obj;
+      };
+    } else {
+      module.exports = _typeof = function _typeof(obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  module.exports = _typeof;
+  });
+
+  var interopRequireWildcard = createCommonjsModule(function (module) {
+  function _getRequireWildcardCache() {
+    if (typeof WeakMap !== "function") return null;
+    var cache = new WeakMap();
+
+    _getRequireWildcardCache = function _getRequireWildcardCache() {
+      return cache;
+    };
+
+    return cache;
+  }
+
+  function _interopRequireWildcard(obj) {
+    if (obj && obj.__esModule) {
+      return obj;
+    }
+
+    if (obj === null || _typeof_1(obj) !== "object" && typeof obj !== "function") {
+      return {
+        "default": obj
+      };
+    }
+
+    var cache = _getRequireWildcardCache();
+
+    if (cache && cache.has(obj)) {
+      return cache.get(obj);
+    }
+
+    var newObj = {};
+    var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor;
+
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null;
+
+        if (desc && (desc.get || desc.set)) {
+          Object.defineProperty(newObj, key, desc);
+        } else {
+          newObj[key] = obj[key];
+        }
+      }
+    }
+
+    newObj["default"] = obj;
+
+    if (cache) {
+      cache.set(obj, newObj);
+    }
+
+    return newObj;
+  }
+
+  module.exports = _interopRequireWildcard;
+  });
+
+  unwrapExports(interopRequireWildcard);
+
+  var interopRequireDefault = createCommonjsModule(function (module) {
+  function _interopRequireDefault(obj) {
+    return obj && obj.__esModule ? obj : {
+      "default": obj
+    };
+  }
+
+  module.exports = _interopRequireDefault;
+  });
+
+  unwrapExports(interopRequireDefault);
+
   var util$1 = createCommonjsModule(function (module, exports) {
 
   exports.__esModule = true;
@@ -71389,39 +71480,12 @@
   var util_4$1 = util$1.isReference;
   var util_5$1 = util$1.replaceWithOrRemove;
 
-  var hoist$1 = createCommonjsModule(function (module, exports) {
+  var util$2 = interopRequireWildcard(util$1);
 
-  var util = _interopRequireWildcard(util$1);
+  var hasOwn$1 = Object.prototype.hasOwnProperty;
 
-  function _interopRequireWildcard(obj) {
-    if (obj && obj.__esModule) {
-      return obj;
-    } else {
-      var newObj = {};
-
-      if (obj != null) {
-        for (var key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {};
-
-            if (desc.get || desc.set) {
-              Object.defineProperty(newObj, key, desc);
-            } else {
-              newObj[key] = obj[key];
-            }
-          }
-        }
-      }
-
-      newObj["default"] = obj;
-      return newObj;
-    }
-  }
-
-  var hasOwn = Object.prototype.hasOwnProperty;
-
-  exports.hoist = function (funPath) {
-    var t = util.getTypes();
+  var hoist_1 = function (funPath) {
+    var t = util$2.getTypes();
     t.assertFunction(funPath.node);
     var vars = {};
 
@@ -71453,7 +71517,7 @@
           if (expr === null) {
             path.remove();
           } else {
-            util.replaceWithOrRemove(path, t.expressionStatement(expr));
+            util$2.replaceWithOrRemove(path, t.expressionStatement(expr));
           }
 
           path.skip();
@@ -71463,14 +71527,14 @@
         var init = path.get("init");
 
         if (init.isVariableDeclaration()) {
-          util.replaceWithOrRemove(init, varDeclToExpr(init, false));
+          util$2.replaceWithOrRemove(init, varDeclToExpr(init, false));
         }
       },
       ForXStatement: function ForXStatement(path) {
         var left = path.get("left");
 
         if (left.isVariableDeclaration()) {
-          util.replaceWithOrRemove(left, varDeclToExpr(left, true));
+          util$2.replaceWithOrRemove(left, varDeclToExpr(left, true));
         }
       },
       FunctionDeclaration: function FunctionDeclaration(path) {
@@ -71482,7 +71546,7 @@
           path.parentPath.unshiftContainer("body", assignment);
           path.remove();
         } else {
-          util.replaceWithOrRemove(path, assignment);
+          util$2.replaceWithOrRemove(path, assignment);
         }
 
         path.scope.removeBinding(node.id.name);
@@ -71505,7 +71569,7 @@
     });
     var declarations = [];
     Object.keys(vars).forEach(function (name) {
-      if (!hasOwn.call(paramNames, name)) {
+      if (!hasOwn$1.call(paramNames, name)) {
         declarations.push(t.variableDeclarator(vars[name], null));
       }
     });
@@ -71516,26 +71580,18 @@
 
     return t.variableDeclaration("var", declarations);
   };
-  });
 
-  unwrapExports(hoist$1);
-  var hoist_1 = hoist$1.hoist;
+  var hoist$1 = {
+  	hoist: hoist_1
+  };
 
-  var leap = createCommonjsModule(function (module, exports) {
-
-  var _assert = _interopRequireDefault(assert$2);
+  var _assert = interopRequireDefault(assert$2);
 
 
 
 
 
 
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      "default": obj
-    };
-  }
 
   function Entry() {
     _assert["default"].ok(this instanceof Entry);
@@ -71548,7 +71604,7 @@
   }
 
   (0, _util.inherits)(FunctionEntry, Entry);
-  exports.FunctionEntry = FunctionEntry;
+  var FunctionEntry_1 = FunctionEntry;
 
   function LoopEntry(breakLoc, continueLoc, label) {
     Entry.call(this);
@@ -71568,7 +71624,7 @@
   }
 
   (0, _util.inherits)(LoopEntry, Entry);
-  exports.LoopEntry = LoopEntry;
+  var LoopEntry_1 = LoopEntry;
 
   function SwitchEntry(breakLoc) {
     Entry.call(this);
@@ -71577,7 +71633,7 @@
   }
 
   (0, _util.inherits)(SwitchEntry, Entry);
-  exports.SwitchEntry = SwitchEntry;
+  var SwitchEntry_1 = SwitchEntry;
 
   function TryEntry(firstLoc, catchEntry, finallyEntry) {
     Entry.call(this);
@@ -71604,7 +71660,7 @@
   }
 
   (0, _util.inherits)(TryEntry, Entry);
-  exports.TryEntry = TryEntry;
+  var TryEntry_1 = TryEntry;
 
   function CatchEntry(firstLoc, paramId) {
     Entry.call(this);
@@ -71616,7 +71672,7 @@
   }
 
   (0, _util.inherits)(CatchEntry, Entry);
-  exports.CatchEntry = CatchEntry;
+  var CatchEntry_1 = CatchEntry;
 
   function FinallyEntry(firstLoc, afterLoc) {
     Entry.call(this);
@@ -71628,7 +71684,7 @@
   }
 
   (0, _util.inherits)(FinallyEntry, Entry);
-  exports.FinallyEntry = FinallyEntry;
+  var FinallyEntry_1 = FinallyEntry;
 
   function LabeledEntry(breakLoc, label) {
     Entry.call(this);
@@ -71640,7 +71696,7 @@
   }
 
   (0, _util.inherits)(LabeledEntry, Entry);
-  exports.LabeledEntry = LabeledEntry;
+  var LabeledEntry_1 = LabeledEntry;
 
   function LeapManager(emitter) {
     _assert["default"].ok(this instanceof LeapManager);
@@ -71652,7 +71708,7 @@
   }
 
   var LMp = LeapManager.prototype;
-  exports.LeapManager = LeapManager;
+  var LeapManager_1 = LeapManager;
 
   LMp.withEntry = function (entry, callback) {
     _assert["default"].ok(entry instanceof Entry);
@@ -71694,17 +71750,17 @@
   LMp.getContinueLoc = function (label) {
     return this._findLeapLocation("continueLoc", label);
   };
-  });
 
-  unwrapExports(leap);
-  var leap_1 = leap.FunctionEntry;
-  var leap_2 = leap.LoopEntry;
-  var leap_3 = leap.SwitchEntry;
-  var leap_4 = leap.TryEntry;
-  var leap_5 = leap.CatchEntry;
-  var leap_6 = leap.FinallyEntry;
-  var leap_7 = leap.LabeledEntry;
-  var leap_8 = leap.LeapManager;
+  var leap = {
+  	FunctionEntry: FunctionEntry_1,
+  	LoopEntry: LoopEntry_1,
+  	SwitchEntry: SwitchEntry_1,
+  	TryEntry: TryEntry_1,
+  	CatchEntry: CatchEntry_1,
+  	FinallyEntry: FinallyEntry_1,
+  	LabeledEntry: LabeledEntry_1,
+  	LeapManager: LeapManager_1
+  };
 
   var originalObject = Object;
   var originalDefProp = Object.defineProperty;
@@ -71733,7 +71789,7 @@
 
   makeSafeToCall(originalDefProp);
   makeSafeToCall(originalCreate);
-  var hasOwn$1 = makeSafeToCall(Object.prototype.hasOwnProperty);
+  var hasOwn$2 = makeSafeToCall(Object.prototype.hasOwnProperty);
   var numToStr = makeSafeToCall(Number.prototype.toString);
   var strSlice = makeSafeToCall(String.prototype.slice);
 
@@ -71754,7 +71810,7 @@
   function makeUniqueKey() {
     do {
       var uniqueKey = internString(strSlice.call(numToStr.call(rand(), 36), 2));
-    } while (hasOwn$1.call(uniqueKeys, uniqueKey));
+    } while (hasOwn$2.call(uniqueKeys, uniqueKey));
 
     return uniqueKeys[uniqueKey] = uniqueKey;
   }
@@ -71770,7 +71826,7 @@
 
   Object.getOwnPropertyNames = function getOwnPropertyNames(object) {
     for (var names = originalGetOPNs(object), src = 0, dst = 0, len = names.length; src < len; ++src) {
-      if (!hasOwn$1.call(uniqueKeys, names[src])) {
+      if (!hasOwn$2.call(uniqueKeys, names[src])) {
         if (src > dst) {
           names[dst] = names[src];
         }
@@ -71805,12 +71861,12 @@
     }
 
     function accessor(object) {
-      if (!hasOwn$1.call(object, brand)) register(object);
+      if (!hasOwn$2.call(object, brand)) register(object);
       return object[brand](passkey);
     }
 
     accessor.forget = function (object) {
-      if (hasOwn$1.call(object, brand)) object[brand](passkey, true);
+      if (hasOwn$2.call(object, brand)) object[brand](passkey, true);
     };
 
     return accessor;
@@ -71823,22 +71879,14 @@
   	makeAccessor: makeAccessor_1
   };
 
-  var meta = createCommonjsModule(function (module, exports) {
-
-  var _assert = _interopRequireDefault(assert$2);
+  var _assert$1 = interopRequireDefault(assert$2);
 
 
 
 
 
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      "default": obj
-    };
-  }
-
-  var m = (0, _private.makeAccessor)();
-  var hasOwn = Object.prototype.hasOwnProperty;
+  var m$2 = (0, _private.makeAccessor)();
+  var hasOwn$3 = Object.prototype.hasOwnProperty;
 
   function makePredicate(propertyName, knownTypes) {
     function onlyChildren(node) {
@@ -71850,7 +71898,7 @@
         if (result) ; else if (Array.isArray(child)) {
           child.some(check);
         } else if (t.isNode(child)) {
-          _assert["default"].strictEqual(result, false);
+          _assert$1["default"].strictEqual(result, false);
 
           result = predicate(child);
         }
@@ -71873,10 +71921,10 @@
 
     function predicate(node) {
       (0, util$1.getTypes)().assertNode(node);
-      var meta = m(node);
-      if (hasOwn.call(meta, propertyName)) return meta[propertyName];
-      if (hasOwn.call(opaqueTypes, node.type)) return meta[propertyName] = false;
-      if (hasOwn.call(knownTypes, node.type)) return meta[propertyName] = true;
+      var meta = m$2(node);
+      if (hasOwn$3.call(meta, propertyName)) return meta[propertyName];
+      if (hasOwn$3.call(opaqueTypes, node.type)) return meta[propertyName] = false;
+      if (hasOwn$3.call(knownTypes, node.type)) return meta[propertyName] = true;
       return meta[propertyName] = onlyChildren(node);
     }
 
@@ -71905,67 +71953,34 @@
     ThrowStatement: true
   };
 
-  for (var type in leapTypes) {
-    if (hasOwn.call(leapTypes, type)) {
-      sideEffectTypes[type] = leapTypes[type];
+  for (var type$2 in leapTypes) {
+    if (hasOwn$3.call(leapTypes, type$2)) {
+      sideEffectTypes[type$2] = leapTypes[type$2];
     }
   }
 
-  exports.hasSideEffects = makePredicate("hasSideEffects", sideEffectTypes);
-  exports.containsLeap = makePredicate("containsLeap", leapTypes);
-  });
+  var hasSideEffects = makePredicate("hasSideEffects", sideEffectTypes);
+  var containsLeap = makePredicate("containsLeap", leapTypes);
 
-  unwrapExports(meta);
-  var meta_1 = meta.hasSideEffects;
-  var meta_2 = meta.containsLeap;
+  var meta = {
+  	hasSideEffects: hasSideEffects,
+  	containsLeap: containsLeap
+  };
 
-  var emit$1 = createCommonjsModule(function (module, exports) {
+  var _assert$2 = interopRequireDefault(assert$2);
 
-  var _assert = _interopRequireDefault(assert$2);
+  var leap$1 = interopRequireWildcard(leap);
 
-  var leap$1 = _interopRequireWildcard(leap);
+  var meta$1 = interopRequireWildcard(meta);
 
-  var meta$1 = _interopRequireWildcard(meta);
+  var util$3 = interopRequireWildcard(util$1);
 
-  var util = _interopRequireWildcard(util$1);
-
-  function _interopRequireWildcard(obj) {
-    if (obj && obj.__esModule) {
-      return obj;
-    } else {
-      var newObj = {};
-
-      if (obj != null) {
-        for (var key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {};
-
-            if (desc.get || desc.set) {
-              Object.defineProperty(newObj, key, desc);
-            } else {
-              newObj[key] = obj[key];
-            }
-          }
-        }
-      }
-
-      newObj["default"] = obj;
-      return newObj;
-    }
-  }
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      "default": obj
-    };
-  }
-
-  var hasOwn = Object.prototype.hasOwnProperty;
+  var hasOwn$4 = Object.prototype.hasOwnProperty;
 
   function Emitter(contextId) {
-    _assert["default"].ok(this instanceof Emitter);
+    _assert$2["default"].ok(this instanceof Emitter);
 
-    util.getTypes().assertIdentifier(contextId);
+    util$3.getTypes().assertIdentifier(contextId);
     this.nextTempId = 0;
     this.contextId = contextId;
     this.listing = [];
@@ -71977,10 +71992,10 @@
   }
 
   var Ep = Emitter.prototype;
-  exports.Emitter = Emitter;
+  var Emitter_1 = Emitter;
 
   Ep.loc = function () {
-    var l = util.getTypes().numericLiteral(-1);
+    var l = util$3.getTypes().numericLiteral(-1);
     this.insertedLocs.add(l);
     return l;
   };
@@ -71990,17 +72005,17 @@
   };
 
   Ep.getContextId = function () {
-    return util.getTypes().clone(this.contextId);
+    return util$3.getTypes().clone(this.contextId);
   };
 
   Ep.mark = function (loc) {
-    util.getTypes().assertLiteral(loc);
+    util$3.getTypes().assertLiteral(loc);
     var index = this.listing.length;
 
     if (loc.value === -1) {
       loc.value = index;
     } else {
-      _assert["default"].strictEqual(loc.value, index);
+      _assert$2["default"].strictEqual(loc.value, index);
     }
 
     this.marked[index] = true;
@@ -72008,7 +72023,7 @@
   };
 
   Ep.emit = function (node) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
 
     if (t.isExpression(node)) {
       node = t.expressionStatement(node);
@@ -72024,12 +72039,12 @@
   };
 
   Ep.assign = function (lhs, rhs) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     return t.expressionStatement(t.assignmentExpression("=", t.cloneDeep(lhs), rhs));
   };
 
   Ep.contextProperty = function (name, computed) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     return t.memberExpression(this.getContextId(), computed ? t.stringLiteral(name) : t.identifier(name), !!computed);
   };
 
@@ -72042,12 +72057,12 @@
   };
 
   Ep.setReturnValue = function (valuePath) {
-    util.getTypes().assertExpression(valuePath.value);
+    util$3.getTypes().assertExpression(valuePath.value);
     this.emitAssign(this.contextProperty("rval"), this.explodeExpression(valuePath));
   };
 
   Ep.clearPendingException = function (tryLoc, assignee) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     t.assertLiteral(tryLoc);
     var catchCall = t.callExpression(this.contextProperty("catch", true), [t.clone(tryLoc)]);
 
@@ -72060,18 +72075,18 @@
 
   Ep.jump = function (toLoc) {
     this.emitAssign(this.contextProperty("next"), toLoc);
-    this.emit(util.getTypes().breakStatement());
+    this.emit(util$3.getTypes().breakStatement());
   };
 
   Ep.jumpIf = function (test, toLoc) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     t.assertExpression(test);
     t.assertLiteral(toLoc);
     this.emit(t.ifStatement(test, t.blockStatement([this.assign(this.contextProperty("next"), toLoc), t.breakStatement()])));
   };
 
   Ep.jumpIfNot = function (test, toLoc) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     t.assertExpression(test);
     t.assertLiteral(toLoc);
     var negatedTest;
@@ -72090,13 +72105,13 @@
   };
 
   Ep.getContextFunction = function (id) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     return t.functionExpression(id || null, [this.getContextId()], t.blockStatement([this.getDispatchLoop()]), false, false);
   };
 
   Ep.getDispatchLoop = function () {
     var self = this;
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var cases = [];
     var current;
     var alreadyEnded = false;
@@ -72121,12 +72136,12 @@
       return null;
     }
 
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var lastLocValue = 0;
     return t.arrayExpression(this.tryEntries.map(function (tryEntry) {
       var thisLocValue = tryEntry.firstLoc.value;
 
-      _assert["default"].ok(thisLocValue >= lastLocValue, "try entries out of order");
+      _assert$2["default"].ok(thisLocValue >= lastLocValue, "try entries out of order");
 
       lastLocValue = thisLocValue;
       var ce = tryEntry.catchEntry;
@@ -72145,7 +72160,7 @@
   };
 
   Ep.explode = function (path, ignoreResult) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var node = path.node;
     var self = this;
     t.assertNode(node);
@@ -72175,7 +72190,7 @@
   }
 
   Ep.explodeStatement = function (path, labelId) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var stmt = path.node;
     var self = this;
     var before, after, head;
@@ -72272,7 +72287,7 @@
         head = this.loc();
         after = this.loc();
         var keyIterNextFn = self.makeTempVar();
-        self.emitAssign(keyIterNextFn, t.callExpression(util.runtimeProperty("keys"), [self.explodeExpression(path.get("right"))]));
+        self.emitAssign(keyIterNextFn, t.callExpression(util$3.runtimeProperty("keys"), [self.explodeExpression(path.get("right"))]));
         self.mark(head);
         var keyInfoTmpVar = self.makeTempVar();
         self.jumpIf(t.memberExpression(t.assignmentExpression("=", keyInfoTmpVar, t.callExpression(t.cloneDeep(keyIterNextFn), [])), t.identifier("done"), false), after);
@@ -72318,7 +72333,7 @@
         }
 
         var discriminant = path.get("discriminant");
-        util.replaceWithOrRemove(discriminant, condition);
+        util$3.replaceWithOrRemove(discriminant, condition);
         self.jump(self.explodeExpression(discriminant));
         self.leapManager.withEntry(new leap$1.SwitchEntry(after), function () {
           path.get("cases").forEach(function (casePath) {
@@ -72334,7 +72349,7 @@
         if (defaultLoc.value === -1) {
           self.mark(defaultLoc);
 
-          _assert["default"].strictEqual(after.value, defaultLoc.value);
+          _assert$2["default"].strictEqual(after.value, defaultLoc.value);
         }
 
         break;
@@ -72421,8 +72436,8 @@
 
   var catchParamVisitor = {
     Identifier: function Identifier(path, state) {
-      if (path.node.name === state.catchParamName && util.isReference(path)) {
-        util.replaceWithOrRemove(path, state.getSafeParam());
+      if (path.node.name === state.catchParamName && util$3.isReference(path)) {
+        util$3.replaceWithOrRemove(path, state.getSafeParam());
       }
     },
     Scope: function Scope(path, state) {
@@ -72434,12 +72449,12 @@
 
   Ep.emitAbruptCompletion = function (record) {
     if (!isValidCompletion(record)) {
-      _assert["default"].ok(false, "invalid completion record: " + JSON.stringify(record));
+      _assert$2["default"].ok(false, "invalid completion record: " + JSON.stringify(record));
     }
 
-    _assert["default"].notStrictEqual(record.type, "normal", "normal completions are not abrupt");
+    _assert$2["default"].notStrictEqual(record.type, "normal", "normal completions are not abrupt");
 
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var abruptArgs = [t.stringLiteral(record.type)];
 
     if (record.type === "break" || record.type === "continue") {
@@ -72459,26 +72474,26 @@
     var type = record.type;
 
     if (type === "normal") {
-      return !hasOwn.call(record, "target");
+      return !hasOwn$4.call(record, "target");
     }
 
     if (type === "break" || type === "continue") {
-      return !hasOwn.call(record, "value") && util.getTypes().isLiteral(record.target);
+      return !hasOwn$4.call(record, "value") && util$3.getTypes().isLiteral(record.target);
     }
 
     if (type === "return" || type === "throw") {
-      return hasOwn.call(record, "value") && !hasOwn.call(record, "target");
+      return hasOwn$4.call(record, "value") && !hasOwn$4.call(record, "target");
     }
 
     return false;
   }
 
   Ep.getUnmarkedCurrentLoc = function () {
-    return util.getTypes().numericLiteral(this.listing.length);
+    return util$3.getTypes().numericLiteral(this.listing.length);
   };
 
   Ep.updateContextPrevLoc = function (loc) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
 
     if (loc) {
       t.assertLiteral(loc);
@@ -72486,7 +72501,7 @@
       if (loc.value === -1) {
         loc.value = this.listing.length;
       } else {
-        _assert["default"].strictEqual(loc.value, this.listing.length);
+        _assert$2["default"].strictEqual(loc.value, this.listing.length);
       }
     } else {
       loc = this.getUnmarkedCurrentLoc();
@@ -72496,7 +72511,7 @@
   };
 
   Ep.explodeExpression = function (path, ignoreResult) {
-    var t = util.getTypes();
+    var t = util$3.getTypes();
     var expr = path.node;
 
     if (expr) {
@@ -72526,7 +72541,7 @@
     var hasLeapingChildren = meta$1.containsLeap.onlyChildren(expr);
 
     function explodeViaTempVar(tempVar, childPath, ignoreChildResult) {
-      _assert["default"].ok(!ignoreChildResult || !tempVar, "Ignoring the result of a child expression but forcing it to " + "be assigned to a temporary variable?");
+      _assert$2["default"].ok(!ignoreChildResult || !tempVar, "Ignoring the result of a child expression but forcing it to " + "be assigned to a temporary variable?");
 
       var result = self.explodeExpression(childPath, ignoreChildResult);
 
@@ -72545,17 +72560,17 @@
         var calleePath = path.get("callee");
         var argsPath = path.get("arguments");
         var newCallee;
-        var newArgs = [];
-        var hasLeapingArgs = false;
-        argsPath.forEach(function (argPath) {
-          hasLeapingArgs = hasLeapingArgs || meta$1.containsLeap(argPath.node);
+        var newArgs;
+        var hasLeapingArgs = argsPath.some(function (argPath) {
+          return meta$1.containsLeap(argPath.node);
         });
+        var injectFirstArg = null;
 
         if (t.isMemberExpression(calleePath.node)) {
           if (hasLeapingArgs) {
             var newObject = explodeViaTempVar(self.makeTempVar(), calleePath.get("object"));
             var newProperty = calleePath.node.computed ? explodeViaTempVar(null, calleePath.get("property")) : calleePath.node.property;
-            newArgs.unshift(newObject);
+            injectFirstArg = newObject;
             newCallee = t.memberExpression(t.memberExpression(t.cloneDeep(newObject), newProperty, calleePath.node.computed), t.identifier("call"), false);
           } else {
             newCallee = self.explodeExpression(calleePath);
@@ -72568,12 +72583,19 @@
           }
         }
 
-        argsPath.forEach(function (argPath) {
-          newArgs.push(explodeViaTempVar(null, argPath));
-        });
-        return finish(t.callExpression(newCallee, newArgs.map(function (arg) {
-          return t.cloneDeep(arg);
-        })));
+        if (hasLeapingArgs) {
+          newArgs = argsPath.map(function (argPath) {
+            return explodeViaTempVar(null, argPath);
+          });
+          if (injectFirstArg) newArgs.unshift(injectFirstArg);
+          newArgs = newArgs.map(function (arg) {
+            return t.cloneDeep(arg);
+          });
+        } else {
+          newArgs = path.node.arguments;
+        }
+
+        return finish(t.callExpression(newCallee, newArgs));
 
       case "NewExpression":
         return finish(t.newExpression(explodeViaTempVar(null, path.get("callee")), path.get("arguments").map(function (argPath) {
@@ -72591,7 +72613,11 @@
 
       case "ArrayExpression":
         return finish(t.arrayExpression(path.get("elements").map(function (elemPath) {
-          return explodeViaTempVar(null, elemPath);
+          if (elemPath.isSpreadElement()) {
+            return t.spreadElement(explodeViaTempVar(null, elemPath.get("argument")));
+          } else {
+            return explodeViaTempVar(null, elemPath);
+          }
         })));
 
       case "SequenceExpression":
@@ -72617,7 +72643,7 @@
         if (expr.operator === "&&") {
           self.jumpIfNot(left, after);
         } else {
-          _assert["default"].strictEqual(expr.operator, "||");
+          _assert$2["default"].strictEqual(expr.operator, "||");
 
           self.jumpIf(left, after);
         }
@@ -72687,42 +72713,19 @@
         throw new Error("unknown Expression of type " + JSON.stringify(expr.type));
     }
   };
-  });
 
-  unwrapExports(emit$1);
-  var emit_1 = emit$1.Emitter;
+  var emit$1 = {
+  	Emitter: Emitter_1
+  };
 
   var replaceShorthandObjectMethod_1 = createCommonjsModule(function (module, exports) {
+
+
 
   exports.__esModule = true;
   exports["default"] = replaceShorthandObjectMethod;
 
-  var util = _interopRequireWildcard(util$1);
-
-  function _interopRequireWildcard(obj) {
-    if (obj && obj.__esModule) {
-      return obj;
-    } else {
-      var newObj = {};
-
-      if (obj != null) {
-        for (var key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {};
-
-            if (desc.get || desc.set) {
-              Object.defineProperty(newObj, key, desc);
-            } else {
-              newObj[key] = obj[key];
-            }
-          }
-        }
-      }
-
-      newObj["default"] = obj;
-      return newObj;
-    }
-  }
+  var util = interopRequireWildcard(util$1);
 
   function replaceShorthandObjectMethod(path) {
     var t = util.getTypes();
@@ -72750,52 +72753,19 @@
 
   unwrapExports(replaceShorthandObjectMethod_1);
 
-  var visit$2 = createCommonjsModule(function (module, exports) {
-
-  var _assert = _interopRequireDefault(assert$2);
+  var _assert$3 = interopRequireDefault(assert$2);
 
 
 
 
 
-  var _replaceShorthandObjectMethod = _interopRequireDefault(replaceShorthandObjectMethod_1);
+  var _replaceShorthandObjectMethod = interopRequireDefault(replaceShorthandObjectMethod_1);
 
-  var util = _interopRequireWildcard(util$1);
+  var util$4 = interopRequireWildcard(util$1);
 
 
 
-  function _interopRequireWildcard(obj) {
-    if (obj && obj.__esModule) {
-      return obj;
-    } else {
-      var newObj = {};
-
-      if (obj != null) {
-        for (var key in obj) {
-          if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {};
-
-            if (desc.get || desc.set) {
-              Object.defineProperty(newObj, key, desc);
-            } else {
-              newObj[key] = obj[key];
-            }
-          }
-        }
-      }
-
-      newObj["default"] = obj;
-      return newObj;
-    }
-  }
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      "default": obj
-    };
-  }
-
-  exports.getVisitor = function (_ref) {
+  var getVisitor = function (_ref) {
     var t = _ref.types;
     return {
       Method: function Method(path, state) {
@@ -72808,7 +72778,7 @@
         path.get("body.body.0.argument.callee").unwrapFunctionEnvironment();
       },
       Function: {
-        exit: util.wrapWithTypes(t, function (path, state) {
+        exit: util$4.wrapWithTypes(t, function (path, state) {
           var node = path.node;
           if (!shouldRegenerate(node, state)) return;
           path = (0, _replaceShorthandObjectMethod["default"])(path);
@@ -72819,7 +72789,7 @@
           var bodyBlockPath = path.get("body");
 
           if (node.async) {
-            bodyBlockPath.traverse(awaitVisitor);
+            bodyBlockPath.traverse(awaitVisitor$1);
           }
 
           bodyBlockPath.traverse(functionSentVisitor, {
@@ -72875,21 +72845,33 @@
 
           if (node.generator) {
             wrapArgs.push(outerFnExpr);
-          } else if (context.usesThis || tryLocsList) {
+          } else if (context.usesThis || tryLocsList || node.async) {
             wrapArgs.push(t.nullLiteral());
           }
 
           if (context.usesThis) {
             wrapArgs.push(t.thisExpression());
-          } else if (tryLocsList) {
+          } else if (tryLocsList || node.async) {
             wrapArgs.push(t.nullLiteral());
           }
 
           if (tryLocsList) {
             wrapArgs.push(tryLocsList);
+          } else if (node.async) {
+            wrapArgs.push(t.nullLiteral());
           }
 
-          var wrapCall = t.callExpression(util.runtimeProperty(node.async ? "async" : "wrap"), wrapArgs);
+          if (node.async) {
+            var currentScope = path.scope;
+
+            do {
+              if (currentScope.hasOwnBinding("Promise")) currentScope.rename("Promise");
+            } while (currentScope = currentScope.parent);
+
+            wrapArgs.push(t.identifier("Promise"));
+          }
+
+          var wrapCall = t.callExpression(util$4.runtimeProperty(node.async ? "async" : "wrap"), wrapArgs);
           outerBody.push(t.returnStatement(wrapCall));
           node.body = t.blockStatement(outerBody);
           path.get("body.body").forEach(function (p) {
@@ -72912,7 +72894,7 @@
           }
 
           if (wasGeneratorFunction && t.isExpression(node)) {
-            util.replaceWithOrRemove(path, t.callExpression(util.runtimeProperty("mark"), [node]));
+            util$4.replaceWithOrRemove(path, t.callExpression(util$4.runtimeProperty("mark"), [node]));
             path.addComment("leading", "#__PURE__");
           }
 
@@ -72947,7 +72929,7 @@
   }
 
   function getOuterFnExpr(funPath) {
-    var t = util.getTypes();
+    var t = util$4.getTypes();
     var node = funPath.node;
     t.assertFunction(node);
 
@@ -72965,7 +72947,7 @@
   var getMarkInfo = (0, _private.makeAccessor)();
 
   function getMarkedFunctionId(funPath) {
-    var t = util.getTypes();
+    var t = util$4.getTypes();
     var node = funPath.node;
     t.assertIdentifier(node.id);
     var blockPath = funPath.findParent(function (path) {
@@ -72978,7 +72960,7 @@
 
     var block = blockPath.node;
 
-    _assert["default"].ok(Array.isArray(block.body));
+    _assert$3["default"].ok(Array.isArray(block.body));
 
     var info = getMarkInfo(block);
 
@@ -72988,14 +72970,14 @@
       info.declPath = blockPath.get("body.0");
     }
 
-    _assert["default"].strictEqual(info.declPath.node, info.decl);
+    _assert$3["default"].strictEqual(info.declPath.node, info.decl);
 
     var markedId = blockPath.scope.generateUidIdentifier("marked");
-    var markCallExp = t.callExpression(util.runtimeProperty("mark"), [t.clone(node.id)]);
+    var markCallExp = t.callExpression(util$4.runtimeProperty("mark"), [t.clone(node.id)]);
     var index = info.decl.declarations.push(t.variableDeclarator(markedId, markCallExp)) - 1;
     var markCallExpPath = info.declPath.get("declarations." + index + ".init");
 
-    _assert["default"].strictEqual(markCallExpPath.node, markCallExp);
+    _assert$3["default"].strictEqual(markCallExpPath.node, markCallExp);
 
     markCallExpPath.addComment("leading", "#__PURE__");
     return t.clone(markedId);
@@ -73006,8 +72988,8 @@
       path.skip();
     },
     Identifier: function Identifier(path, state) {
-      if (path.node.name === "arguments" && util.isReference(path)) {
-        util.replaceWithOrRemove(path, state.getArgsId());
+      if (path.node.name === "arguments" && util$4.isReference(path)) {
+        util$4.replaceWithOrRemove(path, state.getArgsId());
         state.usesArguments = true;
       }
     },
@@ -73020,25 +73002,25 @@
       var node = path.node;
 
       if (node.meta.name === "function" && node.property.name === "sent") {
-        var t = util.getTypes();
-        util.replaceWithOrRemove(path, t.memberExpression(t.clone(this.context), t.identifier("_sent")));
+        var t = util$4.getTypes();
+        util$4.replaceWithOrRemove(path, t.memberExpression(t.clone(this.context), t.identifier("_sent")));
       }
     }
   };
-  var awaitVisitor = {
+  var awaitVisitor$1 = {
     Function: function Function(path) {
       path.skip();
     },
     AwaitExpression: function AwaitExpression(path) {
-      var t = util.getTypes();
+      var t = util$4.getTypes();
       var argument = path.node.argument;
-      util.replaceWithOrRemove(path, t.yieldExpression(t.callExpression(util.runtimeProperty("awrap"), [argument]), false));
+      util$4.replaceWithOrRemove(path, t.yieldExpression(t.callExpression(util$4.runtimeProperty("awrap"), [argument]), false));
     }
   };
-  });
 
-  unwrapExports(visit$2);
-  var visit_1 = visit$2.getVisitor;
+  var visit$2 = {
+  	getVisitor: getVisitor
+  };
 
   var lib = createCommonjsModule(function (module, exports) {
 
@@ -73265,7 +73247,7 @@
   var trace_events = ">= 10";
   var tty = true;
   var url = true;
-  var util$2 = true;
+  var util$5 = true;
   var v8 = ">= 1";
   var vm = true;
   var wasi = ">= 13.4 && < 13.5";
@@ -73332,7 +73314,7 @@
   	trace_events: trace_events,
   	tty: tty,
   	url: url,
-  	util: util$2,
+  	util: util$5,
   	"v8/tools/arguments": ">= 10 && < 12",
   	"v8/tools/codemap": [
   	">= 4.4.0 && < 5",
@@ -73423,7 +73405,7 @@
     trace_events: trace_events,
     tty: tty,
     url: url,
-    util: util$2,
+    util: util$5,
     v8: v8,
     vm: vm,
     wasi: wasi,
