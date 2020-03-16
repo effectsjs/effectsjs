@@ -7,7 +7,8 @@ function main () {
     console.log(message)
   } handle 'get_greeting' with (evt) {
     recall 'Hello'
-  } handle 'get_audience' with ({ payload: { numberOfPersons } }) {
+  } handle 'get_audience' with (evt) {
+    const { payload: { numberOfPersons } } = evt
     if (numberOfPersons > 7e7) recall 'world'
     if (numberOfPersons > 1) recall 'friends'
     if (numberOfPersons === 1) recall 'friend'
@@ -21,7 +22,7 @@ function getMessage ({ numberOfPersons }) {
 }
 
 function getAudience ({ numberOfPersons }) {
-  perform { type: 'get_audience', payload: numberOfPersons }
+  return perform { type: 'get_audience', payload: { numberOfPersons } }
 }
 
 main()

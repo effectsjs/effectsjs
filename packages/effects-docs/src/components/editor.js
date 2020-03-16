@@ -213,7 +213,7 @@ const evaluate = src => {
       const transformed = babel.transform(nextToEvaluate, {
         plugins: [transformEffects]
       }).code;
-      new Function(`use strict;${transformed}`)();
+      eval(transformed);
     } catch (error) {
       console.error({
         message: error.message,
