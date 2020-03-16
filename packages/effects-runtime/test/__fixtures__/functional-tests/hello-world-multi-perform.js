@@ -2,25 +2,26 @@ function main () {
   'use effects'
   try {
     return getMessage({
-      numberOfPersons: 7700000000
+      population: 7700000000
     })
   } handle 'get_greeting' with (evt) {
     recall 'Hello'
-  } handle 'get_audience' with ({ payload: { numberOfPersons } }) {
-    if (numberOfPersons > 7e7) recall 'world'
-    else if (numberOfPersons > 1) recall 'friends'
-    else if (numberOfPersons === 1) recall 'friend'
+  } handle 'get_audience' with (evt) {
+    const { payload: population } = evt
+    if (population > 7e7) recall 'world'
+    else if (population > 1) recall 'friends'
+    else if (population === 1) recall 'friend'
     else recall 'no one'
   }
 }
 
-function getMessage ({ numberOfPersons }) {
+function getMessage ({ population }) {
   const greeting = perform { type: 'get_greeting' }
-  return `${greeting}, ${getAudience({ numberOfPersons })}!`
+  return `${greeting}, ${getAudience(population)}!`
 }
 
-function getAudience ({ numberOfPersons }) {
-  perform { type: 'get_audience', payload: numberOfPersons }
+function getAudience (population) {
+  return perform { type: 'get_audience', payload: population }
 }
 
 module.exports.test = ({it, expect}) => {
