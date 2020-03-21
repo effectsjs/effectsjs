@@ -5,7 +5,9 @@ module.exports = {
     author: `@cdaringe`
   },
   plugins: [
+    "gatsby-plugin-remove-serviceworker",
     `gatsby-plugin-react-helmet`,
+    "gatsby-plugin-workerize-loader",
     {
       resolve: `gatsby-source-filesystem`,
       options: {
