@@ -1,4 +1,4 @@
-const global = self; // not window. #webworker
+import debounce from "lodash/debounce";
 
 /**
  * babel (standalone) makes webpack _lose its cool_ in production mode,
@@ -8,7 +8,8 @@ const global = self; // not window. #webworker
 importScripts("/babel.js");
 const effectsRuntimeP = import("effects-runtime/lib/prelude-polyfill.js");
 const transformEffectsP = import("babel-plugin-effects");
-import debounce from "lodash/debounce";
+
+const global = self; // not window. #webworker
 
 // evil, mutable state
 let isEvaluating = false;
@@ -39,7 +40,7 @@ export const evaluate = debounce(
         plugins: [transformEffects]
       }).code;
       unpatchedInfo(transformed);
-      new Function(transformed)();
+      new Function(transformed)(); // eslint-disable-line
     } catch (error) {
       console.error({
         message: error.message,

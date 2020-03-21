@@ -37,12 +37,14 @@ module.exports = {
     /* effects-docs/gastby */ "react-app"
   ],
   rules: {
+    "no-restricted-globals": 0, // react rules fight `worker` env globals (self)
     "no-unused-vars": 0 // eslint/ts doesn't play nice with interfaces imports consistently
   },
   env: {
     browser: true,
-    node: true,
+    es6: true,
     jest: true,
-    es6: true
+    node: true,
+    worker: true
   }
 };

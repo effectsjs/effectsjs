@@ -7,6 +7,7 @@ import EditorWorker from "./editor.worker.js";
 const worker = typeof window === "object" && new EditorWorker();
 // kick off download ASAP--on parse--well before react-mount
 const reactAceP = import("react-ace");
+let virtualConsole;
 
 export default class Editor extends React.PureComponent {
   constructor(props) {
@@ -37,13 +38,17 @@ export default class Editor extends React.PureComponent {
       case "log": {
         if (!virtualConsole)
           virtualConsole = document.getElementById("virtualConsole");
-        const key = ++this.state.i;
+        const key = this.state.i + 1;
         this.state.logs.push({ ...payload, key });
         if (this.state.logs.length === 51) this.state.logs.shift();
         this.setState({ logs: [...this.state.logs], i: key }, () =>
           virtualConsole.scrollTo(0, virtualConsole.scrollHeight + 100)
         );
+        break;
       }
+      default:
+        // pass. classic eslint
+        break;
     }
   };
 
