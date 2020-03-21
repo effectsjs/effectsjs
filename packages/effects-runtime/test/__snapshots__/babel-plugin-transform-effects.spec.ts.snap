@@ -353,7 +353,7 @@ function main () {
 module.exports.test = ({it, expect}) => {
   it('Should return out-of-order, concurrent effect-roots back in called order', async () => {
     const result = await main();
-    expect(result).equals(['a', 'b', 'c']);
+    expect(result).toEqual(['a', 'b', 'c']);
   });
 };
 
@@ -412,7 +412,7 @@ function main() {
 module.exports.test = ({ it, expect }) => {
   it("Should return out-of-order, concurrent effect-roots back in called order", async () => {
     const result = await main();
-    expect(result).equals(["a", "b", "c"]);
+    expect(result).toEqual(["a", "b", "c"]);
   });
 };
 
