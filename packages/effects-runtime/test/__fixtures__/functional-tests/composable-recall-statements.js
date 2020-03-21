@@ -1,10 +1,12 @@
 const effectTypeA = 'typeA';
 const effectTypeB = 'typeB';
 const effectTypeC = 'typeC';
+const effectTypeD = 'typeD';
 
 const EffectA = () => ({type : effectTypeA});
 const EffectB = () => ({type : effectTypeB});
 const EffectC = () => ({type : effectTypeC});
+const EffectD = (data) => ({type : effectTypeD, data});
 
 const aHandler = () => {
   recall effectTypeA;
@@ -27,6 +29,13 @@ const main = (fn) => {
         bHandler();
     }handle effectTypeC with (e) {
         cHandler();
+    }handle effectTypeD with (e) {
+        switch(e.data){
+            case 1 : return aHandler();
+            case 2 : return bHandler();
+            case 3 : return cHandler();
+            default : return recall "bazinga";
+        }
     }
 };
 
@@ -51,6 +60,13 @@ const performCTest = () => {
     });
 };
 
+const performDTest = (input) => {
+    'use effects';
+    main(() => {
+        return perform EffectD(input);
+    })
+};
+
 const performAllTest = () => {
     'use effects'
     main(() => {
@@ -73,6 +89,21 @@ module.exports.test = ({it, describe, expect, code}) => {
         it('Should perform effect C', async () => {
             const result = await performCTest();
             expect(result).toBe(effectTypeC);
+        });
+
+    });
+
+    describe('Overlapping recall statements', () => {
+        it('Should perform recall functions referenced in multiple places without cause', async () => {
+            const resultA = await performDTest(1);
+            const resultB = await performDTest(2);
+            const resultC = await performDTest(3);
+            const bazinga = await performDTest('bazinga');
+
+            expect(resultA).toBe(effectTypeA);
+            expect(resultB).toBe(effectTypeB);
+            expect(resultC).toBe(effectTypeC);
+            expect(bazinga).toBe('bazinga');
         });
     });
 

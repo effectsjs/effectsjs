@@ -21,6 +21,22 @@ const propDestructure = (mutableThing) => {
     }
 };
 
+const deepPropDestructuring = (propValue) => {
+    'use effects'
+    try{
+        return perform {
+            type : 'a',
+            payload : {
+                a : {
+                    b : propValue
+                }
+            }
+        }
+    }handle 'a' with ({payload : {a : { b }}}){
+        recall b
+    }
+};
+
 const restDestructure = () => {
   'use effects'
   try{
@@ -51,6 +67,14 @@ module.exports.test = ({it, expect, describe, code}) => {
         it('Should destructure props from performed effects', async () => {
             const result = await propDestructure(0);
            expect(result).toBe(4);
+        });
+
+        it('Should destructure deep props from performed effects', async () => {
+            const expectedResult = 'such deep prop very wow';
+            const result = await deepPropDestructuring(expectedResult);
+
+            expect(result).toBe(expectedResult);
+
         });
 
         it('Should handle rest props correctly during the destructure', async () =>{
