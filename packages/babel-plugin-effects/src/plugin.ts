@@ -4,6 +4,7 @@ import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
+import { removeOnExitVisitor } from "./remove-on-exit-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -66,6 +67,7 @@ export default function transformEffects({ types }: Babel): Plugin {
             },
             { types }
           );
+          path.traverse(removeOnExitVisitor, { types });
         }
       },
       TryStatement: {

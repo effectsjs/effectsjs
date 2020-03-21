@@ -15,6 +15,10 @@ import BabelTypes, {
 } from "@babel/types";
 
 import { recallVisitor } from "./recall-visitor";
+import {
+  markPathForRemoval,
+  removeOnExitVisitor
+} from "./remove-on-exit-visitor";
 
 const isLiteralProp = (
   node: NodePath,
@@ -107,10 +111,27 @@ const makeHandlerMethod = (
     isComputed
   } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
 
-  const resultContinuation = createResultContinuation(
-    types,
-    consequent.node.body
-  );
+  // Collect all call expressions located inside of the handler (consequent block)
+  const callExpressionDeclarations: Statement[] = [];
+  consequent.traverse({
+    CallExpression(expressionPath) {
+      const binding = expressionPath.scope.getBinding(
+        expressionPath.node.callee.name
+      );
+      const declaration = binding?.path.find(
+        x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
+      );
+      if (declaration) {
+        callExpressionDeclarations.push(declaration.node);
+        markPathForRemoval(declaration);
+      }
+    }
+  });
+
+  const resultContinuation = createResultContinuation(types, [
+    ...callExpressionDeclarations,
+    ...consequent.node.body
+  ]);
 
   const objectMethod = types.objectMethod(
     "method",
