@@ -9,13 +9,11 @@ import BabelTypes, {
   NumericLiteral,
   ObjectExpression,
   ObjectPattern,
+  Statement,
   StringLiteral,
   SwitchCase
 } from "@babel/types";
-import {
-  collapseObjectPattern,
-  renameIdentNameVisitor
-} from "./traverse-utilities";
+
 import { recallVisitor } from "./recall-visitor";
 
 const isLiteralProp = (
@@ -55,42 +53,11 @@ const extractMemberPropertyPathName = (
   );
 };
 
-const makeHandlerMethod = (
-  memberPropertyPath: NodePath<MemberExpression | Identifier>,
-  rootPath: NodePath<IfStatement | SwitchCase | any>,
+const createResultContinuation = (
   types: typeof BabelTypes,
-  consequent: any,
-  handlerParamName: string,
-  defaultAssignments: ExpressionStatement[]
-) => {
-  const {
-    ident: handlerPropertyName,
-    isComputed
-  } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
-
-  // Collect all call expressions located inside of the handler (consequent block)
-  const callExpressionDeclarations: Node[] = [];
-  consequent.traverse({
-    CallExpression(expressionPath) {
-      const binding = expressionPath.scope.getBinding(
-        expressionPath.node.callee.name
-      );
-      const declaration = binding?.path.find(
-        x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
-      );
-      if (declaration) {
-        callExpressionDeclarations.push(declaration.node);
-        declaration.remove();
-      }
-    }
-  });
-
-  const consequentBody = types.isBlockStatement(consequent.node)
-    ? consequent.node.body
-    : types.blockStatement([consequent.node]).body;
-
-  // GEE WHIZ!
-  const resultContinuation = types.variableDeclaration("const", [
+  consequentBody: Statement[]
+) =>
+  types.variableDeclaration("const", [
     types.variableDeclarator(
       types.identifier("result"),
       types.yieldExpression(
@@ -104,11 +71,7 @@ const makeHandlerMethod = (
                   [types.identifier("res"), types.identifier("rej")],
                   types.blockStatement([
                     types.tryStatement(
-                      types.blockStatement([
-                        ...callExpressionDeclarations,
-                        ...defaultAssignments,
-                        ...consequentBody
-                      ]),
+                      types.blockStatement([...consequentBody]),
                       types.catchClause(
                         types.identifier("handlerError"),
                         types.blockStatement([
@@ -132,10 +95,27 @@ const makeHandlerMethod = (
     )
   ]);
 
+const makeHandlerMethod = (
+  memberPropertyPath: NodePath<MemberExpression | Identifier>,
+  rootPath: NodePath<IfStatement | SwitchCase | any>,
+  types: typeof BabelTypes,
+  consequent: any,
+  handlerParam: Identifier | ObjectPattern
+) => {
+  const {
+    ident: handlerPropertyName,
+    isComputed
+  } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
+
+  const resultContinuation = createResultContinuation(
+    types,
+    consequent.node.body
+  );
+
   const objectMethod = types.objectMethod(
     "method",
     handlerPropertyName ? handlerPropertyName : memberPropertyPath.node,
-    [types.identifier(`${handlerParamName}`), types.identifier("resume")],
+    [handlerParam, types.identifier("resume")],
     types.blockStatement([
       resultContinuation,
       types.returnStatement(
@@ -167,33 +147,6 @@ export const followHandlerDefinitions = (
     | Identifier
     | ObjectPattern;
 
-  const oldIdentName = types.isIdentifier(handlerParam)
-    ? handlerParam.name
-    : null;
-  const newIdentName = types.isIdentifier(handlerParam)
-    ? `__${handlerParam.name}__`
-    : null;
-
-  const {
-    identifier,
-    defaultAssignments
-  }: {
-    identifier: Identifier;
-    defaultAssignments: ExpressionStatement[];
-  } = types.isObjectPattern(handlerParam)
-    ? collapseObjectPattern(handlerParam, types, handlerBody)
-    : {
-        identifier: types.identifier(newIdentName),
-        defaultAssignments: []
-      };
-
-  if (oldIdentName) {
-    handlerBody.traverse(renameIdentNameVisitor, {
-      newName: newIdentName,
-      oldName: oldIdentName
-    });
-  }
-
   handlerBody.traverse(recallVisitor, { types });
 
   handlerObject.properties.push(
@@ -202,8 +155,7 @@ export const followHandlerDefinitions = (
       handlerPath,
       types,
       handlerPath.get("body"),
-      identifier.name,
-      defaultAssignments
+      handlerParam
     )
   );
   const alternatePath = handlerPath.node.alternate
