@@ -325,6 +325,100 @@ module.exports.test = ({ describe, it, code, expect }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS concurrent-async-identity.js: concurrent-async-identity.js 1`] = `
+
+const delay = ms => new Promise(res => setTimeout(res, ms))
+const asyncIdentity = name => {
+  return perform { type: 'async_identity', payload: { name } }
+}
+
+const work = async (name) => {
+  'use effects'
+  try {
+    return asyncIdentity(name)
+  } handle 'async_identity' with (e) {
+    const { payload: { name } } = e
+    await delay(name === 'a' ? 100 : 1)
+    recall name
+  }
+}
+
+function main () {
+  const aP = work('a')
+  const bP = work('b')
+  const cP = work('c')
+  return Promise.all([aP, bP, cP])
+}
+
+module.exports.test = ({it, expect}) => {
+  it('Should return out-of-order, concurrent effect-roots back in called order', async () => {
+    const result = await main();
+    expect(result).equals(['a', 'b', 'c']);
+  });
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const asyncIdentity = function*(name) {
+  return yield performEffect({
+    type: "async_identity",
+    payload: {
+      name
+    }
+  });
+};
+
+const work = async name => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *async_identity(__e__, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+                  const {
+                    payload: { name }
+                  } = __e__;
+                  await delay(name === "a" ? 100 : 1);
+                  return stackResume(handler, name)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield asyncIdentity(name);
+        })()
+      );
+    })()
+  );
+};
+
+function main() {
+  const aP = work("a");
+  const bP = work("b");
+  const cP = work("c");
+  return Promise.all([aP, bP, cP]);
+}
+
+module.exports.test = ({ it, expect }) => {
+  it("Should return out-of-order, concurrent effect-roots back in called order", async () => {
+    const result = await main();
+    expect(result).equals(["a", "b", "c"]);
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS data-passing.js: data-passing.js 1`] = `
 
 const main = () => {
