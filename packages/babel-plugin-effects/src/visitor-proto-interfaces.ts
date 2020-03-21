@@ -8,10 +8,9 @@ export interface TypesVisitorPrototype {
   skipChildTraversal?: boolean;
 }
 
-export interface HandlerCreationPrototype {
-  handlerObject: ObjectExpression;
-  handlerParamName: string;
-  defaultAssignments: ExpressionStatement[];
+export interface EffectsDirectiveVisitorPrototype {
+  types: Babel["types"];
+  callExpressionCandidates: Set<Node>;
 }
 
 export interface Babel {
