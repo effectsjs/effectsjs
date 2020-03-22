@@ -4,10 +4,7 @@ import {
 } from "./visitor-proto-interfaces";
 import { Visitor, NodePath } from "@babel/traverse";
 import BabelTypes, { BlockStatement } from "@babel/types";
-import {
-  toYieldExpression,
-  yieldCallExpressionVisitor
-} from "./to-generator-visitor";
+import { yieldCallExpressionVisitor } from "./to-generator-visitor";
 
 function createRuntimeRoot(
   types: typeof BabelTypes,
@@ -25,7 +22,7 @@ function createRuntimeRoot(
   ]);
 }
 
-const runProgramYieldCallExpressionVisitor: Visitor<EffectsDirectiveVisitorPrototype> = {
+const runProgramYieldCallExpressionVisitor: Visitor<TypesVisitorPrototype> = {
   Identifier(idPath, { types }) {
     if (idPath.node.name === "runProgram") {
       (idPath
@@ -37,28 +34,11 @@ const runProgramYieldCallExpressionVisitor: Visitor<EffectsDirectiveVisitorProto
         });
       });
     }
-  },
-  CallExpression(path, { types, callExpressionCandidates }) {
-    if (callExpressionCandidates.has(path)) {
-      const calleeName = path.get("callee.name").node;
-
-      toYieldExpression(path, types);
-
-      if (calleeName) {
-        const bindingScope = path.findParent(x => x.scope.bindings[calleeName]);
-        if (!bindingScope) return;
-        const bindingPath = bindingScope.scope.bindings[calleeName]?.path;
-        bindingPath?.traverse(runProgramYieldCallExpressionVisitor, {
-          types,
-          callExpressionCandidates
-        });
-      }
-    }
   }
 };
 
-export const effectsDirectiveVisitor: Visitor<EffectsDirectiveVisitorPrototype> = {
-  ExpressionStatement(path, { types, callExpressionCandidates }) {
+export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
+  ExpressionStatement(path, { types }) {
     const expression = path.get("expression")?.node;
     const parentFunction = (path.findParent(
       types.isFunction
@@ -90,13 +70,10 @@ export const effectsDirectiveVisitor: Visitor<EffectsDirectiveVisitorPrototype> 
         : createRuntimeRoot(types, continuation);
 
       path.replaceWith(runtimeExpression);
-      path.traverse(runProgramYieldCallExpressionVisitor, {
-        types,
-        callExpressionCandidates
-      });
+      path.traverse(runProgramYieldCallExpressionVisitor, { types });
     }
   },
-  Directive(path, { types, callExpressionCandidates }) {
+  Directive(path, { types }) {
     const value = ((path.get("value.value") as NodePath)
       .node as unknown) as string;
     if (value !== "use effects") return;
@@ -115,10 +92,7 @@ export const effectsDirectiveVisitor: Visitor<EffectsDirectiveVisitorPrototype> 
       types.returnStatement(createRuntimeRoot(types, blockParent.node.body))
     ];
 
-    blockParent.traverse(runProgramYieldCallExpressionVisitor, {
-      types,
-      callExpressionCandidates
-    });
+    blockParent.traverse(runProgramYieldCallExpressionVisitor, { types });
 
     path.remove();
   }

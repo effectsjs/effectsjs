@@ -3,9 +3,10 @@ import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
-import { fixupParentGenerator } from "./traverse-utilities";
+import { findDeclaration, fixupParentGenerator } from "./traverse-utilities";
 import { removeOnExitVisitor } from "./remove-on-exit-visitor";
 import { isYieldCandidate } from "./to-generator-visitor";
+import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -26,8 +27,6 @@ function createHandler(types: Babel["types"], path: NodePath) {
 
   return handlerObject;
 }
-
-const markedCallExpressions = new Set();
 
 // This is performs the final inversion:
 // Transform a try-statement path and a handler into a `runProgram` call
@@ -60,19 +59,9 @@ export default function transformEffects({ types }: Babel): Plugin {
     },
     visitor: {
       Program: {
-        enter(path) {
-          path.traverse({
-            CallExpression(path) {
-              if (isYieldCandidate(path, types)) {
-                markedCallExpressions.add(path);
-              }
-            }
-          });
-        },
         exit(path) {
           path.traverse(effectsDirectiveVisitor, {
-            types,
-            callExpressionCandidates: markedCallExpressions
+            types
           });
           path.traverse(
             {
@@ -92,6 +81,8 @@ export default function transformEffects({ types }: Babel): Plugin {
 
           // @ts-ignore
           if (handlerType !== "HandleClause" || !handlerBody) return;
+
+          path.get("block").traverse(yieldProgramExpressionVisitor, { types });
 
           const handler = createHandler(types, path.get("handler"));
           const withHandlerExpression = createWithHandlerInvocation(
@@ -113,23 +104,6 @@ export default function transformEffects({ types }: Babel): Plugin {
             );
           } else {
             path.replaceWith(withHandlerExpression);
-          }
-
-          const withHandlerArgs =
-            path.get("expression")?.node?.arguments &&
-            path.get("expression.arguments")[0];
-
-          if (withHandlerArgs) {
-            withHandlerArgs.traverse(
-              {
-                CallExpression(path) {
-                  if (markedCallExpressions.has(path)) {
-                    markedCallExpressions.delete(path);
-                  }
-                }
-              },
-              { types }
-            );
           }
         }
       },

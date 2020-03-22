@@ -44,6 +44,14 @@ export const arrowExpressionToGenerator = (
   );
 };
 
+export const findDeclaration = (identifier: NodePath<Identifier>) => {
+  const identName = identifier.get("name").node;
+  if (!identName) return null;
+  const bindingScope = identifier.findParent(x => x.scope.bindings[identName]);
+
+  return bindingScope?.scope.bindings[identName]?.path;
+};
+
 // Starting from a child path, find the parent function and convert it to a generator.
 // Because we cannot predict what the value of call expressions will be, we must yield them to the stack interpreter.
 export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
