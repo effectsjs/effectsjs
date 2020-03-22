@@ -3,9 +3,8 @@ import { NodePath, Visitor } from "@babel/traverse";
 import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
-import { findDeclaration, fixupParentGenerator } from "./traverse-utilities";
+import { fixupParentGenerator } from "./traverse-utilities";
 import { removeOnExitVisitor } from "./remove-on-exit-visitor";
-import { isYieldCandidate } from "./to-generator-visitor";
 import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 

@@ -1,7 +1,4 @@
-import {
-  EffectsDirectiveVisitorPrototype,
-  TypesVisitorPrototype
-} from "./visitor-proto-interfaces";
+import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 import { Visitor, NodePath } from "@babel/traverse";
 import BabelTypes, { BlockStatement } from "@babel/types";
 import { yieldCallExpressionVisitor } from "./to-generator-visitor";
