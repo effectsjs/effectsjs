@@ -27,8 +27,13 @@ export const arrowExpressionToGenerator = (
   path: NodePath<ArrowFunctionExpression>
 ) => {
   // TODO: [major] - More care needs to be taken here:
-  //  We can't just convert the arrow function over to a generator. We need to perserve the current "this"
+  //  We can't just convert the arrow function over to a generator. We need to preserve the current "this"
   //  into "self" and pass it in.
+  if (!types.isBlockStatement(path.node.body)) {
+    path.node.body = types.blockStatement([
+      types.returnStatement(path.node.body)
+    ]);
+  }
 
   return types.functionExpression(
     undefined,
@@ -37,6 +42,14 @@ export const arrowExpressionToGenerator = (
     true,
     path.node.async
   );
+};
+
+export const findDeclaration = (identifier: NodePath<Identifier>) => {
+  const identName = identifier.get("name").node;
+  if (!identName) return null;
+  const bindingScope = identifier.findParent(x => x.scope.bindings[identName]);
+
+  return bindingScope?.scope.bindings[identName]?.path;
 };
 
 // Starting from a child path, find the parent function and convert it to a generator.

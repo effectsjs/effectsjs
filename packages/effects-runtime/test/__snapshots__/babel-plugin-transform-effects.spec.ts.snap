@@ -785,7 +785,7 @@ const dynamicEffect = (effect) => {
         }
     }
 }
-module.exports.test = ({it, expect}) => {
+module.exports.test = ({it, expect, code}) => {
     it('Should pass data into handler variable', async () => {
         const result = await main();
 
@@ -889,7 +889,7 @@ const dynamicEffect = effect => {
   );
 };
 
-module.exports.test = ({ it, expect }) => {
+module.exports.test = ({ it, expect, code }) => {
   it("Should pass data into handler variable", async () => {
     const result = await main();
     expect(result).toBe("data");
@@ -1590,7 +1590,7 @@ function main() {
           }
         },
         (async function*() {
-          return yield getMessage({
+          return yield yield getMessage({
             population: 7700000000
           });
         })()
@@ -1617,6 +1617,145 @@ module.exports.test = ({ it, expect }) => {
   it("Should create hello-world from multiple-performs", async () => {
     const result = await main();
     expect(result).toBe("Hello, world!");
+  });
+};
+
+
+`;
+
+exports[`transformEffects Transform proposed effects keywords into working JS inline-arrow-function.js: inline-arrow-function.js 1`] = `
+
+const performAThing = (type, props) => perform {type, ...props};
+
+const recallAThing = (dataToRecall) => recall dataToRecall;
+
+const inlineChildMethod = () => performAThing('childPerform', {data : 'performed from child'});
+
+const root = (e, data) => {
+    'use effects'
+    try{
+        if(typeof e === 'undefined'){
+            return inlineChildMethod();
+        }
+
+        return performAThing(e, {data});
+
+    }handle e with ({data}){
+        if(data === 'functionalRecall') return recallAThing(data);
+
+        recall data
+    }handle 'childPerform' with (e){
+        recall e;
+    }
+};
+
+const main = async (e, data) => root(e, data);
+
+
+
+module.exports.test = ({it, expect, code}) => {
+    it('Compiles and runs an inline arrow function expression that performs', async () => {
+        const identity = await main('dynamic-effect', 'hello world');
+        expect(identity).toBe('hello world');
+    });
+
+    it('Compiles and runs an inline arrow function expression that recalls', async () => {
+        const identity = await main('anything', 'functionalRecall');
+        expect(identity).toBe('functionalRecall');
+    });
+
+    it('Compiles and runs an inline arrow function that is a child method in the virtual stack', async () => {
+        const identity = await main(undefined);
+        expect(identity).toEqual({data : 'performed from child' });
+    })
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const performAThing = function*(type, props) {
+  return yield performEffect({
+    type,
+    ...props
+  });
+};
+
+const inlineChildMethod = function*() {
+  return yield performAThing("childPerform", {
+    data: "performed from child"
+  });
+};
+
+const root = (e, data) => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *[e]({ data }, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  const recallAThing = dataToRecall =>
+                    stackResume(handler, dataToRecall)
+                      .then(res)
+                      .catch(rej);
+
+                  if (data === "functionalRecall") return recallAThing(data);
+                  return stackResume(handler, data)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          },
+
+          *childPerform(e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, e)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          if (typeof e === "undefined") {
+            return yield inlineChildMethod();
+          }
+
+          return yield performAThing(e, {
+            data
+          });
+        })()
+      );
+    })()
+  );
+};
+
+const main = async (e, data) => root(e, data);
+
+module.exports.test = ({ it, expect, code }) => {
+  it("Compiles and runs an inline arrow function expression that performs", async () => {
+    const identity = await main("dynamic-effect", "hello world");
+    expect(identity).toBe("hello world");
+  });
+  it("Compiles and runs an inline arrow function expression that recalls", async () => {
+    const identity = await main("anything", "functionalRecall");
+    expect(identity).toBe("functionalRecall");
+  });
+  it("Compiles and runs an inline arrow function that is a child method in the virtual stack", async () => {
+    const identity = await main(undefined);
+    expect(identity).toEqual({
+      data: "performed from child"
+    });
   });
 };
 
@@ -1886,6 +2025,114 @@ module.exports.test = ({ it, expect, code }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS perform-as-module.js: perform-as-module.js 1`] = `
+
+let dynamicRequire = () => {};
+
+const effectResult = Symbol();
+
+const main = () => {
+    'use effects';
+    try{
+        const {method} = dynamicRequire();
+
+        return method();
+    }handle 'effect' with (e){
+        recall effectResult
+    }
+};
+
+module.exports.test = ({it, expect}) => {
+    it('Should it should handle a method that performs, unknown at compile time', async () => {
+        dynamicRequire = () => ({
+            *method(){
+                return yield performEffect({type : 'effect'})
+            }
+        });
+
+        const result = await main();
+
+        expect(result).toBe(effectResult);
+    });
+
+    it('Should run a normal function unknown at compile time', async () => {
+        const expectedResult = Symbol();
+
+        dynamicRequire = () => ({
+            method(){ return expectedResult }
+        });
+
+        const result = await main();
+
+        expect(result).toBe(expectedResult);
+    })
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+let dynamicRequire = () => {};
+
+const effectResult = Symbol();
+
+const main = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *effect(e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, effectResult)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          const { method } = yield dynamicRequire();
+          return yield method();
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ it, expect }) => {
+  it("Should it should handle a method that performs, unknown at compile time", async () => {
+    dynamicRequire = () => ({
+      *method() {
+        return yield performEffect({
+          type: "effect"
+        });
+      }
+    });
+
+    const result = await main();
+    expect(result).toBe(effectResult);
+  });
+  it("Should run a normal function unknown at compile time", async () => {
+    const expectedResult = Symbol();
+
+    dynamicRequire = () => ({
+      method() {
+        return expectedResult;
+      }
+    });
+
+    const result = await main();
+    expect(result).toBe(expectedResult);
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS perform-async-get-integer-control-flow.js: perform-async-get-integer-control-flow.js 1`] = `
 
 const getIntegerHandler = 'getInteger';
@@ -2032,7 +2279,7 @@ const main = ({ onEffectComplete }) => {
         },
         (async function*() {
           const result = yield performEffect(GetAsyncIntegerEffect());
-          onEffectComplete(result);
+          yield onEffectComplete(result);
         })()
       );
     })()

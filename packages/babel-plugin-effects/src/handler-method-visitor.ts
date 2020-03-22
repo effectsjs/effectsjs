@@ -2,7 +2,6 @@ import { NodePath } from "@babel/traverse";
 import BabelTypes, {
   BigIntLiteral,
   BooleanLiteral,
-  ExpressionStatement,
   Identifier,
   IfStatement,
   MemberExpression,
@@ -15,10 +14,7 @@ import BabelTypes, {
 } from "@babel/types";
 
 import { recallVisitor } from "./recall-visitor";
-import {
-  markPathForRemoval,
-  removeOnExitVisitor
-} from "./remove-on-exit-visitor";
+import { markPathForRemoval } from "./remove-on-exit-visitor";
 
 const isLiteralProp = (
   node: NodePath,
