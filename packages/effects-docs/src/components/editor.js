@@ -1,22 +1,24 @@
 import "./editor.css";
 import { EditorLoading } from "./editor-loading";
 import { parseCurrentQuery, setQuery } from "../util/window-location.js";
-import Helmet from "react-helmet";
 import React from "react";
+import EditorWorker from "./editor.worker.js";
 
-const effectsRuntimeP = import("effects-runtime/lib/prelude-polyfill.js");
-const transformEffectsP = import("babel-plugin-effects");
+const worker = typeof window === "object" && new EditorWorker();
+// kick off download ASAP--on parse--well before react-mount
 const reactAceP = import("react-ace");
+let virtualConsole;
 
 export default class Editor extends React.PureComponent {
   constructor(props) {
     super(props);
     const { fullscreen: isQueryFullscreen } = parseCurrentQuery();
     this.state = {
-      isFullScreen: isQueryFullscreen || false,
-      src: props.defaultSource,
+      i: 0,
       isAutoEval: true,
-      logs: []
+      isFullScreen: !!isQueryFullscreen || false,
+      logs: [],
+      src: props.defaultSource
     };
   }
   async componentDidMount() {
@@ -26,30 +28,38 @@ export default class Editor extends React.PureComponent {
       import("ace-builds/src-min-noconflict/mode-javascript.js"),
       import("ace-builds/src-min-noconflict/theme-monokai.js")
     ]);
-    // the react-ace-editor obnoxiously logs on init.
-    // let it render before patching logging and setting initial state
-    setTimeout(() => {
-      this.onChange("");
-      this.unMonkeyMatch = maybeMonkeyPatchConsole(msg => {
-        if (!virtualConsole)
-          virtualConsole = document.getElementById("virtualConsole");
-        this.state.logs.push(msg);
-        if (this.state.logs.length === 51) this.state.logs.shift();
-        this.setState({ logs: [...this.state.logs] }, () =>
-          virtualConsole.scrollTo(0, virtualConsole.scrollHeight + 100)
-        );
-      });
-      // blastoff
-      if (this.props.defaultSource) this.onChange(this.props.defaultSource);
-    }, 100);
-  }
-  componentWillUnmount() {
-    this.unMonkeyMatch && this.unMonkeyMatch();
+    worker.onmessage = this.handleWorkerMessage;
+    this.onChange("");
+    if (this.props.defaultSource) this.onChange(this.props.defaultSource);
   }
 
+  handleWorkerMessage = ({ data: { type, payload } }) => {
+    switch (type) {
+      case "log": {
+        if (!virtualConsole)
+          virtualConsole = document.getElementById("virtualConsole");
+        const key = this.state.i + 1;
+        this.state.logs.push({ ...payload, key });
+        if (this.state.logs.length === 51) this.state.logs.shift();
+        this.setState({ logs: [...this.state.logs], i: key }, () =>
+          virtualConsole.scrollTo(0, virtualConsole.scrollHeight + 100)
+        );
+        break;
+      }
+      default:
+        // pass. classic eslint
+        break;
+    }
+  };
+
+  evaluate = src => {
+    worker.evaluate(src).catch(err => {
+      console.error("failed to evaluate user source code", err.message);
+    });
+  };
   onChange = nextSrc => {
     this.setState({ src: nextSrc }, () => {
-      if (this.state.isAutoEval) evaluate(nextSrc);
+      if (this.state.isAutoEval) worker.evaluate(nextSrc);
     });
   };
 
@@ -70,14 +80,6 @@ export default class Editor extends React.PureComponent {
     const AceEditor = this.AceEditor || EditorLoading;
     return (
       <div id="editor_container" className={isFullScreen ? "fullscreen" : ""}>
-        <Helmet>
-          {/**
-           * babel (standalone) makes webpack _lose its cool_ in production mode,
-           * which is too bad, because webpack should minify it.  it's so bad,
-           * that we're ejecting to script loading this little bugger
-           * */}
-          <script src="/babel.js"></script>
-        </Helmet>
         <div id="top_options" className="node">
           <label htmlFor="toggle_is_fullscreen_control" children="fullscreen" />
           <input
@@ -95,7 +97,7 @@ export default class Editor extends React.PureComponent {
             checked={isAutoEval}
             onChange={this.toggleAutoEval}
           />
-          <div id="run_control" onClick={() => evaluate(src)}>
+          <div id="run_control" onClick={() => this.evaluate(src)}>
             Run
             <div className="arrow-right" />
           </div>
@@ -125,8 +127,8 @@ export default class Editor extends React.PureComponent {
           }}
         />
         <div className="node" id="virtualConsole">
-          {logs.map(({ level, timestamp, msg }) => (
-            <pre key={timestamp}>
+          {logs.map(({ level, timestamp, msg, key }) => (
+            <pre key={key}>
               [{timestamp}] {level}: {msg}
             </pre>
           ))}
@@ -135,92 +137,3 @@ export default class Editor extends React.PureComponent {
     );
   }
 }
-
-let unpatchedLog;
-let unpatchedInfo;
-let unpatchedWarn;
-let unpatchedError;
-
-function maybeMonkeyPatchConsole(onNextMsg) {
-  const patchKeys = ["log", "info", "warn", "error"];
-  unpatchedLog = window.console.log;
-  unpatchedInfo = window.console.info;
-  unpatchedWarn = window.console.warn;
-  unpatchedError = window.console.error;
-  const withTap = (fn, fn2) => (...args) => {
-    fn(...args);
-    return fn2(...args);
-  };
-  const appendLog = (level, ...args) => {
-    let msg;
-    try {
-      msg = args.map(arg =>
-        JSON.stringify(arg)
-          .replace(/^"/, "")
-          .replace(/"$/, "")
-      );
-    } catch (err) {
-      msg = `failed to handle console.${level}: ${err.message}`;
-    }
-    onNextMsg({
-      level,
-      timestamp: new Date().toISOString(),
-      msg
-    });
-  };
-  window.console.log = withTap(
-    (...args) => appendLog("log", ...args),
-    unpatchedLog
-  );
-  window.console.info = withTap(
-    (...args) => appendLog("info", ...args),
-    unpatchedInfo
-  );
-  window.console.warn = withTap(
-    (...args) => appendLog("warn", ...args),
-    unpatchedWarn
-  );
-  window.console.error = withTap(
-    (...args) => appendLog("error", ...args),
-    unpatchedError
-  );
-  return function unMonkeyPatchConsole() {
-    window.console.log = unpatchedLog;
-    window.console.info = unpatchedInfo;
-    window.console.warn = unpatchedWarn;
-    window.console.error = unpatchedError;
-  };
-}
-
-let isEvaluating = false;
-let nextToEvaluate = "";
-const evaluate = src => {
-  nextToEvaluate = src;
-  if (isEvaluating) {
-    return;
-  }
-  isEvaluating = true;
-  window.requestAnimationFrame(async () => {
-    const [babel, transformEffects, effectsRuntime] = await Promise.all([
-      (async () => {
-        while (!window.Babel) await new Promise(res => setTimeout(res, 30));
-        return window.Babel;
-      })(),
-      transformEffectsP,
-      effectsRuntimeP
-    ]);
-    try {
-      const transformed = babel.transform(nextToEvaluate, {
-        plugins: [transformEffects]
-      }).code;
-      eval(transformed);
-    } catch (error) {
-      console.error({
-        message: error.message,
-        meta: "see browser console fo more details"
-      });
-    } finally {
-      isEvaluating = false;
-    }
-  });
-};

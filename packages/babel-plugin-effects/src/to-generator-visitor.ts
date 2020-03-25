@@ -60,16 +60,33 @@ export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
   }
 };
 
+export const isYieldCandidate = (path: NodePath, types: typeof BabelTypes) => {
+  const immediateParent = path.parentPath;
+
+  if (
+    types.isReturnStatement(immediateParent) ||
+    types.isVariableDeclarator(immediateParent) ||
+    (types.isExpressionStatement(immediateParent) &&
+      types.isBlockStatement(path.parentPath?.parentPath))
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+export const toYieldExpression = (path, types) => {
+  path.replaceWith(types.yieldExpression(path.node));
+
+  fixupParentGenerator(path, types);
+};
+
 export const yieldCallExpressionVisitor: Visitor<TypesVisitorPrototype> = {
   CallExpression(path, { types, skipChildTraversal }) {
     const immediateParent = path.parent;
     if (types.isYieldExpression(immediateParent)) return;
 
-    path.replaceWith(types.yieldExpression(path.node));
-
-    // Safety First
-
-    fixupParentGenerator(path, types);
+    toYieldExpression(path, types);
 
     if (exists(skipChildTraversal) && Boolean(skipChildTraversal)) {
       path.skip();

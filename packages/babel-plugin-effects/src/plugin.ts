@@ -4,6 +4,8 @@ import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
+import { removeOnExitVisitor } from "./remove-on-exit-visitor";
+import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
@@ -57,7 +59,9 @@ export default function transformEffects({ types }: Babel): Plugin {
     visitor: {
       Program: {
         exit(path) {
-          path.traverse(effectsDirectiveVisitor, { types });
+          path.traverse(effectsDirectiveVisitor, {
+            types
+          });
           path.traverse(
             {
               YieldExpression(path) {
@@ -66,6 +70,7 @@ export default function transformEffects({ types }: Babel): Plugin {
             },
             { types }
           );
+          path.traverse(removeOnExitVisitor, { types });
         }
       },
       TryStatement: {
@@ -75,6 +80,8 @@ export default function transformEffects({ types }: Babel): Plugin {
 
           // @ts-ignore
           if (handlerType !== "HandleClause" || !handlerBody) return;
+
+          path.get("block").traverse(yieldProgramExpressionVisitor, { types });
 
           const handler = createHandler(types, path.get("handler"));
           const withHandlerExpression = createWithHandlerInvocation(
