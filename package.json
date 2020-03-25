@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "description": "",
   "scripts": {
-    "bootstrap": "npm install && npx lerna bootstrap --loglevel verbose",
+    "bootstrap": "yarn && npx lerna bootstrap --loglevel verbose",
     "postbootstrap": "run-s copy:nvmrc",
     "copy:nvmrc": "lerna exec -- cp ../../.nvmrc ./",
-    "build": "tsc -b packages && lerna exec --scope effects-docs -- npm run build",
+    "build": "tsc -b packages && lerna exec --scope effects-docs -- yarn build",
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
     "format:dryrun": "prettier './*.{js,ts}' './packages/**/*.{js,ts}'",
-    "format": "npm run format:dryrun -- --write",
-    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && npm run format:dryrun -- --check",
-    "test": "lerna exec npm run test"
+    "format": "yarn format:dryrun -- --write",
+    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && yarn format:dryrun -- --check",
+    "test": "lerna exec yarn test"
   },
   "repository": {
     "type": "git",
@@ -36,5 +36,9 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "typescript": "^3.7.5"
-  }
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }
