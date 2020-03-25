@@ -2,8 +2,8 @@
 {
   "files": [],
   "references": [
-      { "path": "./effects-runtime" },
-      { "path": "./effects-common" },
-      { "path": "./babel-plugin-effects" }
+    { "path": "./effects-runtime" },
+    { "path": "./effects-common" },
+    { "path": "./babel-plugin-effects" }
   ]
 }
