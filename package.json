@@ -8,9 +8,10 @@
     "copy:nvmrc": "lerna exec -- cp ../../.nvmrc ./",
     "build": "tsc -b packages && lerna exec --scope effects-docs -- yarn build",
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
-    "format:dryrun": "prettier './*.{js,ts}' './packages/**/*.{js,ts}'",
-    "format": "yarn format:dryrun -- --write",
-    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && yarn format:dryrun -- --check",
+    "format": "prettier './*.{js,ts}' './packages/**/*.{js,ts}' --write",
+    "lint:format": "prettier './*.{js,ts}' './packages/**/*.{js,ts}' --check",
+    "lint:logic": "eslint './.?*.js' 'packages/**/*.{js,ts}'",
+    "lint": "run-p lint:*",
     "test": "lerna exec yarn test"
   },
   "repository": {
