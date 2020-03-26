@@ -1,0 +1,3 @@
+node_modules
+*.log
+babel-override-source/**/*.js
