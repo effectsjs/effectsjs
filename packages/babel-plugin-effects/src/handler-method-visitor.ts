@@ -108,7 +108,7 @@ const makeHandlerMethod = (
   } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
 
   // Collect all call expressions located inside of the handler (consequent block)
-  const callExpressionDeclarations: Statement[] = [];
+  const callExpressionDeclarations: Set<Statement> = new Set();
   consequent.traverse({
     CallExpression(expressionPath) {
       const binding = expressionPath.scope.getBinding(
@@ -118,14 +118,14 @@ const makeHandlerMethod = (
         x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
       );
       if (declaration) {
-        callExpressionDeclarations.push(declaration.node);
+        callExpressionDeclarations.add(declaration.node);
         markPathForRemoval(declaration);
       }
     }
   });
 
   const resultContinuation = createResultContinuation(types, [
-    ...callExpressionDeclarations,
+    ...Array.from(callExpressionDeclarations),
     ...consequent.node.body
   ]);
 
