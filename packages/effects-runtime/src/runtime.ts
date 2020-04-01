@@ -53,7 +53,7 @@ export const stackResume = async (
 
     if (!done) {
       if (isIterator(value)) {
-        if(!exists(getReturnFrame(value)))  addReturn(value, gen);
+        addReturn(value, gen);
         return await stackResume(value, null);
       } else if (isContinuation(value)) {
         return await value(gen);

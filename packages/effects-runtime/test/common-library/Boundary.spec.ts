@@ -26,10 +26,10 @@ describe('Effects Boundaries', () => {
         };
 
         async function* main(){
-            yield boundary.initialize();
+            yield boundary.withContext();
             const result =  yield Promise.all(
                 [2,4,6].map(
-                    boundary.execute( function* (data) {
+                    boundary.into( function* (data) {
                         return yield performEffect({type : '', data})
                     } as any)
                 )

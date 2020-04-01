@@ -377,6 +377,86 @@ module.exports.test = ({ it, expect }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS boundaries.js: boundaries.js 1`] = `
+
+const {Boundary} = require('effects-common');
+
+const boundary = new Boundary();
+
+const root = async () => {
+    'use effects';
+    try{
+        boundary.withContext();
+        return Promise.all([2, 4, 6].map(
+                boundary.into((x) => {
+                    return perform {type : 'double', input : x}
+                })
+            ));
+    } handle 'double' with ({input}) {
+        recall (input * 2);
+    }
+};
+
+
+module.exports.test = ({it, expect, code}) => {
+  it.only('Should produce expected results', async () => {
+      await expect(root()).resolves.toEqual([4,8,12]);
+  })
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const { Boundary } = require("effects-common");
+
+const boundary = new Boundary();
+
+const root = async () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *double({ input }, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, input * 2)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          yield boundary.withContext();
+          return yield Promise.all(
+            [2, 4, 6].map(
+              boundary.into(function*(x) {
+                return yield performEffect({
+                  type: "double",
+                  input: x
+                });
+              })
+            )
+          );
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ it, expect, code }) => {
+  it.only("Should produce expected results", async () => {
+    await expect(root()).resolves.toEqual([4, 8, 12]);
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS captured-continuation-error-handling.js: captured-continuation-error-handling.js 1`] = `
 
 const throwErrorHandler = "throwErrorHandler";
