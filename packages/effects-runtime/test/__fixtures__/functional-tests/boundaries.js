@@ -1,28 +1,24 @@
 const {Boundary} = require('effects-common');
 
-let boundary = null;
+const boundary = new Boundary();
 
-const child = (number) => {
-    return perform {type : 'double', input : number}
-};
-
-const root = () => {
-    try{
-        child();
-    } handle 'double' with ({input}) {
-        return input * 2;
-    }
-};
-
-const main = () => {
+const root = async () => {
     'use effects';
-    const program = root();
-    boundary = Boundary(program);
+    try{
+        boundary.withContext();
+        return Promise.all([2, 4, 6].map(
+                boundary.into((x) => {
+                    return perform {type : 'double', input : x}
+                })
+            ));
+    } handle 'double' with ({input}) {
+        recall (input * 2);
+    }
 };
 
 
 module.exports.test = ({it, expect, code}) => {
-  it.only('Should do', () => {
-      console.log(Boundary, code);
+  it.only('Should produce expected results', async () => {
+      await expect(root()).resolves.toEqual([4,8,12]);
   })
 };
