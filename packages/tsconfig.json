@@ -4,6 +4,7 @@
   "references": [
       { "path": "./effects-runtime" },
       { "path": "./effects-common" },
-      { "path": "./babel-plugin-effects" }
+      { "path": "./babel-plugin-effects" },
+      { "path": "./prettier-plugin-javascript-effects" }
   ]
 }

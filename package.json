@@ -8,9 +8,9 @@
     "copy:nvmrc": "lerna exec -- cp ../../.nvmrc ./",
     "build": "tsc -b packages && lerna exec --scope effects-docs -- npm run build",
     "clean": "del 'packages/*/lib' 'packages/*/*.{tsbuildinfo}' 'packages/*/src/**/*.{map,d.ts}'",
-    "format:dryrun": "prettier './*.{js,ts}' './packages/**/*.{js,ts}'",
-    "format": "npm run format:dryrun -- --write",
-    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && npm run format:dryrun -- --check",
+    "format:base": "prettier --plugin=./packages/prettier-plugin-javascript-effects/src/plugin.js './*.{js,ts}' './packages/**/*.{js,ts}'",
+    "format": "npm run format:base -- --write",
+    "lint": "eslint './.?*.js' 'packages/**/*.{js,ts}' && npm run format:base -- --check",
     "test": "lerna exec npm run test"
   },
   "repository": {
