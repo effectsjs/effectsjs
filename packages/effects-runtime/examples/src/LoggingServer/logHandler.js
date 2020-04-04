@@ -38,17 +38,14 @@ const LogEffect = function(message){
 };
 
 const withLogHandler = async (fn, requestContext = {}) => {
-    try{
-        return fn();
-    } handle (e){
-        switch(e.type){
-            case logHandlerType:
-                await logAndSave(e.message, requestContext);
-        }
-    }
+  try{
+    return fn();
+  } handle 'logHandler' with (e){
+    logAndSave(e.message, requestContext);
+  }
 };
 
 module.exports = {
-    withLogHandler,
-    LogEffect
+  withLogHandler,
+  LogEffect
 };
