@@ -9,20 +9,16 @@ const handlerB = (context) => recall {response : 'B-'+context};
 const withHandlerA = (fn) => {
     try{
         return fn();
-    } handle (e) {
-        if(e.type === effectTypeA){
-            return handlerA();
-        }
+    } handle 'handlerA' with (e) {
+        return handlerA();
     }
 };
 
 const withHandlerB = context => fn => {
     try{
         return fn();
-    }handle(e){
-        if(e.type === effectTypeB){
-            return handlerB(context);
-        }
+    }handle 'handlerB' with (e){
+      return handlerB(context);
     }
 };
 
