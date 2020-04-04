@@ -1,48 +1,72 @@
-import { Boundary } from "effects-common";
+import { Boundary, BoundaryError } from "effects-common";
 import {
   stackResume,
   runProgram,
   performEffect,
   withHandler,
-  UnhandledEffectError,
   DefaultEffectHandler
 } from "../../src/runtime";
 import { Handler } from "effects-common";
-import {
-  getHandler,
-  addHandler,
-  addReturn,
-  setRootContinuation
-} from "effects-common/lib/StackFrame";
+
+const injectContext = (boundary: Boundary) =>
+  Reflect.set(boundary, "stackResume", stackResume);
+const createBoundary = () => {
+  const boundary = new Boundary();
+  injectContext(boundary);
+
+  return boundary;
+};
+
+const defaultHandler: Handler = {
+  *[DefaultEffectHandler]({ data }, resume) {
+    yield resume(data * 2);
+  }
+};
 
 describe("Effects Boundaries", () => {
   it("Should evaluate a stackframe from within a boundary", async () => {
-    const boundary = new Boundary();
-    Reflect.set(boundary, "stackResume", stackResume);
-    const handler: Handler = {
-      *[DefaultEffectHandler]({ data }, resume) {
-        yield resume(data * 2);
-      }
-    };
+    const boundary = createBoundary();
 
-    async function* main() {
+    function* main() {
       yield boundary.withContext();
-      const result = yield Promise.all(
-        [2, 4, 6].map(
-          boundary.into(function*(data) {
-            return yield performEffect({ type: "", data });
-          } as any)
-        )
+      return [2, 4, 6].map(
+        boundary.into(function*(data) {
+          return yield performEffect({ type: "", data });
+        })
       );
-
-      return result;
     }
 
     const program = function*() {
-      return yield withHandler(handler, main());
+      return yield withHandler(defaultHandler, main());
     };
+
     const result = await runProgram(program());
 
-    expect(result).toEqual([4, 8, 12]);
+    await expect(Promise.all(result)).resolves.toEqual([4, 8, 12]);
+  });
+
+  it("Should throw an error upon attempt to mutate context", async () => {
+    const boundary = createBoundary();
+
+    function* parent() {
+      yield boundary.withContext();
+      yield child();
+    }
+
+    function* child() {
+      yield boundary.withContext();
+    }
+
+    await expect(runProgram(parent())).rejects.toThrowError(BoundaryError);
+  });
+
+  it("Should throw when yielded prior to initialization", async () => {
+    const boundary = createBoundary();
+
+    function* main() {
+      yield boundary;
+    }
+
+    await expect(runProgram(main())).rejects.toThrowError(BoundaryError);
   });
 });
