@@ -6,11 +6,13 @@
   "types": "src/plugins.d.ts",
   "files": ["src/plugin.js", "src/*.bundle.js"],
   "scripts": {
-    "build": "run-s compile bundle",
     "build:watch": "IS_WATCHING=1 run-p 'compile --watch' bundle",
+    "build": "run-s compile bundle",
     "bundle": "node -r perish scripts/bundle.js",
-    "clean": "rm tsconfig.tsbuildinfo && rm src/*.bundle.js",
+    "clean": "rm -f tsconfig.tsbuildinfo && rm -f src/*.bundle.js",
     "compile": "tsc",
+    "prebuild": "run-s clean",
+    "pretest": "run-s build",
     "test": "node -r perish tests/test.js"
   },
   "keywords": [],
