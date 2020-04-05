@@ -1,11 +1,10 @@
 import { Plugin } from "prettier";
+const printer = require("./printer-estree.bundle");
+const prettierParserBabel = require("./parser-babel.bundle.js");
+// ^ src/prettier/language-js/parser-babel.js, with parser rewired
 
+export const astFormat = "estreeEffects";
 export const parserName = "babel-effects";
-const prettierBabelParsers = require("prettier/src/language-js/parser-babel.js");
-const effectsParser = require("../../../babel/packages/babel-parser/lib");
-
-export const parser = effectsParser;
-export const astFormat = "estreeEffects"
 
 export const languages: Plugin["languages"] = [
   {
@@ -16,21 +15,17 @@ export const languages: Plugin["languages"] = [
 
 export const parsers: Plugin["parsers"] = {
   [parserName]: {
-    ...(prettierBabelParsers.parsers.babel),
-    astFormat,
-    parse: effectsParser.parse,
+    ...prettierParserBabel.parsers.babel,
+    astFormat
   }
 };
 
-
 export const printers: Plugin["printers"] = {
-  [astFormat]: {
-    ...(require('./printer-estree-effects.bundle'))
-  },
+  [astFormat]: printer
 };
 
 export const plugin: Plugin = {
   languages,
   parsers,
   printers
-}
+};

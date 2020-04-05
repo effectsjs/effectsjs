@@ -14,7 +14,7 @@ async function test() {
   for (const { filename, code } of codes) {
     const formatted = prettier.format(code, {
       parser: parserName,
-      plugins: [plugin]
+      plugins: [plugin],
     });
     if (formatted !== code) {
       await fs.writeFile(filename, formatted);
@@ -25,12 +25,12 @@ async function test() {
 async function readFixtures() {
   const basenames = await fs.readdir(fixturesDir);
   const fixtureFilenames = basenames
-    .filter(basename => basename.match(/js$/))
-    .map(basename => resolve(fixturesDir, basename));
+    .filter((basename) => basename.match(/js$/))
+    .map((basename) => resolve(fixturesDir, basename));
   return Promise.all(
-    fixtureFilenames.map(async filename => ({
+    fixtureFilenames.map(async (filename) => ({
       filename,
-      code: await fs.readFile(filename, "utf8")
+      code: await fs.readFile(filename, "utf8"),
     }))
   );
 }

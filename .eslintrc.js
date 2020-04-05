@@ -17,34 +17,34 @@ module.exports = {
     ".cache",
     "**/highlight/**",
     "**/*example*.js",
-    "example-snippet.ts"
+    "example-snippet.ts",
   ],
 
   // effects-docs/gatsby
   globals: {
-    __PATH_PREFIX__: true
+    __PATH_PREFIX__: true,
   },
 
   parserOptions: {
     ecmaVersion: 2019,
-    sourceType: "module"
+    sourceType: "module",
   },
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint"],
   extends: [
     "eslint:recommended",
     "plugin:prettier/recommended",
-    /* effects-docs/gastby */ "react-app"
+    /* effects-docs/gastby */ "react-app",
   ],
   rules: {
     "no-restricted-globals": 0, // react rules fight `worker` env globals (self)
-    "no-unused-vars": 0 // eslint/ts doesn't play nice with interfaces imports consistently
+    "no-unused-vars": 0, // eslint/ts doesn't play nice with interfaces imports consistently
   },
   env: {
     browser: true,
     es6: true,
     jest: true,
     node: true,
-    worker: true
-  }
+    worker: true,
+  },
 };

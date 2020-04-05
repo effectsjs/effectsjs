@@ -1,6 +1,7 @@
 /**
  * @description
- * direct copy of printer-estree.js from prettier, with small adjustments for effects.
+ * direct copy of node_modules/prettier/src/language-js/printer-estree.js
+ * with small adjustments for effects.
  * all effects modifications shall be annotated with the keyword effectsjs in
  * adjacent comments
  */
@@ -2071,20 +2072,20 @@ function printPathNoParens(path, options, print, args) {
 
       return concat(["catch ", path.call(print, "body")]);
 
-      // effectsjs
-      case "HandleClause":
-        const param = path.call(print, "param");
-        let handleQualifier = "default ";
-        if (n.effectMatcher) {
-          handleQualifier = path.call(print, "effectMatcher");
-        }
-        return concat([
-          "handle ",
-          handleQualifier,
-          "with ",
-          concat(["(", param, ") "]),
-          path.call(print, "body"),
-        ]);
+    // effectsjs
+    case "HandleClause":
+      const param = path.call(print, "param");
+      let handleQualifier = "default ";
+      if (n.effectMatcher) {
+        handleQualifier = path.call(print, "effectMatcher");
+      }
+      return concat([
+        "handle ",
+        handleQualifier,
+        " with ", // @todo, use prettier utils to print with
+        concat(["(", param, ") "]),
+        path.call(print, "body"),
+      ]);
 
     case "ThrowStatement":
       return concat([
