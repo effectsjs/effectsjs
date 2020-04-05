@@ -10,13 +10,13 @@ export const exists = <T>(x: T): x is Exclude<T, null | undefined> =>
 export const isContinuation = (x: any): x is Continuation =>
   typeof x === "function" &&
   ["AsyncGeneratorFunction", "GeneratorFunction"].every(
-    type => type !== Reflect.getPrototypeOf(x).constructor.name
+    (type) => type !== Reflect.getPrototypeOf(x).constructor.name
   );
 
 export const isIterator = (x: any): x is Generator =>
   exists(x) && isContinuation(x.next);
 
-const asyncGeneratorInstance = async function*() {};
+const asyncGeneratorInstance = async function* () {};
 
 export const isAsyncGenerator = (
   input: Generator | AsyncGenerator

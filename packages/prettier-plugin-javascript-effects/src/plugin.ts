@@ -9,23 +9,23 @@ export const parserName = "babel-effects";
 export const languages: Plugin["languages"] = [
   {
     name: "javascript",
-    parsers: [parserName]
-  }
+    parsers: [parserName],
+  },
 ];
 
 export const parsers: Plugin["parsers"] = {
   [parserName]: {
     ...prettierParserBabel.parsers.babel,
-    astFormat
-  }
+    astFormat,
+  },
 };
 
 export const printers: Plugin["printers"] = {
-  [astFormat]: printer
+  [astFormat]: printer,
 };
 
 export const plugin: Plugin = {
   languages,
   parsers,
-  printers
+  printers,
 };

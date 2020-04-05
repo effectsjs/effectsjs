@@ -16,7 +16,7 @@ let isEvaluating = false;
 let nextToEvaluate = "";
 
 async function resolveBabel() {
-  while (!global.Babel) await new Promise(res => setTimeout(res, 50));
+  while (!global.Babel) await new Promise((res) => setTimeout(res, 50));
   return global.Babel;
 }
 
@@ -33,18 +33,18 @@ export const evaluate = debounce(
     const [babel, transformEffects, effectsRuntime] = await Promise.all([
       resolveBabel(),
       transformEffectsP,
-      effectsRuntimeP
+      effectsRuntimeP,
     ]);
     try {
       const transformed = babel.transform(nextToEvaluate, {
-        plugins: [transformEffects]
+        plugins: [transformEffects],
       }).code;
       unpatchedInfo(transformed);
       new Function(transformed)(); // eslint-disable-line
     } catch (error) {
       console.error({
         message: error.message,
-        meta: "see browser console fo more details"
+        meta: "see browser console fo more details",
       });
     } finally {
       isEvaluating = false;
@@ -54,14 +54,14 @@ export const evaluate = debounce(
   { maxWait: 2000, trailing: true }
 );
 
-self.onunhandledrejection = err => {
+self.onunhandledrejection = (err) => {
   err.preventDefault();
   unpatchedError(err);
   console.error(
     (err && err.reason && err.reason.message) || "mega-bummer, jim"
   );
 };
-self.onerror = err => {
+self.onerror = (err) => {
   err.preventDefault();
   unpatchedError(err);
   console.error("bummer, jim");
@@ -85,7 +85,7 @@ function monkeyPatchConsole(onNextMsg) {
   const appendLog = (level, ...args) => {
     let msg;
     try {
-      msg = args.map(arg =>
+      msg = args.map((arg) =>
         JSON.stringify(arg || "")
           .replace(/^"/, "")
           .replace(/"$/, "")
@@ -96,7 +96,7 @@ function monkeyPatchConsole(onNextMsg) {
     onNextMsg({
       level,
       timestamp: new Date().toISOString(),
-      msg
+      msg,
     });
   };
   global.console.log = withTap(
@@ -123,9 +123,9 @@ function monkeyPatchConsole(onNextMsg) {
   };
 }
 
-monkeyPatchConsole(payload => {
+monkeyPatchConsole((payload) => {
   self.postMessage({
     type: "log",
-    payload
+    payload,
   });
 });

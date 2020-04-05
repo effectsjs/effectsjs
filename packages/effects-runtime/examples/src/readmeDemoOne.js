@@ -1,9 +1,9 @@
-require('../../lib/prelude-polyfill');
+require("../../lib/prelude-polyfill");
 
-'use effects'
-try{
-  const result = perform ({type : 'effect'});
+("use effects");
+try {
+  const result = perform { type: "effect" };
   console.log(result);
-} handle default with (e) {
+} handle default  with (e) {
   recall "Effect Result 😘";
 }

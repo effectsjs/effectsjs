@@ -11,7 +11,7 @@ export const removeOnExitVisitor: Visitor<TypesVisitorPrototype> = {
     if (path[REMOVAL_FIELD] === true) {
       path.remove();
     }
-  }
+  },
 };
 
 export const markPathForRemoval = (path: Expression) =>

@@ -2,7 +2,7 @@ module.exports = {
   siteMetadata: {
     title: `effectsjs`,
     description: `Algebraic Effects in Javascript`,
-    author: `@cdaringe`
+    author: `@cdaringe`,
   },
   plugins: [
     "gatsby-plugin-remove-serviceworker",
@@ -12,15 +12,15 @@ module.exports = {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `images`,
-        path: `${__dirname}/src/images`
-      }
+        path: `${__dirname}/src/images`,
+      },
     },
     {
       resolve: `gatsby-source-filesystem`,
       options: {
         name: `files`,
-        path: `${__dirname}/src/`
-      }
+        path: `${__dirname}/src/`,
+      },
     },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
@@ -32,9 +32,9 @@ module.exports = {
       resolve: `gatsby-plugin-google-fonts`,
       options: {
         fonts: [`Ubuntu Mono`],
-        display: "swap"
-      }
-    }
+        display: "swap",
+      },
+    },
     // `gatsby-plugin-preact`, doesnt work due to highlight.js required react-dom directly
-  ].filter(Boolean)
+  ].filter(Boolean),
 };

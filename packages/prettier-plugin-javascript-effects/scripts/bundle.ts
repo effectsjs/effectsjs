@@ -36,15 +36,15 @@ const isWatching = !!process.env.IS_WATCHING;
 async function prepareBundleAssets() {
   const templateFilenames = [
     effectsPrinterTemplateFilename,
-    effectsParserBabelTemplateFilename
+    effectsParserBabelTemplateFilename,
   ];
   // assert template files exist
-  await Promise.all(templateFilenames.map(filename => fs.stat(filename)));
+  await Promise.all(templateFilenames.map((filename) => fs.stat(filename)));
   // clean
   await Promise.all(
     [effectsPrinterBundleEntrypoint, effectsPrinterTargetFilename].map(
-      filename =>
-        fs.unlink(filename).catch(err => {
+      (filename) =>
+        fs.unlink(filename).catch((err) => {
           if (err.code === "ENOENT") {
             return;
           }
@@ -70,21 +70,21 @@ async function bundle() {
     entry: {
       // simulate prettier basenames for less cognitive gymnastics
       "printer-estree": effectsPrinterBundleEntrypoint,
-      "parser-babel": effectsParserBabelBundleEntrypoint
+      "parser-babel": effectsParserBabelBundleEntrypoint,
     },
     output: {
       path: dirname(effectsPrinterTargetFilename),
       filename: "[name].bundle.js",
-      libraryTarget: "commonjs"
+      libraryTarget: "commonjs",
     },
     mode: (process.env.NODE_ENV as any) || "production",
     target: "node",
     watch: isWatching,
     resolve: {
       alias: {
-        "@babel/parser": effectsBabelParserFilename
-      }
-    }
+        "@babel/parser": effectsBabelParserFilename,
+      },
+    },
     // @TODO we gotta turn this on, but require statements to chunks are not
     // generated :/
     // optimization: {
@@ -104,7 +104,7 @@ async function bundle() {
       prepareBundleAssets();
     });
     await compiler.watch({}, (err, stats) => {
-      if (err) return console.error(`webpack error:`, err)
+      if (err) return console.error(`webpack error:`, err);
       console.log("webpack ok");
     });
   } else {

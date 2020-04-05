@@ -10,7 +10,7 @@ import SEO from "../components/seo";
 const IndexPage = () => {
   const {
     references: { html: references },
-    keywords: { html: keywords }
+    keywords: { html: keywords },
   } = useStaticQuery(graphql`
     {
       references: markdownRemark(
@@ -79,13 +79,13 @@ const IndexPage = () => {
         {
           title: `Why do I need to use 'use effects'?`,
           a: "whyuseeffects",
-          answer: `The 'use effects' directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`
+          answer: `The 'use effects' directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`,
         },
         {
           title: `Can I perform an effect from within an effect?`,
           a: "nestedeffects",
-          answer: "Currently, no.  In the future, maybe!"
-        }
+          answer: "Currently, no.  In the future, maybe!",
+        },
       ].map(({ title, a, answer }) => (
         <React.Fragment key={a}>
           <h3 className="node">{title}</h3>

@@ -46,7 +46,7 @@ const createWithHandlerInvocation = (
 
   return types.callExpression(types.identifier("withHandler"), [
     handler,
-    types.callExpression(mainFunctionExpression, [])
+    types.callExpression(mainFunctionExpression, []),
   ]);
 };
 
@@ -60,18 +60,18 @@ export default function transformEffects({ types }: Babel): Plugin {
       Program: {
         exit(path) {
           path.traverse(effectsDirectiveVisitor, {
-            types
+            types,
           });
           path.traverse(
             {
               YieldExpression(path) {
                 fixupParentGenerator(path, types);
-              }
+              },
             },
             { types }
           );
           path.traverse(removeOnExitVisitor, { types });
-        }
+        },
       },
       TryStatement: {
         enter(path) {
@@ -104,7 +104,7 @@ export default function transformEffects({ types }: Babel): Plugin {
           } else {
             path.replaceWith(withHandlerExpression);
           }
-        }
+        },
       },
       UnaryExpression(path) {
         // TODO [minor] ignore required because types do not recognize the operator as valid. Fix that.
@@ -113,7 +113,7 @@ export default function transformEffects({ types }: Babel): Plugin {
           path.replaceWith(
             types.yieldExpression(
               types.callExpression(types.identifier("performEffect"), [
-                path.node.argument
+                path.node.argument,
               ])
             )
           );
@@ -143,7 +143,7 @@ export default function transformEffects({ types }: Babel): Plugin {
             .findParent(types.isExpressionStatement)
             ?.replaceWith(types.returnStatement(path.node));
         }
-      }
-    }
+      },
+    },
   };
 }

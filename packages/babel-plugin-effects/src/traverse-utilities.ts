@@ -5,7 +5,7 @@ import BabelTypes, {
   Identifier,
   ObjectPattern,
   ObjectProperty,
-  ExpressionStatement
+  ExpressionStatement,
 } from "@babel/types";
 import { Babel } from "./plugin";
 import { yieldCallExpressionVisitor } from "./to-generator-visitor";
@@ -15,7 +15,7 @@ export const hasEffectsDirective = (path: NodePath<BabelTypes.Function>) => {
   if (!Array.isArray(directives)) return;
 
   return directives
-    ?.map(directive => {
+    ?.map((directive) => {
       return ((directive.get("value.value") as NodePath)
         ?.node as unknown) as string;
     })
@@ -31,7 +31,7 @@ export const arrowExpressionToGenerator = (
   //  into "self" and pass it in.
   if (!types.isBlockStatement(path.node.body)) {
     path.node.body = types.blockStatement([
-      types.returnStatement(path.node.body)
+      types.returnStatement(path.node.body),
     ]);
   }
 
@@ -47,7 +47,9 @@ export const arrowExpressionToGenerator = (
 export const findDeclaration = (identifier: NodePath<Identifier>) => {
   const identName = identifier.get("name").node;
   if (!identName) return null;
-  const bindingScope = identifier.findParent(x => x.scope.bindings[identName]);
+  const bindingScope = identifier.findParent(
+    (x) => x.scope.bindings[identName]
+  );
 
   return bindingScope?.scope.bindings[identName]?.path;
 };
@@ -88,7 +90,7 @@ export const fixupParentGenerator = (path: NodePath, types: Babel["types"]) => {
       : (parentFunctionPath.parentPath.node as any)?.id?.name;
 
     if (name) {
-      const bindingScope = parentFunctionPath.findParent(x =>
+      const bindingScope = parentFunctionPath.findParent((x) =>
         x.scope.hasBinding(name)
       );
 
@@ -134,7 +136,7 @@ export const toMemberExpressionVisitor: Visitor<{
       );
       path.skip();
     }
-  }
+  },
 };
 
 export const renameIdentNameVisitor: Visitor<{
@@ -145,7 +147,7 @@ export const renameIdentNameVisitor: Visitor<{
     if (path.node.name === oldName) {
       path.node.name = newName;
     }
-  }
+  },
 };
 
 // Convert a destructured default into
@@ -206,13 +208,13 @@ export const collapseObjectPattern = (
     if (types.isRestElement(property)) {
       handlerBodyPath.traverse(renameIdentNameVisitor, {
         newName: identifierName,
-        oldName: (property.argument as Identifier).name
+        oldName: (property.argument as Identifier).name,
       });
     } else {
       handlerBodyPath.traverse(toMemberExpressionVisitor, {
         objectIdentifierName: objectIdentifier.name,
         propName: property.key.name,
-        types
+        types,
       });
     }
   }

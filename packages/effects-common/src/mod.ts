@@ -6,7 +6,7 @@ import {
   getHandler,
   getReturnFrame,
   isRootContinuation,
-  StackFrame
+  StackFrame,
 } from "./StackFrame";
 import { exists, isContinuation, isIterator } from "./util";
 import { Effect, Handler } from "./effects.types";
@@ -120,7 +120,7 @@ export const performEffect = ({ type, ...data }: Effect) => async (
 };
 
 export const withHandler = (handler: Handler, frame: StackFrame) => {
-  const handlerFrame = (function*() {
+  const handlerFrame = (function* () {
     return yield frame;
   })();
 

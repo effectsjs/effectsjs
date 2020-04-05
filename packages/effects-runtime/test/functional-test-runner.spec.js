@@ -9,7 +9,7 @@ const FUNCTIONAL_TEST_DIRECTORY = path.resolve(
   `functional-tests`
 );
 
-const readAndParseFile = textFixtureBaseName => {
+const readAndParseFile = (textFixtureBaseName) => {
   const filename = path.resolve(FUNCTIONAL_TEST_DIRECTORY, textFixtureBaseName);
   const file = `require('../lib/prelude-polyfill');\n ${readFileSync(
     filename,
@@ -23,10 +23,10 @@ const readAndParseFile = textFixtureBaseName => {
   }
 };
 
-const evaluateModule = code => nodeEval(code, "testFixtureModule");
+const evaluateModule = (code) => nodeEval(code, "testFixtureModule");
 
 const extractTests = () => {
-  return readdirSync(FUNCTIONAL_TEST_DIRECTORY).map(testFile => {
+  return readdirSync(FUNCTIONAL_TEST_DIRECTORY).map((testFile) => {
     const code = readAndParseFile(testFile);
     const { test } = evaluateModule(code);
 
