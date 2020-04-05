@@ -16,9 +16,11 @@ async function test() {
       parser: parserName,
       plugins: [plugin],
     });
-    if (formatted !== code) {
-      await fs.writeFile(filename, formatted);
-    }
+    assert(
+      formatted === code,
+      `filename ${filename} does not match expected output`
+    );
+    // await fs.writeFile(filename, formatted);
   }
 }
 
