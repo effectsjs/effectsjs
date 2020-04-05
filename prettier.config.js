@@ -1,7 +1,7 @@
 module.exports = {
   overrides: [
     {
-      files: "*.js",
+      files: "*.{js,example}",
       options: { parser: "babel-effects" },
     },
   ],
