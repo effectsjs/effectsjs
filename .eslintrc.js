@@ -10,6 +10,7 @@ module.exports = {
     "**/*example*/**", // ignore until eslint-plugin :ok_hand:
     "**/effects-runtime/examples/**", // ignore until eslint-plugin :ok_hand:
     "**/effects-runtime/test/**", // ignore until eslint-plugin :ok_hand:
+    "**/prettier-plugin-javascript-effects/**/*.js", // ts project. bugger off, compiled code
 
     // effects-docs/gatsby
     "public",
@@ -31,11 +32,7 @@ module.exports = {
   },
   parser: "@typescript-eslint/parser",
   plugins: ["@typescript-eslint"],
-  extends: [
-    "eslint:recommended",
-    "plugin:prettier/recommended",
-    /* effects-docs/gastby */ "react-app",
-  ],
+  extends: ["eslint:recommended", /* effects-docs/gastby */ "react-app"],
   rules: {
     "no-restricted-globals": 0, // react rules fight `worker` env globals (self)
     "no-unused-vars": 0, // eslint/ts doesn't play nice with interfaces imports consistently
