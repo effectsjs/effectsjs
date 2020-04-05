@@ -501,7 +501,10 @@ function printPathNoParens(path, options, print, args) {
       );
 
       // Only force a trailing newline if there were any contents.
-      if (n.body.length || n.comments) {
+      if (
+        !n.body.every(({ type }) => type === "EmptyStatement") ||
+        n.comments
+      ) {
         parts.push(hardline);
       }
 
@@ -805,7 +808,6 @@ function printPathNoParens(path, options, print, args) {
       return concat(["%", n.name]);
     case "SpreadElement":
     case "SpreadElementPattern":
-    case "RestProperty":
     case "SpreadProperty":
     case "SpreadPropertyPattern":
     case "RestElement":
@@ -1427,11 +1429,9 @@ function printPathNoParens(path, options, print, args) {
       const lastElem = getLast(n[propertiesField]);
 
       const canHaveTrailingSeparator = !(
-        lastElem &&
-        (lastElem.type === "RestProperty" ||
-          lastElem.type === "RestElement" ||
-          hasNodeIgnoreComment(lastElem) ||
-          n.inexact)
+        n.inexact ||
+        (lastElem &&
+          (lastElem.type === "RestElement" || hasNodeIgnoreComment(lastElem)))
       );
 
       let content;
@@ -1762,8 +1762,7 @@ function printPathNoParens(path, options, print, args) {
       const isParentForLoop =
         parentNode.type === "ForStatement" ||
         parentNode.type === "ForInStatement" ||
-        parentNode.type === "ForOfStatement" ||
-        parentNode.type === "ForAwaitStatement";
+        parentNode.type === "ForOfStatement";
 
       const hasValue = n.declarations.some((decl) => decl.init);
 
@@ -1961,16 +1960,10 @@ function printPathNoParens(path, options, print, args) {
       );
 
     case "ForOfStatement":
-    case "ForAwaitStatement": {
-      // Babel 7 removed ForAwaitStatement in favor of ForOfStatement
-      // with `"await": true`:
-      // https://github.com/estree/estree/pull/138
-      const isAwait = n.type === "ForAwaitStatement" || n.await;
-
       return group(
         concat([
           "for",
-          isAwait ? " await" : "",
+          n.await ? " await" : "",
           " (",
           path.call(print, "left"),
           " of ",
@@ -1979,7 +1972,6 @@ function printPathNoParens(path, options, print, args) {
           adjustClause(n.body, path.call(print, "body")),
         ])
       );
-    }
 
     case "DoWhileStatement": {
       const clause = adjustClause(n.body, path.call(print, "body"));
@@ -2087,6 +2079,7 @@ function printPathNoParens(path, options, print, args) {
           path.call(print, "body"),
         ].filter(Boolean)
       );
+
     case "ThrowStatement":
       return concat([
         "throw",
@@ -3653,7 +3646,7 @@ function printPathNoParens(path, options, print, args) {
     case "NGEmptyExpression":
       return "";
     case "NGQuotedExpression":
-      return concat([n.prefix, ":", n.value]);
+      return concat([n.prefix, ": ", n.value.trim()]);
     case "NGMicrosyntax":
       return concat(
         path.map(
