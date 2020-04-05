@@ -6,9 +6,10 @@
   "types": "src/plugins.d.ts",
   "files": ["src/plugin.js", "src/*.bundle.js"],
   "scripts": {
-    "build": "run-p compile bundle",
+    "build": "run-s compile bundle",
     "build:watch": "IS_WATCHING=1 run-p 'compile --watch' bundle",
-    "bundle": "node scripts/bundle.js",
+    "bundle": "node -r perish scripts/bundle.js",
+    "clean": "rm tsconfig.tsbuildinfo && rm src/*.bundle.js",
     "compile": "tsc",
     "test": "node -r perish tests/test.js"
   },
