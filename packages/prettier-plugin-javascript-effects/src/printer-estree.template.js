@@ -226,6 +226,14 @@ function genericPrint(path, options, printPath, args) {
     // Nodes with decorators can't have parentheses, so we can avoid
     // computing pathNeedsParens() except in this case.
     needsParens = pathNeedsParens(path, options);
+
+    // effectsjs start
+    // dirty hack! effects StringLiteral needs to be part of a DirectiveLiteral, probably
+    needsParens =
+      path.stack[path.stack.length - 1].value === "use effects"
+        ? false
+        : needsParens;
+    // effectsjs end
   }
 
   const parts = [];
@@ -515,6 +523,7 @@ function printPathNoParens(path, options, print, args) {
     case "ExpressionStatement":
       // Detect Flow-parsed directives
       if (n.directive) {
+        debugger;
         return concat([nodeStr(n.expression, options, true), semi]);
       }
 
@@ -1703,12 +1712,14 @@ function printPathNoParens(path, options, print, args) {
         (grandParent.type === "Program" ||
           grandParent.type === "BlockStatement");
 
+      if (n.value.match("use effects")) debugger;
       return nodeStr(n, options, isTypeScriptDirective);
     }
     case "Directive":
       return path.call(print, "value"); // Babel 6
     case "DirectiveLiteral":
-      return nodeStr(n, options);
+      const v = nodeStr(n, options);
+      return v;
     case "UnaryExpression":
       parts.push(n.operator);
 
@@ -2800,7 +2811,7 @@ function printPathNoParens(path, options, print, args) {
         (parent.type === "TypeAnnotation" ||
           parent.type === "TSTypeAnnotation") &&
         parentParent.type === "ArrowFunctionExpression";
-
+      if (needsParens) debugger; // eslint-disable-line
       if (isObjectTypePropertyAFunction(parent, options)) {
         isArrowFunctionTypeAnnotation = true;
         needsColon = true;
