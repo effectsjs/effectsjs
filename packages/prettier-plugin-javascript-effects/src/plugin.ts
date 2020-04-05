@@ -1,7 +1,7 @@
 import { Plugin } from "prettier";
 const printer = require("./printer-estree.bundle");
 const prettierParserBabel = require("./parser-babel.bundle.js");
-// ^ src/prettier/language-js/parser-babel.js, with parser rewired
+// ^ prettier/language-js/parser-babel.js, with parser rewired
 
 export const astFormat = "estreeEffects";
 export const parserName = "babel-effects";
