@@ -399,7 +399,7 @@ describe("Effects Unit Tests", () => {
           })()
         )
       ).rejects.toThrowError(
-        "Encountered an unhandled effect :Symbol(oh noes)"
+        "Encountered an unhandled effect: Symbol(oh noes)"
       );
     });
   });

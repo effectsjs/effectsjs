@@ -22,7 +22,7 @@ export class UnhandledEffectError extends TypeError {
   constructor({ type }: Effect) {
     super();
 
-    this.message = `Encountered an unhandled effect :${String(type)}`;
+    this.message = `Encountered an unhandled effect: ${String(type)}`;
   }
 }
 

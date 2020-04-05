@@ -1,10 +1,10 @@
 import "./editor.css";
 import { EditorLoading } from "./editor-loading";
-import { parseCurrentQuery, setQuery } from "../util/window-location.js";
+import { parseCurrentQuery, setQuery, getWindow } from "../util/window-location.js";
 import React from "react";
 import EditorWorker from "./editor.worker.js";
 
-const worker = typeof window === "object" && new EditorWorker();
+const worker = getWindow() && new EditorWorker();
 // kick off download ASAP--on parse--well before react-mount
 const reactAceP = import("react-ace");
 let virtualConsole;

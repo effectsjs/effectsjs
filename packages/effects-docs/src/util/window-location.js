@@ -1,9 +1,13 @@
 /**
  * getWindow for gatsby-ssr support at build time
  */
-function getWindow() {
-  if (typeof window !== `undefined`) {
-    return window;
+export function getWindow() {
+  try {
+    if (typeof window !== `undefined`) {
+      return window;
+    }
+  } catch {
+    // pass
   }
   return null;
 }
@@ -24,5 +28,5 @@ export function setQuery(kvMap) {
     .filter((key) => kvMap[key])
     .map((key) => `${key}=${kvMap[key]}`)
     .join("&");
-  window.history.replaceState(window.history.state, "", `?${queryBody}`);
+    win.history.replaceState(win.history.state, "", `?${queryBody}`);
 }

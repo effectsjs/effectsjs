@@ -55,7 +55,7 @@ module.exports.test = ({ it, expect }) => {
 
   it("Should throw if a parent calls an effect handled by a child function", async () => {
     await expect(throwsUnhandledEffectError()).rejects.toThrowError(
-      "Encountered an unhandled effect :child"
+      "Encountered an unhandled effect: child"
     );
   });
 };
