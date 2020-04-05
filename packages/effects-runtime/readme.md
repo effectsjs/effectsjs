@@ -1,90 +1,62 @@
-# Algebraic Effects
+# Effects Runtime
 
-This repo provides a sketch to explore what Algebraic Effects would look like in JavaScript apps.
+For an overview of what this package enables and interactive exampels, see [the effectsjs website](https://effects.js.org/).
 
-A rudimentary example would look like this:
+### Technical overview
+
+Performing, handling and recalling are all handled by generators under the hood. The [babel transform plugin](../babel-plugin-effects) performs transforms to abstract away the generator syntax.
+
+Consider the following variables
 
 ```javascript
-try{
-    const result = perform ({type : 'effect'});
-    console.log(result);
-} handle (e) {
-    if(e.type === 'effect'){
-        recall "Effect Result";
+const getIntegerHandler = 'getInteger';
+
+const GetIntegerEffect = () => ({
+  type: getIntegerHandler
+});
+```
+
+Compare the following code
+
+```javascript
+const main = async () => {
+    'use effects';
+    try{
+        return perform GetIntegerEffect();
+
+        return integer
+    }handle getIntegerHandler with (e){
+        recall 5;
     }
 }
 ```
 
-Where `perform` allows you to step into a previous stack frame, do something, then (optionally) return to the
-original stack frame with some new data.
-
-This works with async handlers:
+To the functionally equivalent code:
 
 ```javascript
-const sleep = (ms) => new Promise(res => setTimeout(res, ms));
-const asyncHandler = async () => {
-    const start = Date.now();
-    await sleep(1500);
-    recall ({start, end : Date.now()});
+const handler = {
+  *[getIntegerHandler](e, resume){
+    return resume(5);
+  }
 };
-const main = () => {
-    console.log('main start');
-    const performResult = perform ({type : 'sleepHandler'});
-    console.log(performResult);
-    console.log('main end');
+
+const frame = function*(){
+  return  yield performEffect(GetIntegerEffect());  
 }
 
+const program = withHandler(
+  handler,
+  frame()
+);
 
-try{
-    main();
-}handle (e){
-    if(e.type === 'sleepHandler'){
-        asyncHandler()
-    }
-}
+const main = () => runProgram(program());
 ```
 
-Introducing Effects provides some nifty advantages:
+Above, we see all of the features of effects implemented first with the proposed effects syntax and second in runtime syntax.
 
-- Program in a true direct style.
-    - Isolate async actions to effect handlers, write your program directly
-- Encapsulate side effects, perform them in a controlled manner
-    - Effect handlers provide an interface to perform side-effects in a scoped environment
-    without polluting descendent scopes
-- Improve function purity
+The rest of this document will deal with the latter, to demonstrate _how_ effects are implemented for the proposal.
 
-    - Being a more controlled form of Delimited Continuation, the relationship between performer -> effect -> handler
-    allows for delimiting scoped definitions and writing pure functions to perform into into them
+## The Virtual Stack
 
-    - Instead of passing dependencies through you program to make them accessible anywhere,
-    effects allow you to _delimit_ scope accessible to descendants.
+Algebraic Effects operate in a control flow that is not available to us in the JavaScript programming language. We have a call-stack, which is very -- well -- _stack_ like. Quick and dirty overview of the call-stack: as functions are called, they are pushed onto the stack. Functions called from that function are pushed onto stack, evaluated and then popped into the last call-site until the stack is empty. 
 
-
-
-
-## Try it out
-
-The repo contains a babel fork as a sub module. The babel fork introduces three new keywords to the babel parser:
-
-- `perform` - To exit the current stack frame
-- `handle` - To delimit an effect handler
-- `recall` - (needs a better name) - To resume into the frame that performed.
-
-You'll need to run the following commands to setup the babel fork:
-
-```
-git submodule init
-git submodule update
-cd babel
-make bootstrap
-make build
-```
-
-In the babel repo to build the fork.
-
-From there, you'll be able to run the tests `npm run test`.
-
-
-### Use Case
-
-* React Context - Enter more stuff later
