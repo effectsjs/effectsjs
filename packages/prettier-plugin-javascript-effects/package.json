@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/plugin.js",
   "types": "src/plugins.d.ts",
+  "files": ["src/plugin.js", "src/*.bundle.js"],
   "scripts": {
     "build": "run-p compile bundle",
     "build:watch": "IS_WATCHING=1 run-p 'compile --watch' bundle",
