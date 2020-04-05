@@ -61,7 +61,7 @@ const programB = () => {
 
 const programC = async () => {
   try {
-    ("use effects");
+    "use effects";
     entry("contextC")(() => {
       console.log(`
         This is the third program. It's cool because it catches errors that the virtual stack throws.

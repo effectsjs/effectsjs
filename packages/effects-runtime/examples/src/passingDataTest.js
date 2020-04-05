@@ -9,7 +9,7 @@ const main = () => {
   console.log(result);
 };
 
-("use effects");
+"use effects";
 try {
   main();
 } handle default with (e) {

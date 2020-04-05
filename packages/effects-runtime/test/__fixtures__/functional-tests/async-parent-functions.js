@@ -11,7 +11,7 @@ const asyncNotCaught = async () => {
 
 const asyncCaught = async () => {
   try {
-    ("use effects");
+    "use effects";
     entry();
   } catch (e) {
     // swallow error

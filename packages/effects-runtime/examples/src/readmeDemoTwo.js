@@ -16,7 +16,7 @@ const main = () => {
   console.log("main end");
 };
 
-("use effects");
+"use effects";
 try {
   main();
 } handle "sleepHandler" with (e) {

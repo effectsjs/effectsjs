@@ -1,6 +1,6 @@
 require("../../lib/prelude-polyfill");
 
-("use effects");
+"use effects";
 try {
   const result = perform { type: "effect" };
   console.log(result);
