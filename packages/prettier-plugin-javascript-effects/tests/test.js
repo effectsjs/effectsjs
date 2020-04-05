@@ -22,6 +22,7 @@ async function test() {
     );
     // await fs.writeFile(filename, formatted);
   }
+  console.log(`# ok ${codes.length}/${codes.length}`)
 }
 
 async function readFixtures() {
