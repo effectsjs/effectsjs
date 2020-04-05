@@ -1,7 +1,7 @@
 const entry = () => {
   try {
     throw new Error("error");
-  } handle default  with (e) {}
+  } handle default with (e) {}
 };
 
 const asyncNotCaught = async () => {

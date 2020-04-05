@@ -12,7 +12,7 @@ const main = () => {
 ("use effects");
 try {
   main();
-} handle default  with (e) {
+} handle default with (e) {
   if (e.type === "timesTwo") {
     timesTwoHandler(e.number);
   }

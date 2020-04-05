@@ -2074,19 +2074,19 @@ function printPathNoParens(path, options, print, args) {
 
     // effectsjs
     case "HandleClause":
-      const param = path.call(print, "param");
-      let handleQualifier = "default ";
-      if (n.effectMatcher) {
-        handleQualifier = path.call(print, "effectMatcher");
-      }
-      return concat([
-        "handle ",
-        handleQualifier,
-        " with ", // @todo, use prettier utils to print with
-        concat(["(", param, ") "]),
-        path.call(print, "body"),
-      ]);
-
+      const handleEffectQualifier = n.effectMatcher
+        ? path.call(print, "effectMatcher")
+        : false;
+      return concat(
+        [
+          n.defaultMatcher ? "handle default " : "handle ",
+          handleEffectQualifier,
+          n.defaultMatcher ? "" : " ",
+          "with ", // @todo, use prettier utils to print with
+          concat(["(", path.call(print, "param"), ") "]),
+          path.call(print, "body"),
+        ].filter(Boolean)
+      );
     case "ThrowStatement":
       return concat([
         "throw",

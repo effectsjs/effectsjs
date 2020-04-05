@@ -7,7 +7,7 @@ const LogPurgeEffect = () => ({ type: logPurgeType });
 const withLogPurgeHandler = (fn) => {
   try {
     return fn();
-  } handle default  with (e) {
+  } handle default with (e) {
     if (e.type === logPurgeType) {
       fs.unlink(path.resolve(__dirname, "log.txt"), (err) => {
         if (err) {
