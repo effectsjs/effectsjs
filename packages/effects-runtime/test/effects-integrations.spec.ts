@@ -377,14 +377,4 @@ describe("Effect Integrations", () => {
     expect(result1).toBe(childEffectResult);
     expect(result2).toBe(childEffectResult);
   });
-
-  test('Reflect itself', async () => {
-    function* exampleFrame(){
-      const a = yield 5;
-      const b = yield (gen) => stackResume(gen, gen);
-      console.log(b)
-    }
-
-    await runProgram(exampleFrame());
-  });
 });
