@@ -1,0 +1,35 @@
+const LogEffect = Symbol();
+
+const logHandler = (message) => {
+  setTimeout(() => {
+        console.log(`[LOGGER] - ${message}`);
+        recall null
+  }, 10);
+};
+
+const defaultHandler = () => {
+  setTimeout(() => {
+    recall 'Dave'
+  })
+};
+
+const root = () => {
+    'use effects';
+    try{
+      perform {type : LogEffect, message : 'Fetching first name'};
+      const firstName = perform {type : 'getFirstName'};
+      perform {type : LogEffect, message : `First name is ${firstName}`};
+      return 'Ok';
+    }
+    handle LogEffect with ({message}){
+      logHandler(message)
+    }
+    handle default with(e){
+      defaultHandler()
+    }
+};
+
+
+root()
+.then(result => console.log(result)
+.catch(e => console.error(e.message));
