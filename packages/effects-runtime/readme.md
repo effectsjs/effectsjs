@@ -198,5 +198,56 @@ const result = await runProgram(root())
 
 The interpreter will continue evaluating until there are no frames to evaluate, and return the value yeilded by the last frame.
 
-## Effects, perform & recall
+## Effect Handlers
+
+We've covered `StackFrame`s and how the Virtual Stack is evaluated, the last missing piece is Effect Handlers. Above, we looked at the type definition for `StackFrame` and saw that it was the intersection of a `Generator` and the interface `StackFrameSymbols`. Of which, had a property called `HandlerReference` that could optionally contain a `Handler`. Let's look at all of the associated definitions:
+
+```typescript
+export interface Handler {
+  [key: string]: HandlerDefinition;
+  [index: number]: HandlerDefinition;
+}
+
+export type HandlerDefinition = (
+  data: any,
+  resume: Continuation
+) => Generator<any, any, any>;
+
+export type EffectType = string | number | symbol | undefined;
+
+export interface Effect {
+  type: EffectType;
+  data?: any;
+}
+```
+
+A handler is just an object that associates `EffectType`s with `HandlerDefinition`s. In the intro, we defined an effect and effect handler like this:
+
+```javascript
+const handler = {
+  *[getIntegerHandler](e, resume){
+    return resume(5);
+  }
+};
+```
+
+So an `EffectDefinition`, is a `GeneratorFunction`. An `Effect`, is an plain-old-javascript-object that associates a type with some data. And a `Handler` is a POJO that associates `EffectType`s with `EffectDefinition`s.
+
+Any `StackFrame` may hold a reference to a `Handler` but the runtime supplies a special method for associating handlers and frames:
+
+```javascript
+const frameWithHandler = withHandler(handler, root);
+```
+
+This creates the following structure:
+
+<img src='./static/with-handler-diagram.png' />
+
+*note on why this exists*
+
+Even though it's not possible to do under the proposed syntax, this enables us to write runtime code for effects that don't recall. Under the proposed javascript syntax, an `EffectHandler` that doesn't recall is considered undefined behavior. But in the runtime, it's not only possible -- but well defined. In the event that an effect handler does not recall, the stack interpreter will eject into the parent from of the effect handler.
+
+By providing this buffer frame, we gaurantee that the frame is given to the stack interpreter _exactly once_, indicating that all child frames are no longer relevant. 
+
+## Perform
 
