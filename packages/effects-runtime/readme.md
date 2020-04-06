@@ -36,7 +36,7 @@ To the functionally equivalent code:
 ```javascript
 const handler = {
   *[getIntegerHandler](e, resume){
-    return resume(5);
+    yield resume(5);
   }
 };
 
@@ -251,3 +251,86 @@ By providing this buffer frame, we gaurantee that the frame is given to the stac
 
 ## Perform
 
+The final piece is how we simulate the performing of an effect. Let's combine some of the code we've written so far with a bit of new stuff:
+
+```javascript
+const handler = {
+  *sayHi(e, resume){
+    console.log('hi');
+    yield resume(null);
+  }
+};
+
+function* child(){
+  return performEffect({type : 'sayHi'});
+}
+
+function* parent(){
+  return yield child();
+}
+
+function* root(){
+  return yield parent();
+}
+
+const frameWithHandler = withHandler(handler, root);
+
+await runProgram(frameWithHandler());
+```
+
+By the time the stack interpreter starts evaluating `child` the Virtual Stack looks something like this:
+
+<img src='./static/full-virtual-stack.png' />
+
+When `performEffect` is called by a `StackFrame`, we exercise the following behavior:
+
+<img src='./static/constructing-the-handler-frame.png' />
+
+Finally, we interpret the newly created handler frame.
+
+Now, from earlier, we know what will happen if a `StackFrame` yields a `Generator`: it will get linked and evaluated. But the interpreter also considers other values:
+
+- A function will be called with the _current_ `StackFrame` passed to it as it's only argument
+- Anything else is immediately yielded back to the `StackFrame`:
+
+```javascript
+function* exampleFrame(){
+  const a = yield 1;
+  // a === 1
+  const b = yield (gen) => interpret(gen, gen);
+  // b === exampleFrame 🤯🤯🤯🤯
+}
+```
+
+This may take a few seconds to _really_ sink in. There is an extreme level of indirection happening.
+
+Consider now, what happens at the call-site of the `sayHi` handler frame:
+
+```javascript
+*sayHi(e, resume){
+    //snip
+    yield resume(null);
+}
+```
+
+In this context, `resume` is `capturedContinuation`. We call `capturedContinuation`, which returns a function. Remember now, if we yield a function to the interpreter we _stop_ evaluating the current frame. If that function does not resume the frame passed into it, that frame is lost forever.
+
+That's exactly what we do with a perform. The `sayHi` handler frame is abandoned. We don't even consider it in the function `capturedContinuation` returns:
+
+```javascript
+() => interpret(currentFrame, handlerFnResult);
+```
+
+The `sayHi` handler frame is finished, it's no longer a candidate for evaluation. We take the value computed inside of it, and pass it back to the frame that performed.
+
+And that's it! That is a technical deep-dive into the effects runtime.
+
+### Notes on the above examples
+
+In order to really understand how the virtual stack is evaluated, you'll really have to dig into the source. It's deceptively simple: [1 file that describes evaluating the stack and performing effects](./src/runtime.ts).
+
+In the sake of teaching, I renamed several of the actual method names. It should be pretty clear comparing the two. The biggest difference is `interpret` is _actually_ called `stackResume`
+
+Finally, in the process of simplifying, I intentionally left out the _asyncronous_ nature of `stackResume`. There is a very real need for this: stitching together stack frames to recall from anything asynchronous is possible in a totally synchronous manner with the totally unacceptable caveat: any errors frames throw from async continuations can not propagate through the virtual stack, causing totally unexpected an undefined behavior.
+
+The mental overhead introduced with the async nature is minimal in order to adjust to the codebase. The same principals discussed above are relevant.
