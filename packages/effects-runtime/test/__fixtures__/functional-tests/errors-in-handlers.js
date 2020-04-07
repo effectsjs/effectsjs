@@ -14,12 +14,6 @@ const asyncEject = async () => {
     throw new Error('eject');
 };
 
-const continuationEject = () => {
-    setTimeout(() => {
-        throw new Error('eject');
-    }, 10);
-};
-
 const syncEjectCase = () => {
     'use effects';
     try{
@@ -38,25 +32,12 @@ const asyncEjectCase = async () => {
     }
 };
 
-const continuationEjectCase = () => {
-  'use effects';
-  try{
-
-  }handle ejectType with (e){
-      continuationEject();
-  }
-};
-
-module.exports.test = async ({it, expect, code}) => {
+module.exports.test = async ({it, expect}) => {
     it('Should handle errors as expected when effect handlers throw', async() => {
         await expect(syncEjectCase()).rejects.toThrowError('eject');
     });
 
     it('Should handle errors as expected when effect handlers are async and throw', async () => {
         await expect(asyncEjectCase()).rejects.toThrowError('eject');
-    });
-
-    it.skip('Should handle errors as expected when effect handlers are async and throw', async () => {
-        await expect(continuationEjectCase()).rejects.toThrowError('eject');
     });
 };

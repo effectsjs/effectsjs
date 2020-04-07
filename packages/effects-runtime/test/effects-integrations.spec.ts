@@ -377,4 +377,77 @@ describe("Effect Integrations", () => {
     expect(result1).toBe(childEffectResult);
     expect(result2).toBe(childEffectResult);
   });
+
+  test('', async () => {
+    const mainEffectHandler = function* (input) {
+      return yield withHandler({
+        *main(e, resume) {
+          const result = yield function (handler) {
+            return new Promise(async (res, rej) => {
+              try {
+                return stackResume(handler, {
+                  value: "main"
+                }).then(res).catch(rej);
+              } catch (handlerError) {
+                rej(handlerError);
+              }
+            });
+          };
+          return yield resume(result);
+        }
+
+      }, async function* () {
+        return yield input();
+      }());
+    };
+
+
+    const childEffectHandler = function* (input) {
+      return yield withHandler({
+        *child(e, resume) {
+          const result = yield function (handler) {
+            return new Promise(async (res, rej) => {
+              try {
+                return stackResume(handler, {
+                  value: "child"
+                }).then(res).catch(rej);
+              } catch (handlerError) {
+                rej(handlerError);
+              }
+            });
+          };
+          return yield resume(result);
+        }
+
+      }, async function* () {
+        return yield input();
+      }());
+    };
+
+    const throwsUnhandledEffectError = () => {
+      return runProgram(function* () {
+        return yield mainEffectHandler(function* () {
+          const {
+            value
+          } = yield performEffect({
+            type: "main"
+          });
+          const childEffectResult = yield childEffectHandler(function* () {
+            const {
+              value
+            } = yield performEffect({
+              type: 'child'
+            });
+            return value;
+          });
+          const uhOh = yield performEffect({
+            type: 'child'
+          });
+          return [value, childEffectResult];
+        });
+      }());
+    };
+
+    await expect(throwsUnhandledEffectError()).rejects.toThrowError();
+  })
 });

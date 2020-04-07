@@ -1753,6 +1753,199 @@ module.exports.test = ({ it, expect, describe, code }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS error-handling.js: error-handling.js 1`] = `
+
+const child = () => {
+    throw new Error('from child');
+};
+
+const singleLevel = async () => {
+    'use effects';
+    try{
+        try{
+            child();
+        }catch(e){
+            return perform {type : 'rootEffect'};
+        }
+    }handle 'rootEffect' with (e){
+        recall 'rootEffect';
+    }
+};
+
+
+const parent = () => {
+    const result = perform({type : 'getOne'});
+    try{
+        return result + child(result);
+    }catch(e){
+        return result;
+    }
+};
+
+
+const errorBoundaries = async () => {
+    'use effects';
+    try{
+        return parent();
+    }handle 'getOne' with(e){
+        recall 1;
+    }
+};
+
+const parentThatDoesntCatch = () => {
+    return child();
+};
+
+const exceptionBubbling = async () => {
+    'use effects';
+    try{
+        return parentThatDoesntCatch();
+    }handle default with (e){
+        recall null;
+    }
+};
+
+module.exports.test = ({expect, it}) => {
+    it('Should catch exceptions as expected', async () => {
+        await expect(singleLevel()).resolves.toBe('rootEffect');
+    });
+
+    it('Should catch exceptions at boundaries as expected', async() => {
+        await expect(errorBoundaries()).resolves.toBe(1);
+    });
+
+    it('Should bubble exceptions as expected', async () => {
+        await expect(exceptionBubbling()).rejects.toThrow('from child')
+    })
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const child = () => {
+  throw new Error("from child");
+};
+
+const singleLevel = async () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *rootEffect(e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, "rootEffect")
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          try {
+            yield child();
+          } catch (e) {
+            return yield performEffect({
+              type: "rootEffect"
+            });
+          }
+        })()
+      );
+    })()
+  );
+};
+
+const parent = function*() {
+  const result = yield performEffect({
+    type: "getOne"
+  });
+
+  try {
+    return result + (yield child(result));
+  } catch (e) {
+    return result;
+  }
+};
+
+const errorBoundaries = async () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *getOne(e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, 1)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield parent();
+        })()
+      );
+    })()
+  );
+};
+
+const parentThatDoesntCatch = function*() {
+  return yield child();
+};
+
+const exceptionBubbling = async () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *[__defaultEffectHandler__](e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, null)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          return yield parentThatDoesntCatch();
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ expect, it }) => {
+  it("Should catch exceptions as expected", async () => {
+    await expect(singleLevel()).resolves.toBe("rootEffect");
+  });
+  it("Should catch exceptions at boundaries as expected", async () => {
+    await expect(errorBoundaries()).resolves.toBe(1);
+  });
+  it("Should bubble exceptions as expected", async () => {
+    await expect(exceptionBubbling()).rejects.toThrow("from child");
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS errors-in-handlers.js: errors-in-handlers.js 1`] = `
 
 const ejectType = 'throwErrorHandler';
@@ -1769,12 +1962,6 @@ const asyncEject = async () => {
     });
 
     throw new Error('eject');
-};
-
-const continuationEject = () => {
-    setTimeout(() => {
-        throw new Error('eject');
-    }, 10);
 };
 
 const syncEjectCase = () => {
@@ -1795,26 +1982,13 @@ const asyncEjectCase = async () => {
     }
 };
 
-const continuationEjectCase = () => {
-  'use effects';
-  try{
-
-  }handle ejectType with (e){
-      continuationEject();
-  }
-};
-
-module.exports.test = async ({it, expect, code}) => {
+module.exports.test = async ({it, expect}) => {
     it('Should handle errors as expected when effect handlers throw', async() => {
         await expect(syncEjectCase()).rejects.toThrowError('eject');
     });
 
     it('Should handle errors as expected when effect handlers are async and throw', async () => {
         await expect(asyncEjectCase()).rejects.toThrowError('eject');
-    });
-
-    it.skip('Should handle errors as expected when effect handlers are async and throw', async () => {
-        await expect(continuationEjectCase()).rejects.toThrowError('eject');
     });
 };
 
@@ -1889,45 +2063,12 @@ const asyncEjectCase = async () => {
   );
 };
 
-const continuationEjectCase = () => {
-  return runProgram(
-    (function*() {
-      yield withHandler(
-        {
-          *[ejectType](e, resume) {
-            const result = yield function(handler) {
-              return new Promise(async (res, rej) => {
-                try {
-                  const continuationEject = () => {
-                    setTimeout(() => {
-                      throw new Error("eject");
-                    }, 10);
-                  };
-
-                  continuationEject();
-                } catch (handlerError) {
-                  rej(handlerError);
-                }
-              });
-            };
-            return yield resume(result);
-          }
-        },
-        (async function*() {})()
-      );
-    })()
-  );
-};
-
-module.exports.test = async ({ it, expect, code }) => {
+module.exports.test = async ({ it, expect }) => {
   it("Should handle errors as expected when effect handlers throw", async () => {
     await expect(syncEjectCase()).rejects.toThrowError("eject");
   });
   it("Should handle errors as expected when effect handlers are async and throw", async () => {
     await expect(asyncEjectCase()).rejects.toThrowError("eject");
-  });
-  it.skip("Should handle errors as expected when effect handlers are async and throw", async () => {
-    await expect(continuationEjectCase()).rejects.toThrowError("eject");
   });
 };
 
