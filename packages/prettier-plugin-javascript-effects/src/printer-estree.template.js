@@ -2075,22 +2075,29 @@ function printPathNoParens(path, options, print, args) {
 
       return concat(["catch ", path.call(print, "body")]);
 
-    // effectsjs
+    // effectsjs start
     case "HandleClause":
       const handleEffectQualifier = n.effectMatcher
         ? path.call(print, "effectMatcher")
         : false;
+      if (n.alternate) {
+        n.alternate.type = n.alternate.type || "HandlerAlternate";
+      }
       return concat(
         [
           n.defaultMatcher ? "handle default " : "handle ",
           handleEffectQualifier,
           n.defaultMatcher ? "" : " ",
-          "with ", // @todo, use prettier utils to print with
+          "with ",
           concat(["(", path.call(print, "param"), ") "]),
           path.call(print, "body"),
+          n.alternate ? concat([" ", path.call(print, "alternate")]) : false,
         ].filter(Boolean)
       );
 
+    case "HandlerAlternate":
+      return path.call(print, "handler");
+    // effectjs end
     case "ThrowStatement":
       return concat([
         "throw",
