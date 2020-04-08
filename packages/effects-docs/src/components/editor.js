@@ -1,6 +1,10 @@
 import "./editor.css";
 import { EditorLoading } from "./editor-loading";
-import { parseCurrentQuery, setQuery, getWindow } from "../util/window-location.js";
+import {
+  parseCurrentQuery,
+  setQuery,
+  getWindow,
+} from "../util/window-location.js";
 import React from "react";
 import EditorWorker from "./editor.worker.js";
 

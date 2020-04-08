@@ -28,5 +28,5 @@ export function setQuery(kvMap) {
     .filter((key) => kvMap[key])
     .map((key) => `${key}=${kvMap[key]}`)
     .join("&");
-    win.history.replaceState(win.history.state, "", `?${queryBody}`);
+  win.history.replaceState(win.history.state, "", `?${queryBody}`);
 }
