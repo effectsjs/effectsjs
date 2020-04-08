@@ -5,5 +5,6 @@ try{
   const result = perform ({type : 'effect'});
   console.log(result);
 } handle default with (e) {
-  recall "Effect Result 😘";
+  const handler = "GOTCHA Effect Result 😘"
+  recall handler;
 }
