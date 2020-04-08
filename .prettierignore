@@ -7,4 +7,4 @@ coverage
 static
 .cache
 **/*.d.ts
-*.bundle.js
+packages/prettier-plugin-javascript-effects/src/*.js
