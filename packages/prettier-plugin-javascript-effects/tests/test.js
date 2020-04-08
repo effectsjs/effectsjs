@@ -16,10 +16,10 @@ async function test() {
       parser: parserName,
       plugins: [plugin],
     });
-    // assert(
-    //   formatted === code,
-    //   `filename ${filename} does not match expected output`
-    // );
+    assert(
+      formatted === code,
+      `filename ${filename} does not match expected output`
+    );
     // await fs.writeFile(filename + ".formatted.js", formatted);
   }
   console.log(`# ok ${codes.length}/${codes.length}`);
