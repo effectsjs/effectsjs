@@ -3,7 +3,7 @@ import {
   withHandler,
   runProgram,
   performEffect,
-  DefaultEffectHandler,
+  DefaultEffectHandler
 } from "./runtime";
 
 // @ts-ignore

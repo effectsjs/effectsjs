@@ -1,8 +1,8 @@
 const transformEffects = require("babel-plugin-effects");
 
-module.exports = function (api) {
+module.exports = function(api) {
   api.cache(false);
   return {
-    plugins: [transformEffects],
+    plugins: [transformEffects]
   };
 };

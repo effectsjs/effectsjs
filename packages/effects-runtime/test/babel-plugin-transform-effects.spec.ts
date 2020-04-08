@@ -9,10 +9,10 @@ const fixturesDirectory = path.resolve(
   `functional-tests`
 );
 const unpackTests = () =>
-  readdirSync(fixturesDirectory).map((testFile) => ({
+  readdirSync(fixturesDirectory).map(testFile => ({
     fixture: path.resolve(fixturesDirectory, testFile),
     snapshot: true,
-    title: testFile,
+    title: testFile
   }));
 
 describe("transformEffects", () => {
@@ -21,6 +21,6 @@ describe("transformEffects", () => {
     pluginName: "Transform Effects",
     title: "Transform proposed effects keywords into working JS",
     filename: __filename,
-    tests: unpackTests(),
+    tests: unpackTests()
   });
 });

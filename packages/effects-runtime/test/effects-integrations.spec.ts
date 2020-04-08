@@ -7,7 +7,7 @@ import {
   runProgram,
   stackResume,
   withHandler,
-  DefaultEffectHandler,
+  DefaultEffectHandler
 } from "../src/runtime";
 import { Handler } from "effects-common";
 
@@ -59,7 +59,7 @@ describe("Effect Integrations", () => {
       "childB call",
       "childA end",
       "childB call",
-      "parent end",
+      "parent end"
     ]);
   });
 
@@ -72,7 +72,7 @@ describe("Effect Integrations", () => {
         addExecution("testHandler");
 
         yield resume();
-      },
+      }
     };
 
     function* parent() {
@@ -98,7 +98,7 @@ describe("Effect Integrations", () => {
       "parent post effect",
       "child pre effect",
       "testHandler",
-      "child post effect",
+      "child post effect"
     ]);
   });
 
@@ -110,8 +110,8 @@ describe("Effect Integrations", () => {
       *testCps(_, resume) {
         addExecution("testCps start");
 
-        yield (handler) => {
-          return new Promise((res) => {
+        yield handler => {
+          return new Promise(res => {
             setTimeout(() => {
               stackResume(handler).then(res);
             }, 10);
@@ -125,8 +125,8 @@ describe("Effect Integrations", () => {
       *testAsync(_, resume) {
         addExecution("testAsync start");
 
-        yield async (handler) => {
-          const p = new Promise((res) => setTimeout(res, 10));
+        yield async handler => {
+          const p = new Promise(res => setTimeout(res, 10));
           await p;
 
           await stackResume(handler);
@@ -134,7 +134,7 @@ describe("Effect Integrations", () => {
 
         addExecution("testAsync end");
         return yield resume();
-      },
+      }
     };
 
     async function* parent() {
@@ -146,7 +146,7 @@ describe("Effect Integrations", () => {
       addExecution("parent post async effect");
     }
 
-    const program = (function* () {
+    const program = (function*() {
       yield withHandler(handler, parent());
     })();
 
@@ -160,7 +160,7 @@ describe("Effect Integrations", () => {
       "parent pre async effect",
       "testAsync start",
       "testAsync end",
-      "parent post async effect",
+      "parent post async effect"
     ]);
   });
 
@@ -171,8 +171,8 @@ describe("Effect Integrations", () => {
       *testAsync(_, resume) {
         const then = Date.now();
 
-        yield async (handler) => {
-          const p = new Promise((res) => setTimeout(res, 10));
+        yield async handler => {
+          const p = new Promise(res => setTimeout(res, 10));
           await p;
 
           stackResume(handler);
@@ -183,12 +183,12 @@ describe("Effect Integrations", () => {
         expect(now - then).toBeLessThanOrEqual(15);
         expect(now - then).toBeGreaterThanOrEqual(10);
         return yield resume();
-      },
+      }
     };
 
     const program = withHandler(
       handler,
-      (function* () {
+      (function*() {
         const then = Date.now();
         yield performEffect({ type: "testAsync" });
         const now = Date.now();
@@ -206,13 +206,13 @@ describe("Effect Integrations", () => {
     const parentHandler = {
       *parent(_, resume) {
         return yield resume();
-      },
+      }
     };
 
     const childHandler = {
       *child(_, resume) {
         return yield resume();
-      },
+      }
     };
 
     function* parent() {
@@ -235,13 +235,13 @@ describe("Effect Integrations", () => {
     const parentHandler = {
       *parent(_, resume) {
         return yield resume();
-      },
+      }
     };
 
     const childHandler = {
       *child(_, resume) {
         return yield resume();
-      },
+      }
     };
 
     function* parent() {
@@ -268,7 +268,7 @@ describe("Effect Integrations", () => {
       },
       *effect2(data, resume) {
         return yield resume(finalResult);
-      },
+      }
     };
 
     function* parent() {
@@ -292,13 +292,13 @@ describe("Effect Integrations", () => {
       },
       *[DefaultEffectHandler](data, resume) {
         return yield resume(defaultEffectResult);
-      },
+      }
     };
 
     function* main() {
       return [
         yield performEffect({ type: "effect1" }),
-        yield performEffect({ type: undefined }),
+        yield performEffect({ type: undefined })
       ];
     }
 
@@ -315,13 +315,13 @@ describe("Effect Integrations", () => {
     const handler: Handler = {
       *[DefaultEffectHandler](data, resume) {
         return yield resume(defaultEffectResult);
-      },
+      }
     };
 
     const childHandler: Handler = {
       *effect(data, resume) {
         return yield resume(specifiedEffectResult);
-      },
+      }
     };
 
     function* parent() {
@@ -331,7 +331,7 @@ describe("Effect Integrations", () => {
     function* child() {
       return [
         yield performEffect({ type: undefined }),
-        yield performEffect({ type: "effect" }),
+        yield performEffect({ type: "effect" })
       ];
     }
 
@@ -348,24 +348,24 @@ describe("Effect Integrations", () => {
     const parentHandler: Handler = {
       *parentEffect(data, resume) {
         return yield resume(parentEffectResult);
-      },
+      }
     };
 
     const childHandler: Handler = {
       *[DefaultEffectHandler](data, resume) {
         return yield resume(childEffectResult);
-      },
+      }
     };
 
     const program = withHandler(
       parentHandler,
-      (function* () {
+      (function*() {
         return yield withHandler(
           childHandler,
-          (function* () {
+          (function*() {
             return [
               yield performEffect({ type: "parentEffect" }),
-              yield performEffect({ type: "non-exist" }),
+              yield performEffect({ type: "non-exist" })
             ];
           })()
         );

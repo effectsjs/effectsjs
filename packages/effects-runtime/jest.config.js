@@ -32,7 +32,7 @@ module.exports = {
     "/test/mocks/",
     "/test/__fixtures__",
     "/lib/",
-    "babel.config.js",
+    "babel.config.js"
   ],
 
   // A list of reporter names that Jest uses when writing coverage reports
@@ -41,7 +41,7 @@ module.exports = {
     "text",
     "lcov",
     //   "clover"
-    "html",
+    "html"
   ],
 
   // An object that configures minimum threshold enforcement for coverage results
@@ -152,7 +152,7 @@ module.exports = {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ["/node_modules/", "/babel/"],
+  testPathIgnorePatterns: ["/node_modules/", "/babel/"]
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],

@@ -4,14 +4,14 @@ import {
   performEffect,
   withHandler,
   UnhandledEffectError,
-  DefaultEffectHandler,
+  DefaultEffectHandler
 } from "../src/runtime";
 import { Handler } from "effects-common";
 import {
   getHandler,
   addHandler,
   addReturn,
-  setRootContinuation,
+  setRootContinuation
 } from "effects-common/lib/StackFrame";
 
 describe("Effects Unit Tests", () => {
@@ -35,7 +35,7 @@ describe("Effects Unit Tests", () => {
 
       expect(testInstance.next()).toEqual({
         value: undefined,
-        done: true,
+        done: true
       });
     });
 
@@ -106,7 +106,7 @@ describe("Effects Unit Tests", () => {
         "parent1",
         "child1",
         "child2",
-        "parent2",
+        "parent2"
       ]);
     });
 
@@ -191,7 +191,7 @@ describe("Effects Unit Tests", () => {
   describe("withHandler", () => {
     it("Should return a frame with handler field", () => {
       const handler: Handler = {
-        *handle(data, resume) {},
+        *handle(data, resume) {}
       };
       function* main() {}
 
@@ -203,7 +203,7 @@ describe("Effects Unit Tests", () => {
 
     it("Should return a frame that yields the input frame as its only action", () => {
       const handler = {
-        *handle() {},
+        *handle() {}
       };
       function* main() {}
       const program = main();
@@ -219,7 +219,7 @@ describe("Effects Unit Tests", () => {
   describe("perform", () => {
     it("Should throw when a frame performs an effect that has not be handled", async () => {
       const performContinuation = performEffect({ type: "nonexist" });
-      const mockFrame = function* () {};
+      const mockFrame = function*() {};
 
       await expect(performContinuation(mockFrame())).rejects.toThrowError(
         UnhandledEffectError
@@ -232,10 +232,10 @@ describe("Effects Unit Tests", () => {
         *[DefaultEffectHandler](_, resume) {
           handlerSpy();
           resume();
-        },
+        }
       };
 
-      const controlFrame = (function* () {
+      const controlFrame = (function*() {
         yield performEffect({ type: undefined });
       })();
 
@@ -252,7 +252,7 @@ describe("Effects Unit Tests", () => {
         *test(_, resume) {
           handlerSpy();
           resume();
-        },
+        }
       };
 
       const controlFrame = (function* main() {
@@ -272,7 +272,7 @@ describe("Effects Unit Tests", () => {
         *test(data, resume) {
           handlerSpy(data);
           return yield resume();
-        },
+        }
       };
 
       const controlFrame = (function* main() {
@@ -291,13 +291,13 @@ describe("Effects Unit Tests", () => {
       const handler: Handler = {
         *test(_, resume) {
           return yield resume(expectedValue);
-        },
+        }
       };
 
       const controlFrame = (function* main() {
         const result = yield performEffect({
           type: "test",
-          data: expectedValue,
+          data: expectedValue
         });
         controlFrameSpy(result);
       })();
@@ -314,18 +314,18 @@ describe("Effects Unit Tests", () => {
 
       const handler: Handler = {
         *test(_, resume) {
-          yield async (handler) => {
+          yield async handler => {
             continuationSpy();
             await stackResume(handler);
           };
 
-          yield async (handler) => {
+          yield async handler => {
             continuationSpy();
             await stackResume(handler);
           };
 
           return yield resume();
-        },
+        }
       };
 
       const controlFrame = (function* main() {
@@ -344,20 +344,20 @@ describe("Effects Unit Tests", () => {
       );
     });
 
-    it("Should pass data computed in continuations back to the handler", (done) => {
+    it("Should pass data computed in continuations back to the handler", done => {
       expect.assertions(1);
       const expectedResult = Symbol();
 
       const handler: Handler = {
         *test(_, resume) {
-          const result = yield (handler) => {
+          const result = yield handler => {
             setTimeout(() => {
               stackResume(handler, expectedResult);
             }, 1);
           };
 
           return yield resume(result);
-        },
+        }
       };
 
       const controlFrame = (function* main() {
@@ -379,7 +379,7 @@ describe("Effects Unit Tests", () => {
       const handler: Handler = {
         *[handlerType](_, resume) {
           return yield resume(expectedResult);
-        },
+        }
       };
 
       const controlFrame = (function* main() {
@@ -399,7 +399,7 @@ describe("Effects Unit Tests", () => {
           })()
         )
       ).rejects.toThrowError(
-        "Encountered an unhandled effect: Symbol(oh noes)"
+        "Encountered an unhandled effect :Symbol(oh noes)"
       );
     });
   });
