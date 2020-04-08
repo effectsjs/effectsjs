@@ -9,9 +9,9 @@ const {
     findHandlerFrame,
     getHandler,
     getReturnFrame,
-    isRootContinuation
+    isRootContinuation,
   },
-  util: { exists, isContinuation, isIterator }
+  util: { exists, isContinuation, isIterator },
 } = common;
 
 export const DefaultEffectHandler: unique symbol = Symbol(
@@ -131,7 +131,7 @@ export const performEffect = ({ type, ...data }: Effect) => async (
 };
 
 export const withHandler = (handler: Handler, frame: StackFrame) => {
-  const handlerFrame = (function*() {
+  const handlerFrame = (function* () {
     return yield frame;
   })();
 
