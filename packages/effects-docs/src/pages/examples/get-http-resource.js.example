@@ -32,7 +32,7 @@ async function getPageSize(url) {
 }
 
 function flushAnalysis(payload) {
-  // createReadStream(payload).pipe(fs.createWriteStream(...))
+  // e.g. createReadStream(payload).pipe(fs.createWriteStream(...))
   return Promise.resolve(payload).then(() => ({
     path: "/var/analyses/123.json",
   }));

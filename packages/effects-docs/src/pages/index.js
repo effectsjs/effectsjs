@@ -7,14 +7,33 @@ import Logo from "../components/logo";
 import React from "react";
 import SEO from "../components/seo";
 
+const FAQS = [
+  {
+    title: `Why do I need to use "use effects"?`,
+    a: "whyuseeffects",
+    answer: `The "use effects" directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`,
+  },
+  {
+    title: `Can I perform an effect from within an effect?`,
+    a: "nestedeffects",
+    answer: "Currently, no.  In the future, maybe!",
+  },
+];
+
 const IndexPage = () => {
   const {
     references: { html: references },
     keywords: { html: keywords },
+    elevator_pitch: { html: elevator_pitch },
   } = useStaticQuery(graphql`
     {
       references: markdownRemark(
         frontmatter: { title: { eq: "index_references" } }
+      ) {
+        html
+      }
+      elevator_pitch: markdownRemark(
+        frontmatter: { title: { eq: "elevator_pitch" } }
       ) {
         html
       }
@@ -39,14 +58,7 @@ const IndexPage = () => {
         language="js"
         children={exampleText}
       />
-      <p className="node">
-        As seen above, the code 'use effects' directive enables the user to
-        begin using effects
-        <a className="super" href="#whyuseeffects">
-          1
-        </a>
-        . Further, you may observe that a few new keywords have been added:
-      </p>
+      <Html className="node" children={elevator_pitch} />
       <h3 className="node">Effects keywords</h3>
       <Html className="node" children={keywords} />
       <div className="node funsies" children={<Logo />} />
@@ -75,18 +87,7 @@ const IndexPage = () => {
       <h3 className="node">References</h3>
       <Html className="node" children={references} />
       <h2 className="node">FAQ</h2>
-      {[
-        {
-          title: `Why do I need to use 'use effects'?`,
-          a: "whyuseeffects",
-          answer: `The 'use effects' directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`,
-        },
-        {
-          title: `Can I perform an effect from within an effect?`,
-          a: "nestedeffects",
-          answer: "Currently, no.  In the future, maybe!",
-        },
-      ].map(({ title, a, answer }) => (
+      {FAQS.map(({ title, a, answer }) => (
         <React.Fragment key={a}>
           <h3 className="node">{title}</h3>
           <a name={a} href={a} /> {/* eslint-disable-line */}
