@@ -17,7 +17,18 @@ jobs:
           node-version: 12.16.1
       - name: install
         run: npm ci && npm run bootstrap
+      - name: get babel sha
+        run: echo ::set-env name=BABEL_SHA::$(node scripts/get-babel-sha.js)
+      - name: echo babel sha
+        run: echo ${{ env.BABEL_SHA }}
+      - name: create babel fork cache id
+        id: cache-babel-fork
+        uses: actions/cache@v1
+        with:
+          path: babel
+          key: ${{ runner.os }}-${{ env.BABEL_SHA }}
       - name: init-babel-fork
+        if: steps.cache-babel-fork.outputs.cache-hit != 'true'
         run: bash scripts/init-babel.sh
       - name: build
         run: npm run build
