@@ -27,13 +27,13 @@ async function test() {
 
 async function readFixtures() {
   const basenames = await fs.readdir(fixturesDir);
-  const fixtureFilenames = [
-    "/Users/cdaringe/node/effectsjs/packages/effects-runtime/test/__fixtures__/functional-tests/inline-arrow-function.js",
-  ];
+  // const fixtureFilenames = [
+    // @info - add debug filename here
+  // ];
   // @TODO restore
-  // basenames
-  //   .filter((basename) => basename.match(/js$/))
-  //   .map((basename) => resolve(fixturesDir, basename));
+  const fixtureFilenames = basenames
+    .filter((basename) => basename.match(/js$/))
+    .map((basename) => resolve(fixturesDir, basename));
   return Promise.all(
     fixtureFilenames.map(async (filename) => ({
       filename,
