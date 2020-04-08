@@ -11,7 +11,7 @@ function main () {
 
 function analyzePage () {
   const start = Date.now()
-  const url = window.location.href
+  const url = location.href
   const size = perform { type: 'get_page_size', payload: { url } }
   const { path: analysisPath } = perform { type: 'flush_analysis', payload: { url, size } }
   const finish = Date.now()
@@ -25,7 +25,6 @@ async function getPageSize (url) {
 }
 
 function flushAnalysis (payload) {
-  // createReadStream(payload).pipe(fs.createWriteStream(...))
   return Promise.resolve(payload).then(() => ({ path: '/var/analyses/123.json' }))
 }
 

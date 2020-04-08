@@ -9,14 +9,11 @@ To bootstrap development, please
 - install [nvm](https://github.com/nvm-sh/nvm)
 - fork & clone this repo, then `cd ./effectsjs`
 - install and use the repository requestend version of nodejs: `nvm install && nvm use`
-- install and link all depedencies: `npm run bootstrap`
-- configure the babel fork:
-  - `git submodule init`
-  - `git submodule update`
-  - `cd babel`
-  - `make bootstrap`
-  - `make build`
-  - `cd ..`
+- install and link all dependencies: `npm run bootstrap`
+- configure the babel fork: `scripts/init-babel.sh` (this takes a while)
+
+### congrats! you're ready to start hacking:
+
 - cd `packages/<package-name>`
 - start the compiler: `npm run build -- --watch`
 - do great work
