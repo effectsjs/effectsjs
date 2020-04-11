@@ -8,7 +8,7 @@ const {
     addReturn,
     findHandlerFrame,
     getHandler,
-    getReturnFrame,
+    getReturnFrame
   },
   util: { exists, isContinuation, isIterator }
 } = common;
@@ -30,12 +30,12 @@ const unwindStack = async (e: Error | any, frame: StackFrame) => {
   //  This might be done best with the help of a babel transform plugin
   const parent = getReturnFrame(frame);
 
-  if(isIterator(parent)){
+  if (isIterator(parent)) {
     return await stackResume(parent, e, true);
-  }else if(isContinuation(parent)){
+  } else if (isContinuation(parent)) {
     return await parent(e);
-  }else{
-    throw e
+  } else {
+    throw e;
   }
 };
 

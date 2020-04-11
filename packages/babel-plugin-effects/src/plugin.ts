@@ -4,15 +4,15 @@ import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
-import {REMOVAL_FIELD} from "./remove-on-exit-visitor";
+import { REMOVAL_FIELD } from "./remove-on-exit-visitor";
 import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
   visitor: Visitor;
   // yeah, I dont like it either
-  pre?: (this : any, state?: any) => void;
-  post?: (this : any, state?: any) => void;
+  pre?: (this: any, state?: any) => void;
+  post?: (this: any, state?: any) => void;
   parserOverride: typeof parse;
 }
 
@@ -57,10 +57,10 @@ export default function transformEffects({ types }: Babel): Plugin {
     parserOverride(code, opts) {
       return parser.parse(code, opts);
     },
-    pre(){
+    pre() {
       this.removalNodes = new Set<NodePath>();
     },
-    post(){
+    post() {
       Array.from(this.removalNodes).forEach((x: NodePath) => x.remove());
     },
     visitor: {
@@ -77,13 +77,16 @@ export default function transformEffects({ types }: Babel): Plugin {
             },
             { types }
           );
-          path.traverse({
-            Declaration: (path) => {
-              if (path[REMOVAL_FIELD] === true) {
-                state.removalNodes.add(path)
+          path.traverse(
+            {
+              Declaration: path => {
+                if (path[REMOVAL_FIELD] === true) {
+                  state.removalNodes.add(path);
+                }
               }
-            }
-          }, { types });
+            },
+            { types }
+          );
         }
       },
       TryStatement: {

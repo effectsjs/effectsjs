@@ -118,11 +118,12 @@ const makeHandlerMethod = (
         x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
       );
 
-      if(declaration){
-          callExpressionDeclarations.add(declaration.node);
+      if (declaration) {
+        callExpressionDeclarations.add(declaration.node);
 
-          // Not the most elegant.
-          declaration.parent?.parent?.type === 'Program' && markPathForRemoval(declaration);
+        // Not the most elegant.
+        declaration.parent?.parent?.type === "Program" &&
+          markPathForRemoval(declaration);
       }
     }
   });
