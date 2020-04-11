@@ -21,7 +21,7 @@ const asyncCaught = async () => {
   }
 };
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Should await runtime root when parent function is async', async () => {
         expect(asyncNotCaught()).rejects.toThrow('error');
     });

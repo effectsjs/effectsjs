@@ -35,7 +35,7 @@ const locallyScopedEffects = async () => {
   }
 };
 
-module.exports.test = ({describe, it, code, expect}) => {
+module.exports.test = ({describe, it, expect}) => {
     describe(`Computed props for effects handlers`, () => {
         it('Should behave as expected when performing a symbol handler', async () => {
             await expect(performSymbolHandler()).resolves.toBe('symbol');

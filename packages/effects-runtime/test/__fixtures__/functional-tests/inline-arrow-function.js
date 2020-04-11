@@ -26,7 +26,7 @@ const main = async (e, data) => root(e, data);
 
 
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Compiles and runs an inline arrow function expression that performs', async () => {
         const identity = await main('dynamic-effect', 'hello world');
         expect(identity).toBe('hello world');

@@ -379,75 +379,65 @@ describe("Effect Integrations", () => {
   });
 
   test('', async () => {
-    const mainEffectHandler = function* (input) {
-      return yield withHandler({
-        *main(e, resume) {
-          const result = yield function (handler) {
-            return new Promise(async (res, rej) => {
-              try {
-                return stackResume(handler, {
-                  value: "main"
-                }).then(res).catch(rej);
-              } catch (handlerError) {
-                rej(handlerError);
-              }
-            });
-          };
-          return yield resume(result);
-        }
-
-      }, async function* () {
-        return yield input();
-      }());
-    };
-
-
-    const childEffectHandler = function* (input) {
-      return yield withHandler({
-        *child(e, resume) {
-          const result = yield function (handler) {
-            return new Promise(async (res, rej) => {
-              try {
-                return stackResume(handler, {
-                  value: "child"
-                }).then(res).catch(rej);
-              } catch (handlerError) {
-                rej(handlerError);
-              }
-            });
-          };
-          return yield resume(result);
-        }
-
-      }, async function* () {
-        return yield input();
-      }());
-    };
-
-    const throwsUnhandledEffectError = () => {
+    const catchingEject = async () => {
       return runProgram(function* () {
-        return yield mainEffectHandler(function* () {
-          const {
-            value
-          } = yield performEffect({
-            type: "main"
-          });
-          const childEffectResult = yield childEffectHandler(function* () {
-            const {
-              value
-            } = yield performEffect({
-              type: 'child'
+        return yield withHandler({
+          *[DefaultEffectHandler](e, resume) {
+            const result = yield function (handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  console.log('recalling');
+                  return stackResume(handler, 'it works!').then(res).catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+
+        }, async function* () {
+          try {
+            yield console.log('test', (yield performEffect({
+              type: 'outerPerform'
+            })));
+            return yield await withHandler({
+              *[DefaultEffectHandler](e, resume) {
+                const result = yield function (handler) {
+                  return new Promise(async (res, rej) => {
+                    try {
+                      const syncEject = () => {
+                        throw new Error('eject');
+                      };
+
+                      console.log('ejecting');
+                      syncEject();
+                    } catch (handlerError) {
+                      rej(handlerError);
+                    }
+                  });
+                };
+                return yield resume(result);
+              }
+
+            }, async function* () {
+              yield performEffect({
+                type: 'innerPerform'
+              });
+            }());
+          } catch (e) {
+            // yield console.log('catching');
+            const a =  yield performEffect({
+              type: 'outerPerform'
             });
-            return value;
-          });
-          const uhOh = yield performEffect({
-            type: 'child'
-          });
-          return [value, childEffectResult];
-        });
+
+            return a;
+          }
+        }());
       }());
     };
 
-    await expect(throwsUnhandledEffectError()).rejects.toThrowError();
-  })
+    const a = await catchingEject();
+    debugger;
+  });
 });

@@ -31,9 +31,9 @@ const unwindStack = async (e: Error | any, frame: StackFrame) => {
   const parent = getReturnFrame(frame);
 
   if(isIterator(parent)){
-    await parent.throw(e);
+    return await stackResume(parent, e, true);
   }else if(isContinuation(parent)){
-    await parent(e);
+    return await parent(e);
   }else{
     throw e
   }
@@ -41,14 +41,15 @@ const unwindStack = async (e: Error | any, frame: StackFrame) => {
 
 export const stackResume = async (
   gen: Generator | StackFrame | any,
-  arg?: any
+  arg?: any,
+  willThrow?: boolean
 ): Promise<any> => {
   if (!isIterator(gen)) {
     return gen;
   }
 
   try {
-    const { value, done } = await gen.next(arg);
+    const { value, done } = await (willThrow ? gen.throw(arg) : gen.next(arg));
 
     if (!done) {
       if (isIterator(value)) {
@@ -71,7 +72,7 @@ export const stackResume = async (
       }
     }
   } catch (e) {
-    await unwindStack(e, gen);
+    return await unwindStack(e, gen);
   }
 };
 

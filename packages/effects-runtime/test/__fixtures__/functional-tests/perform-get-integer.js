@@ -13,7 +13,7 @@ const main = async () => {
     }
 }
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it("Should compile, and return expected results", async () => {
         const result = await main();
 

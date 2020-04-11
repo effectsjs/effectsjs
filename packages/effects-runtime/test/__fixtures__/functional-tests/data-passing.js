@@ -21,7 +21,7 @@ const dynamicEffect = (effect) => {
         }
     }
 }
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Should pass data into handler variable', async () => {
         const result = await main();
 
