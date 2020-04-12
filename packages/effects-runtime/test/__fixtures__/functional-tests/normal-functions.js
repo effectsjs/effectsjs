@@ -22,7 +22,7 @@ const main = () => {
     })
 };
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Should handle the happy-path nested child', async () => {
         const result = await main();
 

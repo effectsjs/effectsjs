@@ -76,7 +76,7 @@ const incrementCounter = async () => {
     }
 };
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Should perform atomic updates on external lock-protected resources', async () => {
         await database.connect();
         const result = await Promise.all([

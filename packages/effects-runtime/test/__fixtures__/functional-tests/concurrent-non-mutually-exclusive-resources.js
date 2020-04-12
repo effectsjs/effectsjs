@@ -32,7 +32,7 @@ const root = async () => {
 };
 
 
-module.exports.test = ({expect, it, code}) => {
+module.exports.test = ({expect, it}) => {
     it(`Shouldn't bottleneck when performing concurrent behavior`, async () => {
         expect.assertions(1);
         const results = await Promise.all([

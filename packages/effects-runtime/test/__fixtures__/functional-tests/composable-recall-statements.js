@@ -74,7 +74,7 @@ const performAllTest = () => {
     });
 };
 
-module.exports.test = ({it, describe, expect, code}) => {
+module.exports.test = ({it, describe, expect}) => {
     describe('Single effect', () => {
         it('Should perform effect A', async () => {
             const result = await performATest();

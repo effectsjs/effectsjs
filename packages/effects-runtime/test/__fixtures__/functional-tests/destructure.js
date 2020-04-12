@@ -56,7 +56,7 @@ const defaultAssignments = () => {
     }
 };
 
-module.exports.test = ({it, expect, describe, code}) => {
+module.exports.test = ({it, expect, describe}) => {
     describe('Destructuring effects handlers', () => {
         it('Should destructure effect types in handle block', async () => {
             const result = await typeDestructure();

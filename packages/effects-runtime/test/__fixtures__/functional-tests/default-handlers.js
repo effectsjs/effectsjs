@@ -15,7 +15,7 @@ const main = async (data) => {
 };
 
 
-module.exports.test = ({it, expect, code}) => {
+module.exports.test = ({it, expect}) => {
     it('Should handle a non-explicitly declared effect when a default effect handler when present', async () => {
         const result = await main(1);
 

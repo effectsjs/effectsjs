@@ -117,9 +117,13 @@ const makeHandlerMethod = (
       const declaration = binding?.path.find(
         x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
       );
+
       if (declaration) {
         callExpressionDeclarations.add(declaration.node);
-        markPathForRemoval(declaration);
+
+        // Not the most elegant.
+        declaration.parent?.parent?.type === "Program" &&
+          markPathForRemoval(declaration);
       }
     }
   });
