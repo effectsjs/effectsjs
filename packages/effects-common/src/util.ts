@@ -7,6 +7,8 @@ export const exists = <T>(x: T): x is Exclude<T, null | undefined> =>
 export const isGeneratorFactory = (
   x: any
 ): x is AsyncGeneratorFunction | GeneratorFunction => {
+  if (typeof x !== "function") return false;
+
   return ["AsyncGeneratorFunction", "GeneratorFunction"].some(
     type => type === Reflect.getPrototypeOf(x).constructor.name
   );

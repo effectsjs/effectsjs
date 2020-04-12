@@ -76,7 +76,7 @@ const programThree = async () => {
 
 
 module.exports.test = ({it, expect, describe, code}) => {
-    describe.only('Boundary functional tests', () => {
+    describe('Boundary functional tests', () => {
         it('Should produce expected results from a functional interface', async () => {
             await expect(programOne()).resolves.toEqual([4,8,12]);
         });
