@@ -4,7 +4,7 @@ import {
   getReturnFrame,
   StackFrame
 } from "./StackFrame";
-import { exists } from "./util";
+import { exists, isContinuation, isGeneratorFactory, isIterator } from "./util";
 
 enum BOUNDARY_STATE {
   UNINITIALIZED,
@@ -69,8 +69,27 @@ export class Boundary implements Iterator<any> {
     return this;
   }
 
-  into(temporalFrameCreator: (...data: any[]) => StackFrame | Continuation) {
+  into(
+    temporalFrameCreator:
+      | Continuation
+      | ((...data: any[]) => StackFrame | Continuation)
+  ) {
     return (...args: any[]) => {
+      if (
+        !isContinuation(temporalFrameCreator) &&
+        !isGeneratorFactory(temporalFrameCreator)
+      ) {
+        throw new BoundaryError(
+          `Received an invalid frame creator for .into. Expected GeneratorFunction or Continuation but received: ${typeof temporalFrameCreator}`
+        );
+      }
+
+      if (isContinuation(temporalFrameCreator)) {
+        temporalFrameCreator = function*() {
+          return yield temporalFrameCreator();
+        };
+      }
+
       const unlinkTemporalFrame = () => addReturn(temporalFrame, null);
       const stackResume = getStackResumeFromContext(this);
 
