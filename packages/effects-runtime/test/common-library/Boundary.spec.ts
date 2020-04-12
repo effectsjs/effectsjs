@@ -238,29 +238,29 @@ describe("Effects Boundaries", () => {
     expect(result).toBe("it works!");
   });
 
-  it('Should accept a continuation as a temporal frame creator', async () => {
+  it("Should accept a continuation as a temporal frame creator", async () => {
     const boundary = createBoundary();
     const expectedResult = Symbol();
 
-    function* root(){
+    function* root() {
       yield boundary.withContext();
       return yield boundary.into(() => {
-        return expectedResult
+        return expectedResult;
       });
     }
 
     await expect(runProgram(root())).resolves.toBe(expectedResult);
   });
 
-  it('Should throw if passed an incorrect argument', async () => {
+  it("Should throw if passed an incorrect argument", async () => {
     const boundary = createBoundary();
 
-    function* root(){
+    function* root() {
       yield boundary.withContext();
       // @ts-ignore
-      return yield boundary.into('hello');
+      return yield boundary.into("hello");
     }
 
     await expect(runProgram(root())).rejects.toThrowError(BoundaryError);
-  })
+  });
 });
