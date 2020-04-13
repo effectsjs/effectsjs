@@ -3,7 +3,7 @@ import { Visitor, NodePath } from "@babel/traverse";
 import BabelTypes, { ArrowFunctionExpression } from "@babel/types";
 import {
   arrowExpressionToGenerator,
-  fixupParentGenerator
+  fixupParentGenerator,
 } from "./traverse-utilities";
 import { performVisitor } from "./perform-visitor";
 import { util as effectsUtil } from "effects-common";
@@ -30,7 +30,7 @@ export const toGeneratorVisitor: Visitor<TypesVisitorPrototype> = {
     body?.traverse(yieldCallExpressionVisitor, { types });
     body?.traverse(callExpressionVisitor, { types });
     body?.traverse(performVisitor, { types });
-  }
+  },
 };
 
 export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
@@ -57,7 +57,7 @@ export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
         path.replaceWith(types.yieldExpression(path.node));
       }
     }
-  }
+  },
 };
 
 export const isYieldCandidate = (path: NodePath, types: typeof BabelTypes) => {
@@ -91,5 +91,5 @@ export const yieldCallExpressionVisitor: Visitor<TypesVisitorPrototype> = {
     if (exists(skipChildTraversal) && Boolean(skipChildTraversal)) {
       path.skip();
     }
-  }
+  },
 };

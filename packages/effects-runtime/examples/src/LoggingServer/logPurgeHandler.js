@@ -1,26 +1,26 @@
-const fs = require('fs');
-const path = require('path');
-const logPurgeType = 'log_purge';
+const fs = require("fs");
+const path = require("path");
+const logPurgeType = "log_purge";
 
-const LogPurgeEffect = () => ({type : logPurgeType});
+const LogPurgeEffect = () => ({ type: logPurgeType });
 
 const withLogPurgeHandler = (fn) => {
-  try{
-      return fn();
-  } handle default with (e){
-    if(e.type === logPurgeType){
-        fs.unlink(path.resolve(__dirname, 'log.txt'), (err) => {
-            if(err){
-                recall err;
-            }
+  try {
+    return fn();
+  } handle default with (e) {
+    if (e.type === logPurgeType) {
+      fs.unlink(path.resolve(__dirname, "log.txt"), (err) => {
+        if (err) {
+          recall err;
+        }
 
-            recall null;
-        })
+        recall null;
+      });
     }
   }
 };
 
 module.exports = {
-    LogPurgeEffect,
-    withLogPurgeHandler
+  LogPurgeEffect,
+  withLogPurgeHandler,
 };

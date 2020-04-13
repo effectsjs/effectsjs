@@ -1,26 +1,28 @@
-const delay = ms => new Promise(res => setTimeout(res, ms))
-const asyncIdentity = name => {
-  return perform { type: 'async_identity', payload: { name } }
-}
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+const asyncIdentity = (name) => {
+  return perform { type: "async_identity", payload: { name } };
+};
 
 const work = async (name) => {
-  'use effects'
+  "use effects";
   try {
-    return asyncIdentity(name)
-  } handle 'async_identity' with (e) {
-    const { payload: { name } } = e
-    await delay(name === 'a' ? 100 : 1)
-    console.log(`identity resolved: ${name}`)
-    recall name
+    return asyncIdentity(name);
+  } handle "async_identity" with (e) {
+    const {
+      payload: { name },
+    } = e;
+    await delay(name === "a" ? 100 : 1);
+    console.log(`identity resolved: ${name}`);
+    recall name;
   }
+};
+
+async function main() {
+  console.log("firing events a, b, c");
+  const aP = work("a");
+  const bP = work("b");
+  const cP = work("c");
+  console.log(await Promise.all([aP, bP, cP]));
 }
 
-async function main () {
-  console.log('firing events a, b, c')
-  const aP = work('a')
-  const bP = work('b')
-  const cP = work('c')
-  console.log(await Promise.all([aP, bP, cP]))
-}
-
-main()
+main();

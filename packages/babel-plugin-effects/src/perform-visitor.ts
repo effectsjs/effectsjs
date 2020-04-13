@@ -14,10 +14,10 @@ export const performVisitor: Visitor<TypesVisitorPrototype> = {
       path.replaceWith(
         types.yieldExpression(
           types.callExpression(types.identifier("performEffect"), [
-            path.node.argument
+            path.node.argument,
           ])
         )
       );
     }
-  }
+  },
 };

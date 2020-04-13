@@ -27,5 +27,5 @@ export const recallVisitor: Visitor<TypesVisitorPrototype> = {
         .findParent(types.isExpressionStatement)
         ?.replaceWith(types.returnStatement(path.node));
     }
-  }
+  },
 };

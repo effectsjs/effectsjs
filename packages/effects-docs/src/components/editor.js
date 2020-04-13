@@ -1,10 +1,14 @@
 import "./editor.css";
 import { EditorLoading } from "./editor-loading";
-import { parseCurrentQuery, setQuery } from "../util/window-location.js";
+import {
+  parseCurrentQuery,
+  setQuery,
+  getWindow,
+} from "../util/window-location.js";
 import React from "react";
 import EditorWorker from "./editor.worker.js";
 
-const worker = typeof window === "object" && new EditorWorker();
+const worker = getWindow() && new EditorWorker();
 // kick off download ASAP--on parse--well before react-mount
 const reactAceP = import("react-ace");
 let virtualConsole;
@@ -18,15 +22,15 @@ export default class Editor extends React.PureComponent {
       isAutoEval: true,
       isFullScreen: !!isQueryFullscreen || false,
       logs: [],
-      src: props.defaultSource
+      src: props.defaultSource,
     };
   }
   async componentDidMount() {
     let virtualConsole;
-    this.AceEditor = await reactAceP.then(mod => mod.default);
+    this.AceEditor = await reactAceP.then((mod) => mod.default);
     await Promise.all([
       import("ace-builds/src-min-noconflict/mode-javascript.js"),
-      import("ace-builds/src-min-noconflict/theme-monokai.js")
+      import("ace-builds/src-min-noconflict/theme-monokai.js"),
     ]);
     worker.onmessage = this.handleWorkerMessage;
     this.onChange("");
@@ -52,12 +56,12 @@ export default class Editor extends React.PureComponent {
     }
   };
 
-  evaluate = src => {
-    worker.evaluate(src).catch(err => {
+  evaluate = (src) => {
+    worker.evaluate(src).catch((err) => {
       console.error("failed to evaluate user source code", err.message);
     });
   };
-  onChange = nextSrc => {
+  onChange = (nextSrc) => {
     this.setState({ src: nextSrc }, () => {
       if (this.state.isAutoEval) worker.evaluate(nextSrc);
     });
@@ -123,7 +127,7 @@ export default class Editor extends React.PureComponent {
             enableLiveAutocompletion: false,
             enableSnippets: false,
             showLineNumbers: true,
-            tabSize: 2
+            tabSize: 2,
           }}
         />
         <div className="node" id="virtualConsole">

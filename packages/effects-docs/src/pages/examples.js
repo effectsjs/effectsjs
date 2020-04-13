@@ -7,12 +7,12 @@ import { Html } from "../components/html";
 import {
   toExamples,
   withoutExampleSuffix,
-  withoutJsSuffix
+  withoutJsSuffix,
 } from "../util/examples";
 
 const Examples = () => {
   const {
-    examples: { edges }
+    examples: { edges },
   } = useStaticQuery(graphql`
     {
       examples: allFile(

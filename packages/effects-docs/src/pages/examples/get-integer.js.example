@@ -1,10 +1,10 @@
 const main = async () => {
-  'use effects'
-  try{
-    const integer = perform { type: 'get_int' }
-    console.log({ integer, ok: 5 === integer })
-  } handle 'get_int' with (e) {
+  "use effects";
+  try {
+    const integer = perform { type: "get_int" };
+    console.log({ integer, ok: 5 === integer });
+  } handle "get_int" with (e) {
     recall 5;
   }
-}
-main()
+};
+main();
