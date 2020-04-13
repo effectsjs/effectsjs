@@ -4,14 +4,15 @@ import BabelTypes, { ObjectExpression, TryStatement } from "@babel/types";
 import { effectsDirectiveVisitor } from "./effects-directive-visitor";
 import { followHandlerDefinitions } from "./handler-method-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
-import { removeOnExitVisitor } from "./remove-on-exit-visitor";
+import { REMOVAL_FIELD } from "./remove-on-exit-visitor";
 import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
 const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
   visitor: Visitor;
-  pre?: (state?: any) => void;
-  post?: (state?: any) => void;
+  // yeah, I dont like it either
+  pre?: (this: any, state?: any) => void;
+  post?: (this: any, state?: any) => void;
   parserOverride: typeof parse;
 }
 
@@ -46,7 +47,7 @@ const createWithHandlerInvocation = (
 
   return types.callExpression(types.identifier("withHandler"), [
     handler,
-    types.callExpression(mainFunctionExpression, []),
+    types.callExpression(mainFunctionExpression, [])
   ]);
 };
 
@@ -56,22 +57,37 @@ export default function transformEffects({ types }: Babel): Plugin {
     parserOverride(code, opts) {
       return parser.parse(code, opts);
     },
+    pre() {
+      this.removalNodes = new Set<NodePath>();
+    },
+    post() {
+      Array.from(this.removalNodes).forEach((x: NodePath) => x.remove());
+    },
     visitor: {
       Program: {
-        exit(path) {
+        exit(path, state) {
           path.traverse(effectsDirectiveVisitor, {
-            types,
+            types
           });
           path.traverse(
             {
               YieldExpression(path) {
                 fixupParentGenerator(path, types);
-              },
+              }
             },
             { types }
           );
-          path.traverse(removeOnExitVisitor, { types });
-        },
+          path.traverse(
+            {
+              Declaration: path => {
+                if (path[REMOVAL_FIELD] === true) {
+                  state.removalNodes.add(path);
+                }
+              }
+            },
+            { types }
+          );
+        }
       },
       TryStatement: {
         enter(path) {
@@ -104,7 +120,7 @@ export default function transformEffects({ types }: Babel): Plugin {
           } else {
             path.replaceWith(withHandlerExpression);
           }
-        },
+        }
       },
       UnaryExpression(path) {
         // TODO [minor] ignore required because types do not recognize the operator as valid. Fix that.
@@ -113,7 +129,7 @@ export default function transformEffects({ types }: Babel): Plugin {
           path.replaceWith(
             types.yieldExpression(
               types.callExpression(types.identifier("performEffect"), [
-                path.node.argument,
+                path.node.argument
               ])
             )
           );
@@ -143,7 +159,7 @@ export default function transformEffects({ types }: Babel): Plugin {
             .findParent(types.isExpressionStatement)
             ?.replaceWith(types.returnStatement(path.node));
         }
-      },
-    },
+      }
+    }
   };
 }
