@@ -47,7 +47,7 @@
 /******/ 		promises.push(Promise.resolve().then(function() {
 /******/ 			// "1" is the signal for "already loaded"
 /******/ 			if(!installedChunks[chunkId]) {
-/******/ 				importScripts(__webpack_require__.p + "" + chunkId + "." + "ca7cb30c51d3c1a00d6c" + ".worker.js");
+/******/ 				importScripts(__webpack_require__.p + "" + chunkId + "." + "c2f529ae9477247aaf7f" + ".worker.js");
 /******/ 			}
 /******/ 		}));
 /******/ 		return Promise.all(promises);
@@ -758,7 +758,7 @@ let isEvaluating = false;
 let nextToEvaluate = "";
 
 async function resolveBabel() {
-  while (!global.Babel) await new Promise(res => setTimeout(res, 50));
+  while (!global.Babel) await new Promise((res) => setTimeout(res, 50));
   return global.Babel;
 }
 
@@ -775,18 +775,18 @@ const evaluate = lodash_debounce__WEBPACK_IMPORTED_MODULE_0___default()(
     const [babel, transformEffects, effectsRuntime] = await Promise.all([
       resolveBabel(),
       transformEffectsP,
-      effectsRuntimeP
+      effectsRuntimeP,
     ]);
     try {
       const transformed = babel.transform(nextToEvaluate, {
-        plugins: [transformEffects]
+        plugins: [transformEffects],
       }).code;
       unpatchedInfo(transformed);
       new Function(transformed)(); // eslint-disable-line
     } catch (error) {
       console.error({
         message: error.message,
-        meta: "see browser console fo more details"
+        meta: "see browser console fo more details",
       });
     } finally {
       isEvaluating = false;
@@ -796,14 +796,14 @@ const evaluate = lodash_debounce__WEBPACK_IMPORTED_MODULE_0___default()(
   { maxWait: 2000, trailing: true }
 );
 
-self.onunhandledrejection = err => {
+self.onunhandledrejection = (err) => {
   err.preventDefault();
   unpatchedError(err);
   console.error(
     (err && err.reason && err.reason.message) || "mega-bummer, jim"
   );
 };
-self.onerror = err => {
+self.onerror = (err) => {
   err.preventDefault();
   unpatchedError(err);
   console.error("bummer, jim");
@@ -827,7 +827,7 @@ function monkeyPatchConsole(onNextMsg) {
   const appendLog = (level, ...args) => {
     let msg;
     try {
-      msg = args.map(arg =>
+      msg = args.map((arg) =>
         JSON.stringify(arg || "")
           .replace(/^"/, "")
           .replace(/"$/, "")
@@ -838,7 +838,7 @@ function monkeyPatchConsole(onNextMsg) {
     onNextMsg({
       level,
       timestamp: new Date().toISOString(),
-      msg
+      msg,
     });
   };
   global.console.log = withTap(
@@ -865,10 +865,10 @@ function monkeyPatchConsole(onNextMsg) {
   };
 }
 
-monkeyPatchConsole(payload => {
+monkeyPatchConsole((payload) => {
   self.postMessage({
     type: "log",
-    payload
+    payload,
   });
 });
 
@@ -877,4 +877,4 @@ addEventListener('message', function (e) {var ref = e.data;var type = ref.type;v
 /***/ })
 
 /******/ });
-//# sourceMappingURL=ca7cb30c51d3c1a00d6c.worker.js.map
+//# sourceMappingURL=c2f529ae9477247aaf7f.worker.js.map
