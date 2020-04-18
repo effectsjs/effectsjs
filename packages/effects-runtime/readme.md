@@ -1,6 +1,6 @@
 # Effects Runtime
 
-For an overview of what this package enables and interactive exampels, see [the effectsjs website](https://effects.js.org/).
+For an overview of what this package enables and interactive examples, see [the effectsjs website](https://effects.js.org/).
 
 ### Technical overview
 
@@ -9,10 +9,10 @@ Performing, handling and recalling are handled by generators under the hood. The
 Consider the following variables
 
 ```javascript
-const getIntegerHandler = 'getInteger';
+const getIntegerHandler = "getInteger";
 
 const GetIntegerEffect = () => ({
-  type: getIntegerHandler
+  type: getIntegerHandler,
 });
 ```
 
@@ -20,34 +20,29 @@ And compare the following code
 
 ```javascript
 const main = async () => {
-    'use effects';
-    try{
-        return perform GetIntegerEffect();
-
-        return integer
-    }handle getIntegerHandler with (e){
-        recall 5;
-    }
-}
+  "use effects";
+  try{
+    return perform GetIntegerEffect();
+  } handle getIntegerHandler with (e) {
+    recall 5;
+  }
+};
 ```
 
 To the functionally equivalent code:
 
 ```javascript
 const handler = {
-  *[getIntegerHandler](e, resume){
+  *[getIntegerHandler](e, resume) {
     yield resume(5);
-  }
+  },
 };
 
-const frame = function*(){
-  return  yield performEffect(GetIntegerEffect());  
-}
+const frame = function* () {
+  return yield performEffect(GetIntegerEffect());
+};
 
-const program = withHandler(
-  handler,
-  frame()
-);
+const program = withHandler(handler, frame());
 
 const main = () => runProgram(program());
 ```
@@ -62,14 +57,14 @@ Algebraic Effects require a control flow that is not available to us in the Java
 
 In order to simulate one-shot continuations, we need to be able to redirect when and how values get popped off the stack, and _where_ they return to. JavaScript runtimes don't have anything available to do this natively, so instead we need to simulate it.
 
-*The Virtual Stack* is this simulation: and instead of a stack, we treat it as a linked list. A Frame in the Virtual Stack is an iterator.
+_The Virtual Stack_ is this simulation: and instead of a stack, we treat it as a linked list. A Frame in the Virtual Stack is an iterator.
 
 ### Aside, Generators
 
 Let's create a `GeneratorFunction`
 
 ```javascript
-function* gen(){
+function* gen() {
   const a = yield `I'm`;
   const b = yield `a`;
   const c = yield `generator`;
@@ -100,7 +95,7 @@ The first difference is that it must be _driven_: Invoking the function does not
 We did it manually above, another way to do it would be to use a `for..of` loop:
 
 ```javascript
-for(const x of gen()){
+for (const x of gen()) {
   process.stdout.write(`Value: ${x},`);
 }
 
@@ -117,11 +112,11 @@ Array.from(gen());
 
 Notice however that we were able to do something even more interesting when driving it manually: pass values _into_ the function. This provides three incredibly useful properties:
 
-1) Perform routines like a regular old function.
-2) Preserve the context that a generator was executed in.
-3) Maintain the ability to halt the function -- without returning -- and resume "later" recieving new values.
+1. Perform routines like a regular old function.
+2. Preserve the context that a generator was executed in.
+3. Maintain the ability to halt the function -- without returning -- and resume "later" receiving new values.
 
-## Stack Frames 
+## Stack Frames
 
 Here's type signature for a virtual stack frame:
 
@@ -129,7 +124,7 @@ Here's type signature for a virtual stack frame:
 type StackFrame = (Generator | AsyncGenerator) & StackFrameSymbols;
 ```
 
-Remember, `GeneratorFunction` (and `AsyncGeneratorFunction`) return _something_ that implements the Iterator Protocol. These are typed as `Generator` and `AsyncGenerator`, but they're really nothing more than something that exposes iterator interface as far as types are concerned. How they behave internally is _kind of_ irrelevant at this point.
+Remember, `GeneratorFunction` (and `AsyncGeneratorFunction`) return _something_ that implements the Iterator Protocol. These are typed as `Generator` and `AsyncGenerator`, but they're really nothing more than something that exposes the iterator interface as far as types are concerned. How they behave internally is _kind of_ irrelevant at this point.
 
 A Stack Frame is the intersection of this iterator protocol with the following interface:
 
@@ -142,33 +137,30 @@ interface StackFrameSymbols {
 
 These are symbols that may or may not be present on the iterator: a return frame, and a handler reference.
 
-As mentioned before, our Virtual Stack isn't a stack at all: it's a singly-linked list. We build this list up by linking generators to _other_ generators. Any given `StackFrame` is the child of a `StackFrame` that it may return to. A parent has no knowledge of any children, only where it itself may return to. 
+As mentioned before, our Virtual Stack isn't a stack at all: it's a singly-linked list. We build this list up by linking generators to _other_ generators. Any given `StackFrame` is the child of a `StackFrame` that it may return to. A parent has no knowledge of any children, only where it itself may return to.
 
 The active state of the Virtual Stack corresponds to the [internal properties](http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-generator-instances) for generators. At any given time, there should be one StackFrame that has the internal property of `executing`, the rest should be either `suspended` or `completed`.
 
 ## The Stack Interpreter
 
-Up until now we've talked about generators, StackFrames and this theoretical virtual stack. 
+Up until now we've talked about generators, StackFrames and this theoretical virtual stack.
 
 So far, we know that frames can be linked together:
-
 
 <img src="./static/basic-stack-frames.png" align="left" style="padding: 5em;" />
 
 ```javascript
-
-function* child(){
+function* child() {
   return null;
 }
 
-function* parent(){
+function* parent() {
   return yield child();
 }
 
-function* root(){
+function* root() {
   return yield parent();
 }
-
 ```
 
 <br/>
@@ -177,26 +169,22 @@ The heart of what the Effects Runtime provides are the rules for evaluating stac
 
 The interpreter has a few important qualities:
 
-First, it doesn't manage or maintain any internal state. It recieves a single iterator that represents the _next_ frame to evaluate and an optional value. It then calls `next` on the frame passing in the optional value.   
+First, it doesn't manage or maintain any internal state. It receives a single iterator that represents the _next_ frame to evaluate and an optional value. It then calls `next` on the frame passing in the optional value.
 
-Second, it manages the state of the frame it just evaluated: 
-  
-  - If the result of the `next` operation yielded a stack frame, attach the current frame to the `[ReturnFrame]` property and iterpret the yielded frame.
-  - If the result of the `next` operation indicates that the iterator is `done`, check to see if the current frame has a return frame. If so, interpret the return frame with the value yielded by the current frame.
+Second, it manages the state of the frame it just evaluated:
 
+- If the result of the `next` operation yielded a stack frame, attach the current frame to the `[ReturnFrame]` property and interpret the yielded frame.
+- If the result of the `next` operation indicates that the iterator is `done`, check to see if the current frame has a return frame. If so, interpret the return frame with the value yielded by the current frame.
 
   <img src='./static/stack-frame-interpretation.png'  style="padding: 0 2em;" />
-
 
 This entire process is initiated by a call to the function `runProgram` provided by the runtime:
 
 ```javascript
-
-const result = await runProgram(root())
-
+const result = await runProgram(root());
 ```
 
-The interpreter will continue evaluating until there are no frames to evaluate, and return the value yeilded by the last frame.
+The interpreter will continue evaluating until there are no frames to evaluate, and return the value yielded by the last frame.
 
 ## Effect Handlers
 
@@ -225,9 +213,9 @@ A handler is just an object that associates `EffectType`s with `HandlerDefinitio
 
 ```javascript
 const handler = {
-  *[getIntegerHandler](e, resume){
+  *[getIntegerHandler](e, resume) {
     return resume(5);
-  }
+  },
 };
 ```
 
@@ -243,11 +231,11 @@ This creates the following structure:
 
 <img src='./static/with-handler-diagram.png' />
 
-*note on why this exists*
+_note on why this exists_
 
-Even though it's not possible to do under the proposed syntax, this enables us to write runtime code for effects that don't recall. Under the proposed javascript syntax, an `EffectHandler` that doesn't recall is considered undefined behavior. But in the runtime, it's not only possible -- but well defined. In the event that an effect handler does not recall, the stack interpreter will eject into the parent from of the effect handler.
+Even though it's not possible to do under the proposed syntax, this enables us to write runtime code for effects that don't recall. Under the proposed javascript syntax, an `EffectHandler` that doesn't recall is considered undefined behavior. But in the runtime, it's not only possible -- but well defined. In the event that an effect handler does not recall, the stack interpreter will eject into the parent from the effect handler.
 
-By providing this buffer frame, we gaurantee that the frame is given to the stack interpreter _exactly once_, indicating that all child frames are no longer relevant. 
+By providing this buffer frame, we guarantee that the frame is given to the stack interpreter _exactly once_, indicating that all child frames are no longer relevant.
 
 ## Perform
 
@@ -255,21 +243,21 @@ The final piece is how we simulate the performing of an effect. Let's combine so
 
 ```javascript
 const handler = {
-  *sayHi(e, resume){
-    console.log('hi');
+  *sayHi(e, resume) {
+    console.log("hi");
     yield resume(null);
-  }
+  },
 };
 
-function* child(){
-  return performEffect({type : 'sayHi'});
+function* child() {
+  return performEffect({ type: "sayHi" });
 }
 
-function* parent(){
+function* parent() {
   return yield child();
 }
 
-function* root(){
+function* root() {
   return yield parent();
 }
 
@@ -294,7 +282,7 @@ Now, from earlier, we know what will happen if a `StackFrame` yields a `Generato
 - Anything else is immediately yielded back to the `StackFrame`:
 
 ```javascript
-function* exampleFrame(){
+function* exampleFrame() {
   const a = yield 1;
   // a === 1
   const b = yield (gen) => interpret(gen, gen);

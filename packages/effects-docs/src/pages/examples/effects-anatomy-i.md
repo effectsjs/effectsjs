@@ -6,11 +6,11 @@ This sounds like a lot. But it's not that bad:
 
 #### use effects
 
-Because effects aren't first-class (yet), we need a way to indicate to the transpiler that 
+Because effects aren't first-class (yet), we need a way to indicate to the transpiler that
 the Virtual Stack should begin. The `'use effects'` directive is the way to do this.
 
 There are several valid places for the `'use effects'` directive to be used, but the convention
-is to place it immediately above the root `try/handle` expression. 
+is to place it immediately above the root `try/handle` expression.
 
 If used within a function, the directive indicates that the function is asynchronous:
 Should the function return a value, due to the asynchronous nature of `try/handle` the value
@@ -30,12 +30,10 @@ const result = perform {type : 'fetch_pokemon'}
 ```
 
 _Any_ function may perform. Calling that function outside of a `try/handle` construct is considered undefined behavior. It's important
-to emphasize here that, performs *do not* have to occur as direct descendants of`try/handle`, but they must be descendants. 
+to emphasize here that, performs _do not_ have to occur as direct descendants of`try/handle`, but they must be descendants.
 
 We conceptualize this as the `Virtual Stack`. The `'use effects'` directive indicates that we are beginning the `Virtual Stack`, the `try/handle` construct indicates the _bounds_ of the virtual stack.
 As long as a `perform` keyword is used within the virtual stack, it's considered valid.
-
-
 
 #### try / handle
 
@@ -57,7 +55,7 @@ A handler that does not `recall` is considered undefined behavior and will resul
 
 #### recall
 
-Recall is the final keyword we must learn, and is the easiest to master. Like `perform`, it is another `UnaryExpression`. `recall` 
+Recall is the final keyword we must learn, and is the easiest to master. Like `perform`, it is another `UnaryExpression`. `recall`
 expects any expression as it's argument. Thus, the following are all valid expressions:
 
 ```javascript
@@ -67,5 +65,5 @@ recall getResult()
 recall null
 ```
 
-As mentioned previously, every effect must recall. `recall` -- unlike `perform` -- is only valid in effect frames. Thus, only descendants of the 
+As mentioned previously, every effect must recall. `recall` -- unlike `perform` -- is only valid in effect frames. Thus, only descendants of the
 effect handler block may `recall`. `recall`ing outside of an effect frame is considered undefined behavior.
