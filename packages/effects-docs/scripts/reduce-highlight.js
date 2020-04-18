@@ -1,6 +1,6 @@
 const highlightIndex = require.resolve("highlight.js");
 const {
-  promises: { readFile, writeFile }
+  promises: { readFile, writeFile },
 } = require("fs");
 
 const whitelist = ["javascript"];
@@ -10,9 +10,9 @@ async function go() {
   const nextContents =
     contents
       .split("\n")
-      .map(line => {
+      .map((line) => {
         if (!line.match(/\s*hljs.registerLanguage\(/)) return line;
-        if (whitelist.some(white => line.match(white))) return line;
+        if (whitelist.some((white) => line.match(white))) return line;
         return "// " + line;
       })
       .join("\n") + "\n";

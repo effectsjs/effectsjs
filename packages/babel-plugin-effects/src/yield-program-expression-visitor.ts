@@ -10,8 +10,8 @@ export const yieldProgramExpressionVisitor: Visitor<TypesVisitorPrototype> = {
 
       toYieldExpression(path, types);
       findDeclaration(callee)?.traverse(yieldProgramExpressionVisitor, {
-        types
+        types,
       });
     }
-  }
+  },
 };

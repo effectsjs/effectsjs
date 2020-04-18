@@ -1,0 +1,7 @@
+src/**/*.d.ts
+src/**/*.map
+src/plugin.js
+src/*.bundle.js
+scripts/*
+!scripts/*.ts
+**.d.ts

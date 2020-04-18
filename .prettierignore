@@ -1,7 +1,4 @@
-# ignore __fixtures__ only until we can dogfood our own plugin
-**/__fixtures__/**
 highlight.pack.js
-**/*example*/**
 example-snippet.ts
 lib
 dist
@@ -9,3 +6,5 @@ public
 coverage
 static
 .cache
+**/*.d.ts
+packages/prettier-plugin-javascript-effects/**/*.js

@@ -13,7 +13,7 @@ const FUNCTIONAL_TEST_DIRECTORY = path.resolve(
 );
 const fixture = process.argv[2];
 
-const readAndParseFile = textFixtureBaseName => {
+const readAndParseFile = (textFixtureBaseName) => {
   const filename = path.resolve(FUNCTIONAL_TEST_DIRECTORY, textFixtureBaseName);
   const file = readFileSync(filename, "utf8");
 

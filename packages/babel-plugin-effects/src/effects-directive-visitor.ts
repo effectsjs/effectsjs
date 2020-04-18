@@ -15,7 +15,7 @@ function createRuntimeRoot(
   );
 
   return types.callExpression(types.identifier("runProgram"), [
-    types.callExpression(mainFunctionExpression, [])
+    types.callExpression(mainFunctionExpression, []),
   ]);
 }
 
@@ -24,14 +24,14 @@ const runProgramYieldCallExpressionVisitor: Visitor<TypesVisitorPrototype> = {
     if (idPath.node.name === "runProgram") {
       (idPath
         .findParent(types.isCallExpression)
-        ?.get("arguments") as any)?.forEach(n => {
+        ?.get("arguments") as any)?.forEach((n) => {
         n.traverse(yieldCallExpressionVisitor, {
           types,
-          skipChildTraversal: true
+          skipChildTraversal: true,
         });
       });
     }
-  }
+  },
 };
 
 export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
@@ -86,11 +86,11 @@ export const effectsDirectiveVisitor: Visitor<TypesVisitorPrototype> = {
     }
 
     blockParent.node.body = [
-      types.returnStatement(createRuntimeRoot(types, blockParent.node.body))
+      types.returnStatement(createRuntimeRoot(types, blockParent.node.body)),
     ];
 
     blockParent.traverse(runProgramYieldCallExpressionVisitor, { types });
 
     path.remove();
-  }
+  },
 };

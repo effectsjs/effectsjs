@@ -9,22 +9,22 @@ import SEO from "../components/seo";
 
 const FAQS = [
   {
-    title: `Why do I need to use 'use effects'?`,
+    title: `Why do I need to use "use effects"?`,
     a: "whyuseeffects",
-    answer: `The 'use effects' directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`
+    answer: `The "use effects" directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`,
   },
   {
     title: `Can I perform an effect from within an effect?`,
     a: "nestedeffects",
-    answer: "Currently, no.  In the future, maybe!"
-  }
+    answer: "Currently, no.  In the future, maybe!",
+  },
 ];
 
 const IndexPage = () => {
   const {
     references: { html: references },
     keywords: { html: keywords },
-    elevator_pitch: { html: elevator_pitch }
+    elevator_pitch: { html: elevator_pitch },
   } = useStaticQuery(graphql`
     {
       references: markdownRemark(

@@ -10,7 +10,7 @@ import BabelTypes, {
   ObjectPattern,
   Statement,
   StringLiteral,
-  SwitchCase
+  SwitchCase,
 } from "@babel/types";
 
 import { recallVisitor } from "./recall-visitor";
@@ -33,7 +33,7 @@ const extractMemberPropertyPathName = (
   if (isLiteralProp(memberPropertyNode, types)) {
     return {
       ident: types.identifier(memberPropertyNode.value),
-      isComputed: false
+      isComputed: false,
     };
   } else if (types.isIdentifier(memberPropertyNode)) {
     const binding = parentPath.scope.getBinding(memberPropertyNode.name) as any;
@@ -44,7 +44,7 @@ const extractMemberPropertyPathName = (
   } else if (parentPath.get("defaultMatcher").node) {
     return {
       ident: types.identifier("__defaultEffectHandler__"),
-      isComputed: true
+      isComputed: true,
     };
   }
 
@@ -77,22 +77,22 @@ const createResultContinuation = (
                         types.blockStatement([
                           types.expressionStatement(
                             types.callExpression(types.identifier("rej"), [
-                              types.identifier("handlerError")
+                              types.identifier("handlerError"),
                             ])
-                          )
+                          ),
                         ])
                       ),
                       null
-                    )
+                    ),
                   ]),
                   true
-                )
+                ),
               ])
-            )
+            ),
           ])
         )
       )
-    )
+    ),
   ]);
 
 const makeHandlerMethod = (
@@ -104,7 +104,7 @@ const makeHandlerMethod = (
 ) => {
   const {
     ident: handlerPropertyName,
-    isComputed
+    isComputed,
   } = extractMemberPropertyPathName(rootPath, types, memberPropertyPath.node);
 
   // Collect all call expressions located inside of the handler (consequent block)
@@ -115,18 +115,22 @@ const makeHandlerMethod = (
         expressionPath.node.callee.name
       );
       const declaration = binding?.path.find(
-        x => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
+        (x) => types.isVariableDeclaration(x) || types.isFunctionDeclaration(x)
       );
+
       if (declaration) {
         callExpressionDeclarations.add(declaration.node);
-        markPathForRemoval(declaration);
+
+        // Not the most elegant.
+        declaration.parent?.parent?.type === "Program" &&
+          markPathForRemoval(declaration);
       }
-    }
+    },
   });
 
   const resultContinuation = createResultContinuation(types, [
     ...Array.from(callExpressionDeclarations),
-    ...consequent.node.body
+    ...consequent.node.body,
   ]);
 
   const objectMethod = types.objectMethod(
@@ -138,10 +142,10 @@ const makeHandlerMethod = (
       types.returnStatement(
         types.yieldExpression(
           types.callExpression(types.identifier("resume"), [
-            types.identifier("result")
+            types.identifier("result"),
           ])
         )
-      )
+      ),
     ]),
     isComputed
   );

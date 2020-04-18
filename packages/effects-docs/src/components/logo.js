@@ -14,7 +14,7 @@ export default function Logo(props) {
         "effectsjs-logo",
         className,
         animated && "animated",
-        spin && "spin"
+        spin && "spin",
       ]
         .filter(Boolean)
         .join(" ")}

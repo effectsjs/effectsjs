@@ -38,14 +38,14 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
     createNodeField({
       node,
       name: `slug`,
-      value: slug
+      value: slug,
     });
     createNodeField({
       node,
       name: `exampleSourceCode`,
       value: node.relativePath.endsWith(".example")
         ? fs.readFileSync(node.absolutePath, "utf8")
-        : ""
+        : "",
     });
   }
 };
@@ -63,8 +63,8 @@ exports.createPages = async ({ graphql, actions }) => {
       path: pagePath,
       component: path.resolve(__dirname, `src/components/example.template.js`),
       context: {
-        slug: node.fields.slug
-      }
+        slug: node.fields.slug,
+      },
     });
   });
 };

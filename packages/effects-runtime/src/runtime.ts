@@ -1,6 +1,6 @@
 import { Effect, Handler } from "effects-common";
 import * as common from "effects-common";
-import { FrameLink, StackFrame } from "effects-common/lib/StackFrame";
+import { StackFrame } from "effects-common/lib/StackFrame";
 
 const {
   frame: {
@@ -9,9 +9,8 @@ const {
     findHandlerFrame,
     getHandler,
     getReturnFrame,
-    isRootContinuation
   },
-  util: { exists, isContinuation, isIterator }
+  util: { exists, isContinuation, isIterator },
 } = common;
 
 export const DefaultEffectHandler: unique symbol = Symbol(
@@ -26,29 +25,31 @@ export class UnhandledEffectError extends TypeError {
   }
 }
 
-const unwindStack = (e: Error | any, frame: StackFrame) => {
+const unwindStack = async (e: Error | any, frame: StackFrame) => {
   // TODO: [major] construct an intelligible stack trace.
   //  This might be done best with the help of a babel transform plugin
-  let root: FrameLink = frame;
+  const parent = getReturnFrame(frame);
 
-  while (exists(root) && !isRootContinuation(root)) {
-    root = getReturnFrame(root);
+  if (isIterator(parent)) {
+    return await stackResume(parent, e, true);
+  } else if (isContinuation(parent)) {
+    return await parent(e);
+  } else {
+    throw e;
   }
-
-  if (isContinuation(root)) root(e);
-  else throw e;
 };
 
 export const stackResume = async (
   gen: Generator | StackFrame | any,
-  arg?: any
+  arg?: any,
+  willThrow?: boolean
 ): Promise<any> => {
   if (!isIterator(gen)) {
     return gen;
   }
 
   try {
-    const { value, done } = await gen.next(arg);
+    const { value, done } = await (willThrow ? gen.throw(arg) : gen.next(arg));
 
     if (!done) {
       if (isIterator(value)) {
@@ -71,14 +72,14 @@ export const stackResume = async (
       }
     }
   } catch (e) {
-    unwindStack(e, gen);
+    return await unwindStack(e, gen);
   }
 };
 
-export const runProgram = async (root: Generator) => {
-  const result = await stackResume(root, null);
-  return result;
-};
+// I guess for historic reasons we can keep runProgram as it is.
+// An earlier version of the stack interpreter was synchronous and attached a continuation to the root frame.
+// The async version doesn't require this root continuation to exist anymore.
+export const runProgram = async (root: Generator) => stackResume(root, null);
 
 export const performEffect = ({ type, ...data }: Effect) => async (
   currentFrame: Generator
@@ -90,7 +91,7 @@ export const performEffect = ({ type, ...data }: Effect) => async (
   );
 
   if (!exists(frameWithEffectHandler)) {
-    throw new UnhandledEffectError({ type });
+    return currentFrame.throw(new UnhandledEffectError({ type }));
   }
 
   // This is a GeneratorFunction, it will create the handler frame
@@ -131,7 +132,7 @@ export const performEffect = ({ type, ...data }: Effect) => async (
 };
 
 export const withHandler = (handler: Handler, frame: StackFrame) => {
-  const handlerFrame = (function*() {
+  const handlerFrame = (function* () {
     return yield frame;
   })();
 
