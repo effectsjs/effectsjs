@@ -42,7 +42,7 @@ jobs:
         run: npm run lint
       # @ref https://github.com/JamesIves/github-pages-deploy-action
       - name: gh-pages
-        uses: JamesIves/github-pages-deploy-action@releases/v3.1.5
+        uses: JamesIves/github-pages-deploy-action@releases/3.1.5
         with:
           ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
           BASE_BRANCH: master
