@@ -46,4 +46,6 @@ jobs:
           set -ex
           NODE_DEBUG=gh-pages \
           GH_TOKEN=${{ secrets.GH_TOKEN }} \
-          node -e "require('gh-pages').publish('packages/effects-docs/public', { user: { name: 'cdaringe', email: 'cdaringe@nope.com' } })"
+          node \
+            -r perish \
+            -e "require('gh-pages').publish('packages/effects-docs/public', { repo: 'https://' + process.env.GH_TOKEN + '@github.com/effectsjs/effectsjs.git', user: { name: 'cdaringe', email: 'cdaringe@nope.com' } })"
