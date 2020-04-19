@@ -49973,7 +49973,7 @@
       defaultValue = "development";
     }
 
-    return process.env.BABEL_ENV || undefined || defaultValue;
+    return process.env.BABEL_ENV || "development" || defaultValue;
   }
 
   function normalizeArray(parts, allowAboveRoot) {
@@ -72828,7 +72828,9 @@
 
           if (context.usesArguments) {
             vars = vars || t.variableDeclaration("var", []);
-            vars.declarations.push(t.variableDeclarator(t.clone(argsId), t.identifier("arguments")));
+            var argumentIdentifier = t.identifier("arguments");
+            argumentIdentifier._shadowedFunctionLiteral = path;
+            vars.declarations.push(t.variableDeclarator(t.clone(argsId), argumentIdentifier));
           }
 
           var emitter = new emit$1.Emitter(contextId);
