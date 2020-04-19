@@ -2,14 +2,14 @@ import {
   addReturn,
   Continuation,
   getReturnFrame,
-  StackFrame
+  StackFrame,
 } from "./StackFrame";
 import { exists, isContinuation, isGeneratorFactory } from "./util";
 
 enum BOUNDARY_STATE {
   UNINITIALIZED,
   INITIALIZING,
-  INITIALIZED
+  INITIALIZED,
 }
 
 declare global {
@@ -87,9 +87,9 @@ export class Boundary implements Iterator<any> {
       const unlinkTemporalFrame = () => addReturn(temporalFrame, null);
       const stackResume = getStackResumeFromContext(this);
 
-      const temporalFrame: StackFrame = (function*() {
+      const temporalFrame: StackFrame = (function* () {
         const frameFactory = isContinuation(temporalFrameCreator)
-          ? function*(...args: any[]) {
+          ? function* (...args: any[]) {
               return yield temporalFrameCreator(...args);
             }
           : temporalFrameCreator;

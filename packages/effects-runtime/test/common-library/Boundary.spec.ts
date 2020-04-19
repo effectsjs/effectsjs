@@ -4,7 +4,7 @@ import {
   runProgram,
   performEffect,
   withHandler,
-  DefaultEffectHandler
+  DefaultEffectHandler,
 } from "../../src/runtime";
 import { Handler } from "effects-common";
 
@@ -20,7 +20,7 @@ const createBoundary = () => {
 const defaultHandler: Handler = {
   *[DefaultEffectHandler]({ data }, resume) {
     yield resume(data * 2);
-  }
+  },
 };
 
 describe("Effects Boundaries", () => {
@@ -30,13 +30,13 @@ describe("Effects Boundaries", () => {
     function* main() {
       yield boundary.withContext();
       return [2, 4, 6].map(
-        boundary.into(function*(data) {
+        boundary.into(function* (data) {
           return yield performEffect({ type: "", data });
         })
       );
     }
 
-    const program = function*() {
+    const program = function* () {
       return yield withHandler(defaultHandler, main());
     };
 
@@ -66,13 +66,13 @@ describe("Effects Boundaries", () => {
     const handler: Handler = {
       *[DefaultEffectHandler](e, resume) {
         return yield resume("yay");
-      }
+      },
     };
 
     async function* root() {
       yield boundary.withContext();
 
-      const boundaryResult = await boundary.into(function*() {
+      const boundaryResult = await boundary.into(function* () {
         return yield performEffect({ type: "any" });
       })();
 
@@ -104,13 +104,13 @@ describe("Effects Boundaries", () => {
     const handler: Handler = {
       *["IThrow"]() {
         throw "cool";
-      }
+      },
     };
 
     function* main() {
       yield boundary.withContext();
 
-      return boundary.into(function*() {
+      return boundary.into(function* () {
         return yield performEffect({ type: "IThrow" });
       })();
     }
@@ -130,22 +130,22 @@ describe("Effects Boundaries", () => {
       },
       *[doubleHandlerType]({ num }, resume) {
         return yield resume(num * 2);
-      }
+      },
     };
 
     const childHandler: Handler = {
       *[childHandlerType](e, resume) {
         return yield resume("child");
-      }
+      },
     };
 
-    const child = async function*(input) {
+    const child = async function* (input) {
       const performResult = yield await performEffect({
-        type: childHandlerType
+        type: childHandlerType,
       });
       const doubleList = await Promise.all(
         [2, 4, 6].map(
-          boundary.into(function*(x) {
+          boundary.into(function* (x) {
             return yield performEffect({ type: doubleHandlerType, num: x });
           })
         )
@@ -154,21 +154,21 @@ describe("Effects Boundaries", () => {
       return yield `${performResult} ${input} ${doubleList.join(" ")}`;
     };
 
-    const parent = async function*() {
+    const parent = async function* () {
       yield boundary.withContext();
       const firstPerformResult = yield await performEffect({
-        type: parentHandlerType
+        type: parentHandlerType,
       });
       const childResult = yield withHandler(
         childHandler,
         child(firstPerformResult)
       );
       const secondPerformResult = yield await performEffect({
-        type: parentHandlerType
+        type: parentHandlerType,
       });
       const doubleList = await Promise.all(
         [4, 8, 12].map(
-          boundary.into(function*(x) {
+          boundary.into(function* (x) {
             return yield performEffect({ type: doubleHandlerType, num: x });
           })
         )
@@ -192,7 +192,7 @@ describe("Effects Boundaries", () => {
     function* main() {
       yield boundary.withContext();
 
-      return yield boundary.into(function*() {
+      return yield boundary.into(function* () {
         return expectedResult;
       })();
     }
@@ -206,7 +206,7 @@ describe("Effects Boundaries", () => {
     function* main() {
       yield boundary.withContext();
 
-      return yield boundary.into(function*() {
+      return yield boundary.into(function* () {
         throw 1337;
       })();
     }
@@ -219,7 +219,7 @@ describe("Effects Boundaries", () => {
     const handler: Handler = {
       *[DefaultEffectHandler](_, resume) {
         return yield resume("it works!");
-      }
+      },
     };
 
     function* root() {
@@ -231,7 +231,7 @@ describe("Effects Boundaries", () => {
 
     expect(programResult).toBe("complete");
 
-    const result = await boundary.into(function*() {
+    const result = await boundary.into(function* () {
       return yield performEffect({ type: "anything at all" });
     })();
 

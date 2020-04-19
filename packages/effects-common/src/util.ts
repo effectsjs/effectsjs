@@ -10,7 +10,7 @@ export const isGeneratorFactory = (
   if (typeof x !== "function") return false;
 
   return ["AsyncGeneratorFunction", "GeneratorFunction"].some(
-    type => type === Reflect.getPrototypeOf(x).constructor.name
+    (type) => type === Reflect.getPrototypeOf(x).constructor.name
   );
 };
 
