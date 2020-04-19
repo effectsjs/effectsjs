@@ -5,7 +5,6 @@ module.exports = {
     "**/node_modules/**",
     "**/lib/**",
     "!.eslintrc.js",
-    "*highlight*",
     "babel.js", // babel is currently forked and submoduled.  but we need the file for the ui build!
     "**/*example*/**", // ignore until eslint-plugin :ok_hand:
     "**/effects-runtime/examples/**", // ignore until eslint-plugin :ok_hand:
@@ -16,7 +15,6 @@ module.exports = {
     "public",
     "static",
     ".cache",
-    "**/highlight/**",
     "**/*example*.js",
     "example-snippet.ts",
   ],

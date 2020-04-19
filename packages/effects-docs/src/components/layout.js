@@ -3,13 +3,10 @@ import { graphql, Link, useStaticQuery } from "gatsby";
 import ForkMe from "./fork-me";
 import Logo from "./logo";
 import React from "react";
-import * as hljs from "highlight.js";
-import "highlight.js/styles/solarized-light.css";
+require("prismjs/themes/prism-solarizedlight.css");
+require("./layout.prism.css");
 
 const Layout = ({ children }) => {
-  React.useEffect(() => {
-    hljs.initHighlightingOnLoad();
-  }, []);
   const data = useStaticQuery(graphql`
     query SiteTitleQuery {
       site {
@@ -22,7 +19,7 @@ const Layout = ({ children }) => {
   return (
     <React.Fragment>
       <ForkMe />
-      <div className="node hero">
+      <header className="hero">
         <Link to="/" id="banner">
           <h1 children="effectsjs" />
           <Logo animated />
@@ -31,9 +28,9 @@ const Layout = ({ children }) => {
           <li children={<Link to="/">home</Link>} />
           <li children={<Link to="/examples">examples</Link>} />
         </ul>
-      </div>
-      {children}
-      <div className="node footer" />
+      </header>
+      <div id="content">{children}</div>
+      <div className="footer" />
     </React.Fragment>
   );
 };
