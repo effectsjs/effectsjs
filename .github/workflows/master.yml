@@ -44,6 +44,6 @@ jobs:
       - name: gh-pages
         run: |
           set -ex
-          git config --global user.email "wa11edevbot@giddyup.com"
-          git config --global user.name "wa11-e"
-          NODE_DEBUG=gh-pages GH_TOKEN=${{ secrets.GH_TOKEN }} npx gh-pages -d packages/effects-docs/public
+          NODE_DEBUG=gh-pages \
+          GH_TOKEN=${{ secrets.GH_TOKEN }} \
+          node -e "require('gh-pages').publish('packages/effects-docs/public', { user: { name: 'cdaringe', email: 'cdaringe@nope.com' } })"
