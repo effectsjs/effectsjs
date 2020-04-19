@@ -42,4 +42,8 @@ jobs:
         run: npm run lint
       # @ref https://github.com/JamesIves/github-pages-deploy-action
       - name: gh-pages
-        run: NODE_DEBUG=gh-pages GH_TOKEN=${{ secrets.GH_TOKEN }} npx gh-pages -d packages/effects-docs/public
+        run: |
+          set -ex
+          git config --global user.email "wa11edevbot@giddyup.com"
+          git config --global user.name "wa11-e"
+          NODE_DEBUG=gh-pages GH_TOKEN=${{ secrets.GH_TOKEN }} npx gh-pages -d packages/effects-docs/public
