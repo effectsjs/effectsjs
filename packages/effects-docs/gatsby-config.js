@@ -24,7 +24,6 @@ module.exports = {
     },
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
-    `gatsby-transformer-remark`,
     process.env.NODE_ENV === "development"
       ? "gatsby-plugin-webpack-bundle-analyser-v2"
       : null,
@@ -35,6 +34,16 @@ module.exports = {
         display: "swap",
       },
     },
-    // `gatsby-plugin-preact`, doesnt work due to highlight.js required react-dom directly
+    {
+      resolve: `gatsby-plugin-mdx`,
+      options: {
+        gatsbyRemarkPlugins: [
+          {
+            resolve: `gatsby-remark-prismjs`,
+            options: {},
+          },
+        ],
+      },
+    },
   ].filter(Boolean),
 };

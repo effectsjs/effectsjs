@@ -1,0 +1,123 @@
+---
+title: home
+---
+
+import Logo from "../components/logo";
+
+## What is it?
+
+Extensions to the javascript language, enabling new control flows that
+may be well suited to a variety of general purpose programming contexts.
+
+## Example
+
+```ts
+async function main() {
+  "use effects"; // highlight-line
+  try {
+    const cat = await getCatUrl();
+    console.log(cat)
+  } handle "fetchJson" with ({ data }) {  // highlight-line
+    recall await fetch(data.url).then(res => res.json())  // highlight-line
+  }
+}
+async function getCatUrl() {
+  const metaCat = perform {  // highlight-line
+    type: "fetchJson", // highlight-line
+    data: { url: "https://aws.random.cat/meow" }
+  };
+  return metaCat.file
+}
+main()
+```
+
+## TL;DR - What are Algebraic Effects?
+
+The best way to conceptualize the effect control flow is to expand upon an already well-known programming language construct, `Exception`s.
+
+Consider the following example:
+
+```javascript
+const child = () => {
+  throw "Hello";
+};
+
+const parent = () => {
+  child();
+  doMoreWork();
+};
+
+const main = () => {
+  try {
+    parent();
+  } catch (e) {
+    console.log(e);
+  }
+};
+```
+
+Function calls get pushed onto the call-stack as they are invoked.
+Normally, after a function completes, its frame is popped off of the call stack
+and the previous stack frame is resumed. The above example demonstrates an
+alternative flow:
+
+- `child` throws an exception,
+- the exception "bubbles" up the call-stack until a call-site with an exception handler is found.
+
+If you've been programming in a language that offers first-class support for exception handling as outlined above, you're most-likely
+comfortable with the flow just described.
+
+Now let's tweak our existing mental model for this new concept. Imagine a catch-block that can resume back to the throwing call-site.
+In the above example, our `catch` block in `main`, would recall to `child`.
+
+This is the crash course for the proposed control flow, and the keywords to facilitate it.
+
+## Keywords
+
+| Keyword   | Description                                                                                                                                                           |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `perform` | Initiates an effect. The current function halts, and later resumes when an effect handler `resume`s                                                                   |
+| `handle`  | `try/handle` blocks allow users to specify handlers for effect events, using well-known `try/catch`-like semantics. `try/handle` is _not_ compatible with `try/catch` |
+| `recall`  | Recalls the previously halted function, who called `perform`.                                                                                                         |
+
+<div className="node funsies" children={<Logo />} />
+
+## Getting started
+
+There are two ways to get started:
+
+- [Try our editor and examples online, now!](./examples)
+- [(pending) Install effects into your javascript or typescript project](./installation)
+
+<div className="node funsies" children={<Logo />} />
+
+## References
+
+| Reference               | Description                                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| Source code             | [github.com/effectsjs/effectsjs](https://github.com/effectsjs/effectsjs)                             |
+| Dan's Conceptualization | [Algebraic Effects for the Rest of Us](https://overreacted.io/algebraic-effects-for-the-rest-of-us/) |
+
+# FAQ
+
+export const FAQS = () =>
+  [
+    {
+      title: `Why do I need to use "use effects"?`,
+      a: "whyuseeffects",
+      answer: `The "use effects" directive is not desired for part of the specification. It is a temporary, syntactical necessity to enable the babel compiler to support effectjs at runtime.`,
+    },
+    {
+      title: `Can I perform an effect from within an effect?`,
+      a: "nestedeffects",
+      answer: "Currently, no.  In the future, maybe!",
+    },
+  ].map(({ title, a, answer }) => (
+    <React.Fragment key={a}>
+      <h3>{title}</h3>
+      <a name={a} href={a} /> {/* eslint-disable-line */}
+      <p children={answer} />
+    </React.Fragment>
+  ));
+
+<FAQS />
