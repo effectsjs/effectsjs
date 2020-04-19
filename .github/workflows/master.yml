@@ -42,10 +42,4 @@ jobs:
         run: npm run lint
       # @ref https://github.com/JamesIves/github-pages-deploy-action
       - name: gh-pages
-        uses: JamesIves/github-pages-deploy-action@releases/3.1.5
-        with:
-          ACCESS_TOKEN: ${{ secrets.GH_TOKEN }}
-          BASE_BRANCH: master
-          BRANCH: gh-pages
-          FOLDER: packages/effects-docs/public
-          CLEAN: true
+        run: NODE_DEBUG=gh-pages GH_TOKEN=${{ secrets.GH_TOKEN }} npx gh-pages -d packages/effects-docs/public
