@@ -34,7 +34,7 @@ type Thenable = (...args: any[]) => Promise<any>;
 
 // Importing stackResume directly causes some circular dependency nonsense.
 //  If this is being used in transpiled user-land, then the prelude-polyfill is a requirement.
-const getStackResumeFromContext = (ctx: Boundary): Thenable => {
+const getStackResumeFromContext = (ctx: any): Thenable => {
   const stackResume = global.stackResume ?? ctx["stackResume"];
 
   if (!exists(stackResume)) {
@@ -103,6 +103,15 @@ export class Boundary implements Iterator<any> {
       return stackResume(temporalFrame);
     };
   }
+
+  // static *edge(continuation : (args : any) => any) {
+  //   const stackResume = getStackResumeFromContext(this);
+  //
+  //   const frame : StackFrame = yield (gen : StackFrame) => stackResume(gen, gen);
+  //   const temporalFrame : StackFrame = (function*(){
+  //
+  //   })();
+  // }
 
   next() {
     switch (this.state) {

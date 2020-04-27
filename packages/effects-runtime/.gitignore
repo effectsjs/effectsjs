@@ -38,6 +38,7 @@ node_modules
 lib
 scratches
 examples/dist
+test/scratch.test.ts
 
 # prettier debug files
 *.js.formatted.js

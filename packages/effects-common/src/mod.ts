@@ -19,6 +19,7 @@ export const util = _util;
 export * from "./effects.types";
 
 export { Boundary, BoundaryError } from "./Boundary";
+export {EffectBoundary} from './EffectBoundary';
 
 export class UnhandledEffectError extends TypeError {
   constructor({ type }: Effect) {
