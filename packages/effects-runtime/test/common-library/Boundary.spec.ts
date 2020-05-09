@@ -38,7 +38,6 @@ describe("Effects Boundaries", () => {
     await expect(Promise.all(result)).resolves.toEqual([4, 8, 12]);
   });
 
-
   it("Should return expected results if operations are performed after invoking a boundary", async () => {
     const handler: Handler = {
       *[DefaultEffectHandler](e, resume) {
@@ -65,7 +64,6 @@ describe("Effects Boundaries", () => {
 
     expect(programResult).toBe(`yay 2`);
   });
-
 
   it("Should catch errors and reject when a perform throws", async () => {
     const handler: Handler = {
