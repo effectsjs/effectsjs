@@ -73269,7 +73269,10 @@
   	events: events,
   	freelist: freelist,
   	fs: fs$2,
-  	"fs/promises": ">= 10 && < 10.1",
+  	"fs/promises": [
+  	">= 10 && < 10.1",
+  	">= 14"
+  ],
   	_http_agent: _http_agent,
   	_http_client: _http_client,
   	_http_common: _http_common,
@@ -73491,6 +73494,8 @@
     return Object.prototype.hasOwnProperty.call(core_1, x);
   };
 
+  var realpathFS = fs$1.realpath && typeof fs$1.realpath["native"] === 'function' ? fs$1.realpath["native"] : fs$1.realpath;
+
   var defaultIsFile = function isFile(file, cb) {
     fs$1.stat(file, function (err, stat) {
       if (!err) {
@@ -73513,11 +73518,15 @@
     });
   };
 
-  var maybeUnwrapSymlink = function maybeUnwrapSymlink(x, opts, cb) {
+  var defaultRealpath = function realpath(x, cb) {
+    realpathFS(x, function (realpathErr, realPath) {
+      if (realpathErr && realpathErr.code !== 'ENOENT') cb(realpathErr);else cb(null, realpathErr ? x : realPath);
+    });
+  };
+
+  var maybeRealpath = function maybeRealpath(realpath, x, opts, cb) {
     if (opts && opts.preserveSymlinks === false) {
-      fs$1.realpath(x, function (realPathErr, realPath) {
-        if (realPathErr && realPathErr.code !== 'ENOENT') cb(realPathErr);else cb(null, realPathErr ? x : realPath);
-      });
+      realpath(x, cb);
     } else {
       cb(null, x);
     }
@@ -73553,13 +73562,14 @@
     var isFile = opts.isFile || defaultIsFile;
     var isDirectory = opts.isDirectory || defaultIsDir;
     var readFile = opts.readFile || fs$1.readFile;
+    var realpath = opts.realpath || defaultRealpath;
     var packageIterator = opts.packageIterator;
     var extensions = opts.extensions || ['.js'];
     var basedir = opts.basedir || path$1.dirname(caller());
     var parent = opts.filename || basedir;
     opts.paths = opts.paths || [];
     var absoluteStart = path$1.resolve(basedir);
-    maybeUnwrapSymlink(absoluteStart, opts, function (err, realStart) {
+    maybeRealpath(realpath, absoluteStart, opts, function (err, realStart) {
       if (err) cb(err);else init(realStart);
     });
     var res;
@@ -73576,7 +73586,7 @@
         return cb(null, x);
       } else loadNodeModules(x, basedir, function (err, n, pkg) {
         if (err) cb(err);else if (n) {
-          return maybeUnwrapSymlink(n, opts, function (err, realN) {
+          return maybeRealpath(realpath, n, opts, function (err, realN) {
             if (err) {
               cb(err);
             } else {
@@ -73594,7 +73604,7 @@
     function onfile(err, m, pkg) {
       if (err) cb(err);else if (m) cb(null, m, pkg);else loadAsDirectory(res, function (err, d, pkg) {
         if (err) cb(err);else if (d) {
-          maybeUnwrapSymlink(d, opts, function (err, realD) {
+          maybeRealpath(realpath, d, opts, function (err, realD) {
             if (err) {
               cb(err);
             } else {
@@ -73657,7 +73667,7 @@
       }
 
       if (/[/\\]node_modules[/\\]*$/.test(dir)) return cb(null);
-      maybeUnwrapSymlink(dir, opts, function (unwrapErr, pkgdir) {
+      maybeRealpath(realpath, dir, opts, function (unwrapErr, pkgdir) {
         if (unwrapErr) return loadpkg(path$1.dirname(dir), cb);
         var pkgfile = path$1.join(pkgdir, 'package.json');
         isFile(pkgfile, function (err, ex) {
@@ -73688,7 +73698,7 @@
         fpkg = opts["package"];
       }
 
-      maybeUnwrapSymlink(x, opts, function (unwrapErr, pkgdir) {
+      maybeRealpath(realpath, x, opts, function (unwrapErr, pkgdir) {
         if (unwrapErr) return cb(unwrapErr);
         var pkgfile = path$1.join(pkgdir, 'package.json');
         isFile(pkgfile, function (err, ex) {
@@ -73769,6 +73779,8 @@
     }
   };
 
+  var realpathFS$1 = fs$1.realpathSync && typeof fs$1.realpathSync["native"] === 'function' ? fs$1.realpathSync["native"] : fs$1.realpathSync;
+
   var defaultIsFile$1 = function isFile(file) {
     try {
       var stat = fs$1.statSync(file);
@@ -73791,15 +73803,21 @@
     return stat.isDirectory();
   };
 
-  var maybeUnwrapSymlink$1 = function maybeUnwrapSymlink(x, opts) {
-    if (opts && opts.preserveSymlinks === false) {
-      try {
-        return fs$1.realpathSync(x);
-      } catch (realPathErr) {
-        if (realPathErr.code !== 'ENOENT') {
-          throw realPathErr;
-        }
+  var defaultRealpathSync = function realpathSync(x) {
+    try {
+      return realpathFS$1(x);
+    } catch (realpathErr) {
+      if (realpathErr.code !== 'ENOENT') {
+        throw realpathErr;
       }
+    }
+
+    return x;
+  };
+
+  var maybeRealpathSync = function maybeRealpathSync(realpathSync, x, opts) {
+    if (opts && opts.preserveSymlinks === false) {
+      return realpathSync(x);
     }
 
     return x;
@@ -73824,23 +73842,24 @@
     var isFile = opts.isFile || defaultIsFile$1;
     var readFileSync = opts.readFileSync || fs$1.readFileSync;
     var isDirectory = opts.isDirectory || defaultIsDir$1;
+    var realpathSync = opts.realpathSync || defaultRealpathSync;
     var packageIterator = opts.packageIterator;
     var extensions = opts.extensions || ['.js'];
     var basedir = opts.basedir || path$1.dirname(caller());
     var parent = opts.filename || basedir;
     opts.paths = opts.paths || [];
-    var absoluteStart = maybeUnwrapSymlink$1(path$1.resolve(basedir), opts);
+    var absoluteStart = maybeRealpathSync(realpathSync, path$1.resolve(basedir), opts);
 
     if (/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[/\\])/.test(x)) {
       var res = path$1.resolve(absoluteStart, x);
       if (x === '.' || x === '..' || x.slice(-1) === '/') res += '/';
       var m = loadAsFileSync(res) || loadAsDirectorySync(res);
-      if (m) return maybeUnwrapSymlink$1(m, opts);
+      if (m) return maybeRealpathSync(realpathSync, m, opts);
     } else if (isCore(x)) {
       return x;
     } else {
       var n = loadNodeModulesSync(x, absoluteStart);
-      if (n) return maybeUnwrapSymlink$1(n, opts);
+      if (n) return maybeRealpathSync(realpathSync, n, opts);
     }
 
     var err = new Error("Cannot find module '" + x + "' from '" + parent + "'");
@@ -73880,7 +73899,7 @@
       }
 
       if (/[/\\]node_modules[/\\]*$/.test(dir)) return;
-      var pkgfile = path$1.join(maybeUnwrapSymlink$1(dir, opts), 'package.json');
+      var pkgfile = path$1.join(maybeRealpathSync(realpathSync, dir, opts), 'package.json');
 
       if (!isFile(pkgfile)) {
         return loadpkg(path$1.dirname(dir));
@@ -73903,7 +73922,7 @@
     }
 
     function loadAsDirectorySync(x) {
-      var pkgfile = path$1.join(maybeUnwrapSymlink$1(x, opts), '/package.json');
+      var pkgfile = path$1.join(maybeRealpathSync(realpathSync, x, opts), '/package.json');
 
       if (isFile(pkgfile)) {
         try {
