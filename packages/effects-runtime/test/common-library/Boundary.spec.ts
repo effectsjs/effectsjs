@@ -1,4 +1,4 @@
-import {Boundary, BoundaryError, EffectBoundary} from "effects-common";
+import { BoundaryError, EffectBoundary } from "effects-common";
 import {
   stackResume,
   runProgram,
@@ -8,15 +8,6 @@ import {
 } from "../../src/runtime";
 import { Handler } from "effects-common";
 
-const injectContext = (boundary: Boundary) =>
-  Reflect.set(boundary, "stackResume", stackResume);
-const createBoundary = () => {
-  const boundary = new Boundary();
-  injectContext(boundary);
-
-  return boundary;
-};
-
 const defaultHandler: Handler = {
   *[DefaultEffectHandler]({ data }, resume) {
     yield resume(data * 2);
@@ -25,16 +16,16 @@ const defaultHandler: Handler = {
 
 describe("Effects Boundaries", () => {
   beforeAll(() => {
-    EffectBoundary['stackResume'] = stackResume;
+    EffectBoundary["stackResume"] = stackResume;
   });
 
   it("Should evaluate a stackframe from within a boundary", async () => {
     function* main() {
       const boundary = yield EffectBoundary();
       return [2, 4, 6].map(
-          boundary(function* (data) {
-            return yield performEffect({ type: "", data });
-          })
+        boundary(function* (data) {
+          return yield performEffect({ type: "", data });
+        })
       );
     }
 
@@ -47,21 +38,6 @@ describe("Effects Boundaries", () => {
     await expect(Promise.all(result)).resolves.toEqual([4, 8, 12]);
   });
 
-  // Skip for rfc, this isnt needed anymore
-  it.skip("Should throw an error upon attempt to mutate context", async () => {
-    const boundary = createBoundary();
-
-    function* parent() {
-      yield boundary.withContext();
-      yield child();
-    }
-
-    function* child() {
-      yield boundary.withContext();
-    }
-
-    await expect(runProgram(parent())).rejects.toThrowError(BoundaryError);
-  });
 
   it("Should return expected results if operations are performed after invoking a boundary", async () => {
     const handler: Handler = {
@@ -73,9 +49,9 @@ describe("Effects Boundaries", () => {
     async function* root() {
       const boundary = yield EffectBoundary();
 
-      const boundaryResult = await (boundary(function* () {
+      const boundaryResult = await boundary(function* () {
         return yield performEffect({ type: "any" });
-      }))();
+      })();
 
       expect(boundaryResult).toBe("yay");
 
@@ -90,16 +66,6 @@ describe("Effects Boundaries", () => {
     expect(programResult).toBe(`yay 2`);
   });
 
-  // Skip for RFC, no longer stateful in this way.. so no need to worry!
-  it.skip("Should throw when yielded prior to initialization", async () => {
-    const boundary = createBoundary();
-
-    function* main() {
-      yield boundary;
-    }
-
-    await expect(runProgram(main())).rejects.toThrowError(BoundaryError);
-  });
 
   it("Should catch errors and reject when a perform throws", async () => {
     const handler: Handler = {
@@ -111,15 +77,14 @@ describe("Effects Boundaries", () => {
     function* main() {
       const boundary = yield EffectBoundary();
 
-      return (boundary(function* () {
+      return boundary(function* () {
         return yield performEffect({ type: "IThrow" });
-      }))();
+      })();
     }
 
     await expect(runProgram(withHandler(handler, main()))).rejects.toBe("cool");
   });
 
-  // @todo rfc: this isn't really needed anymore, boundaries don't preserve state
   it("Should be context-agnostic in terms of where the boundary is executed", async () => {
     const parentHandlerType = Symbol();
     const childHandlerType = Symbol();
@@ -192,12 +157,18 @@ describe("Effects Boundaries", () => {
 
     function* main() {
       const boundary = yield EffectBoundary();
-      return (boundary(function* () {
+      return boundary(function* () {
         return expectedResult;
-      }))();
+      })();
     }
 
-    await expect(runProgram(function*(){ return yield main() }())).resolves.toBe(expectedResult);
+    await expect(
+      runProgram(
+        (function* () {
+          return yield main();
+        })()
+      )
+    ).resolves.toBe(expectedResult);
   });
 
   it("Should handle normal exceptions transparently", async () => {
@@ -208,25 +179,33 @@ describe("Effects Boundaries", () => {
       })();
     }
 
-    await expect(runProgram(function*(){return yield main()}())).rejects.toBe(1337);
+    await expect(
+      runProgram(
+        (function* () {
+          return yield main();
+        })()
+      )
+    ).rejects.toBe(1337);
   });
-
 
   it("Should accept a continuation as a temporal frame creator", async () => {
     const expectedResult = Symbol();
 
     function* root() {
       const boundary = yield EffectBoundary();
-      return (boundary(() => expectedResult))();
+      return boundary(() => expectedResult)();
     }
 
-    await expect(runProgram(function*(){
-      yield root()
-    }())).resolves.toBe(expectedResult);
+    await expect(
+      runProgram(
+        (function* () {
+          yield root();
+        })()
+      )
+    ).resolves.toBe(expectedResult);
   });
 
   it("Should throw if passed an incorrect argument", async () => {
-
     function* root() {
       // @ts-ignore
       return yield new EffectBoundary("hello")();

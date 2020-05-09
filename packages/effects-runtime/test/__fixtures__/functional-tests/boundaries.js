@@ -5,7 +5,9 @@ const programOne = () => {
     "use effects";
     try {
       const boundary = EffectBoundary();
-      return Promise.all([2, 4, 6].map(boundary(x => perform { type: 'double', input : x})))
+      return Promise.all(
+        [2, 4, 6].map(boundary((x) => perform { type: "double", input: x }))
+      );
     } handle "double" with ({ input }) {
       recall (input * 2);
     }
@@ -16,8 +18,8 @@ const programOne = () => {
 
 const programTwo = () => {
   class Test {
-    constructor({boundary}) {
-      this.performThing = boundary(() => perform {type : 'any', data : 10});
+    constructor({ boundary }) {
+      this.performThing = boundary(() => perform { type: "any", data: 10 });
     }
   }
 
@@ -25,7 +27,7 @@ const programTwo = () => {
     "use effects";
     try {
       const boundary = EffectBoundary();
-      const test = new Test({boundary});
+      const test = new Test({ boundary });
 
       return test.performThing();
     } handle default with ({ data }) {
@@ -36,9 +38,8 @@ const programTwo = () => {
   return root();
 };
 
-
 module.exports.test = ({ it, expect, describe }) => {
-  describe.only("Boundary functional tests", () => {
+  describe("Boundary functional tests", () => {
     it("Should produce expected results from a functional interface", async () => {
       await expect(programOne()).resolves.toEqual([4, 8, 12]);
     });

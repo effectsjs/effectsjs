@@ -21,6 +21,6 @@ describe("transformEffects", () => {
     pluginName: "Transform Effects",
     title: "Transform proposed effects keywords into working JS",
     filename: __filename,
-    tests: unpackTests()
+    tests: unpackTests(),
   });
 });

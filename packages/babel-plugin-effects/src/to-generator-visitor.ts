@@ -1,6 +1,6 @@
 import { TypesVisitorPrototype } from "./visitor-proto-interfaces";
 import { Visitor, NodePath } from "@babel/traverse";
-import BabelTypes, {ArrowFunctionExpression, isProgram} from "@babel/types";
+import BabelTypes, { ArrowFunctionExpression, isProgram } from "@babel/types";
 import {
   arrowExpressionToGenerator,
   fixupParentGenerator,
@@ -62,12 +62,16 @@ export const callExpressionVisitor: Visitor<TypesVisitorPrototype> = {
 
 export const isYieldCandidate = (path: NodePath, types: typeof BabelTypes) => {
   const immediateParent = path.parentPath;
-  if(types.isVariableDeclarator(immediateParent) && types.isProgram(path.scope.block)) return false;
+  if (
+    types.isVariableDeclarator(immediateParent) &&
+    types.isProgram(path.scope.block)
+  )
+    return false;
 
   if (
-      types.isReturnStatement(immediateParent) ||
-      types.isVariableDeclarator(immediateParent) ||
-     (types.isExpressionStatement(immediateParent) &&
+    types.isReturnStatement(immediateParent) ||
+    types.isVariableDeclarator(immediateParent) ||
+    (types.isExpressionStatement(immediateParent) &&
       types.isBlockStatement(path.parentPath?.parentPath))
   ) {
     return true;
@@ -77,7 +81,7 @@ export const isYieldCandidate = (path: NodePath, types: typeof BabelTypes) => {
 };
 
 export const toYieldExpression = (path, types) => {
-  if(isProgram(path.parentPath)) return;
+  if (isProgram(path.parentPath)) return;
   path.replaceWith(types.yieldExpression(path.node));
 
   fixupParentGenerator(path, types);
