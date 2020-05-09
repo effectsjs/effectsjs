@@ -14,5 +14,5 @@ export type EffectType = string | number | symbol | undefined;
 
 export interface Effect {
   type: EffectType;
-  data?: any;
+  [data: string]: any;
 }

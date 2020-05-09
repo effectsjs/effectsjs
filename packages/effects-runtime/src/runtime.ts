@@ -132,7 +132,7 @@ export const performEffect = ({ type, ...data }: Effect) => async (
 };
 
 export const withHandler = (handler: Handler, frame: StackFrame) => {
-  const handlerFrame = (function* () {
+  const handlerFrame = (function* handlerFrame() {
     return yield frame;
   })();
 
