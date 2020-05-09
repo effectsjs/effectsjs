@@ -1,0 +1,52 @@
+{
+  "name": "effects-examples",
+  "version": "0.0.0",
+  "description": "Standalone Examples For Effects",
+  "keywords": [
+    "algebraic",
+    "effects",
+    "cool"
+  ],
+  "author": "Dave Campion <me@davecampion.com>",
+  "homepage": "https://github.com/effectsjs/effectsjs/tree/master/packages/effects-examples#readme",
+  "license": "ISC",
+  "main": "lib/effects-examples.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/effectsjs/effectsjs.git"
+  },
+  "scripts": {
+    "test": "",
+    "build": "babel ./src --out-dir ./dist"
+  },
+  "bugs": {
+    "url": "https://github.com/effectsjs/effectsjs/issues"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.9.0",
+    "@babel/polyfill": "^7.8.7",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-react": "^7.9.4",
+    "babel-plugin-effects": "^0.0.1",
+    "effects-runtime": "^0.0.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "babel-loader": "^8.1.0",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-plugin": "^4.0.3",
+    "http-server": "^0.12.1",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  }
+}

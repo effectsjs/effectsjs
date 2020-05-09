@@ -2,6 +2,7 @@ import { Effect, Handler } from "effects-common";
 import * as common from "effects-common";
 import { StackFrame } from "effects-common/lib/StackFrame";
 
+export { EffectBoundary } from "effects-common";
 const {
   frame: {
     addHandler,

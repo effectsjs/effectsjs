@@ -2,6 +2,7 @@ const { promises: fsPromise, ...fs } = require("fs");
 const path = require("path");
 
 const logFilePath = path.resolve(__dirname, "log.txt");
+console.log(`Logs streaming to disk at ${logFilePath}`);
 let logFileStream = fs.createWriteStream(logFilePath, { flags: "a" });
 const logHandlerType = "logHandler";
 
@@ -43,8 +44,8 @@ const LogEffect = function (message) {
 const withLogHandler = async (fn, requestContext = {}) => {
   try {
     return fn();
-  } handle "logHandler" with (e) {
-    logAndSave(e.message, requestContext);
+  } handle logHandlerType with (e) {
+    await logAndSave(e.message, requestContext);
   }
 };
 

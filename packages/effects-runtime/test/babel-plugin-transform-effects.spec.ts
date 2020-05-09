@@ -1,4 +1,4 @@
-import plugin from "babel-plugin-effects";
+import { transformEffects } from "babel-plugin-effects";
 import pluginTester from "babel-plugin-tester";
 import path from "path";
 import { readdirSync } from "fs";
@@ -17,7 +17,7 @@ const unpackTests = () =>
 
 describe("transformEffects", () => {
   pluginTester({
-    plugin,
+    plugin: transformEffects,
     pluginName: "Transform Effects",
     title: "Transform proposed effects keywords into working JS",
     filename: __filename,

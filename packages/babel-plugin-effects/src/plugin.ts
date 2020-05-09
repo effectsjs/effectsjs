@@ -6,7 +6,8 @@ import { followHandlerDefinitions } from "./handler-method-visitor";
 import { fixupParentGenerator } from "./traverse-utilities";
 import { REMOVAL_FIELD } from "./remove-on-exit-visitor";
 import { yieldProgramExpressionVisitor } from "./yield-program-expression-visitor";
-const parser = require("../../../babel/packages/babel-parser/lib");
+
+export const parser = require("../../../babel/packages/babel-parser/lib");
 
 export interface Plugin {
   visitor: Visitor;
@@ -51,7 +52,7 @@ const createWithHandlerInvocation = (
   ]);
 };
 
-export default function transformEffects({ types }: Babel): Plugin {
+export function transformEffects({ types }: Babel): Plugin {
   return {
     // Deliver the custom grammar parser to the top-level visitor
     parserOverride(code, opts) {
