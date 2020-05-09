@@ -5,7 +5,6 @@ import {
     StackFrame,
 } from "./StackFrame";
 import {exists, isContinuation, isGeneratorFactory, isIterator} from "./util";
-import {BoundaryError} from "./Boundary";
 
 type Thenable = (...args: any[]) => Promise<any>;
 type IsolatedContinuation = Continuation |( (...args: any[]) => StackFrame | Continuation)
@@ -14,8 +13,24 @@ const validateIC = (ic : IsolatedContinuation) => (
     isContinuation(ic) || isGeneratorFactory(ic)
 );
 
-// Importing stackResume directly causes some circular dependency nonsense.
-//  If this is being used in transpiled user-land, then the prelude-polyfill is a requirement.
+declare global {
+    namespace NodeJS {
+        interface Global {
+            stackResume?: Thenable;
+        }
+    }
+}
+
+export class BoundaryError extends Error {
+    message: string;
+    constructor(message: string) {
+        super();
+        this.message = message;
+
+        Reflect.setPrototypeOf(this, BoundaryError.prototype);
+    }
+}
+
 const getStackResumeFromContext = (ctx: any): Thenable => {
     const stackResume = global.stackResume ?? ctx["stackResume"];
 
@@ -28,35 +43,36 @@ const getStackResumeFromContext = (ctx: any): Thenable => {
     return stackResume;
 };
 
-export function EffectBoundary(ic : IsolatedContinuation) {
-    const inner = (...args : any[]) => {
-        if(!validateIC(ic)){
-            throw new Error('aight bet')
-        }
+const maybeCreateFrame = (ic : IsolatedContinuation) => isContinuation(ic)
+    ? function*(...args : any[]){
+        return yield ic(...args)
+    }
+    : ic;
 
-        const unlink = () => addReturn(temporalFrame, null);
-        const stackResume = getStackResumeFromContext(EffectBoundary);
-        const temporalFrame : StackFrame = (function*(){
-            const frameFactory = isContinuation(ic)
-                ? function* (...args: any[]) {
-                    return yield ic(...args);
-                }
-                : ic;
+export const EffectBoundary = () => {
+    const ctxFn = (ic : IsolatedContinuation) =>
+        (...args : any[]) => {
+            if(!validateIC(ic)){
+                throw new BoundaryError(`Must call boundary with a function or generator function`);
+            }
 
-            yield frameFactory(...args);
-            unlink();
-        })();
+            const unlink = () => addReturn(temporalFrame, null);
+            const stackResume = getStackResumeFromContext(EffectBoundary);
+            const temporalFrame : StackFrame = (function*(){
+                yield maybeCreateFrame(ic)(...args);
+                unlink();
+            })();
 
-        addReturn(temporalFrame, getReturnFrame(inner));
+            addReturn(temporalFrame, getReturnFrame(ctxFn));
 
-        return stackResume(temporalFrame);
-    };
+            return stackResume(temporalFrame);
+        };
 
-    // @ts-ignore
-    inner.next = () => ({
-        value : inner,
-        done : Boolean(getReturnFrame(inner))
+
+    ctxFn.next = () => ({
+            value : ctxFn,
+            done : !!getReturnFrame(ctxFn)
     });
 
-    return inner;
-}
+    return ctxFn;
+};

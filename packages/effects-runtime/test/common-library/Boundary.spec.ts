@@ -30,8 +30,9 @@ describe("Effects Boundaries", () => {
 
   it("Should evaluate a stackframe from within a boundary", async () => {
     function* main() {
+      const boundary = yield EffectBoundary();
       return [2, 4, 6].map(
-          yield EffectBoundary(function* (data) {
+          boundary(function* (data) {
             return yield performEffect({ type: "", data });
           })
       );
@@ -70,8 +71,9 @@ describe("Effects Boundaries", () => {
     };
 
     async function* root() {
+      const boundary = yield EffectBoundary();
 
-      const boundaryResult = await (yield EffectBoundary(function* () {
+      const boundaryResult = await (boundary(function* () {
         return yield performEffect({ type: "any" });
       }))();
 
@@ -107,8 +109,9 @@ describe("Effects Boundaries", () => {
     };
 
     function* main() {
+      const boundary = yield EffectBoundary();
 
-      return (yield EffectBoundary(function* () {
+      return (boundary(function* () {
         return yield performEffect({ type: "IThrow" });
       }))();
     }
@@ -138,12 +141,13 @@ describe("Effects Boundaries", () => {
     };
 
     const child = async function* (input) {
+      const boundary = yield EffectBoundary();
       const performResult = yield await performEffect({
         type: childHandlerType,
       });
       const doubleList = await Promise.all(
         [2, 4, 6].map(
-          yield EffectBoundary(function* (x) {
+          boundary(function* (x) {
             return yield performEffect({ type: doubleHandlerType, num: x });
           })
         )
@@ -153,6 +157,7 @@ describe("Effects Boundaries", () => {
     };
 
     const parent = async function* () {
+      const boundary = yield EffectBoundary();
       const firstPerformResult = yield await performEffect({
         type: parentHandlerType,
       });
@@ -165,7 +170,7 @@ describe("Effects Boundaries", () => {
       });
       const doubleList = await Promise.all(
         [4, 8, 12].map(
-          yield EffectBoundary(function* (x) {
+          boundary(function* (x) {
             return yield performEffect({ type: doubleHandlerType, num: x });
           })
         )
@@ -186,55 +191,33 @@ describe("Effects Boundaries", () => {
     const expectedResult = Symbol();
 
     function* main() {
-      return yield (EffectBoundary(function* () {
+      const boundary = yield EffectBoundary();
+      return (boundary(function* () {
         return expectedResult;
       }))();
     }
 
-    await expect(runProgram(main())).resolves.toBe(expectedResult);
+    await expect(runProgram(function*(){ return yield main() }())).resolves.toBe(expectedResult);
   });
 
   it("Should handle normal exceptions transparently", async () => {
-
     function* main() {
-      return yield EffectBoundary(function* () {
+      const boundary = yield EffectBoundary();
+      return boundary(function* () {
         throw 1337;
       })();
     }
 
-    await expect(runProgram(main())).rejects.toBe(1337);
+    await expect(runProgram(function*(){return yield main()}())).rejects.toBe(1337);
   });
 
-  // @todo:  RFC skip, this doesn't even make sense any more
-  it.skip("Should preserve boundaries after the program has run", async () => {
-    const boundary = createBoundary();
-    const handler: Handler = {
-      *[DefaultEffectHandler](_, resume) {
-        return yield resume("it works!");
-      },
-    };
-
-    function* root() {
-      yield boundary.withContext();
-      return yield "complete";
-    }
-
-    const programResult = await runProgram(withHandler(handler, root()));
-
-    expect(programResult).toBe("complete");
-
-    const result = await boundary.into(function* () {
-      return yield performEffect({ type: "anything at all" });
-    })();
-
-    expect(result).toBe("it works!");
-  });
 
   it("Should accept a continuation as a temporal frame creator", async () => {
     const expectedResult = Symbol();
 
     function* root() {
-      return (yield EffectBoundary(() => expectedResult))();
+      const boundary = yield EffectBoundary();
+      return (boundary(() => expectedResult))();
     }
 
     await expect(runProgram(function*(){
@@ -242,8 +225,7 @@ describe("Effects Boundaries", () => {
     }())).resolves.toBe(expectedResult);
   });
 
-  // @todo, silly test
-  it.skip("Should throw if passed an incorrect argument", async () => {
+  it("Should throw if passed an incorrect argument", async () => {
 
     function* root() {
       // @ts-ignore
