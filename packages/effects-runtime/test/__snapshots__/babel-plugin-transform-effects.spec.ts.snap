@@ -1436,6 +1436,74 @@ module.exports.test = ({ expect, it }) => {
 
 `;
 
+exports[`transformEffects Transform proposed effects keywords into working JS curried-functions.js: curried-functions.js 1`] = `
+
+const subtract = (x) => (y) => x - y;
+const program = () => {
+  "use effects";
+  try {
+    const x = (x) => subtract(10)(x);
+    return x(5);
+  } handle default with (e) {
+    recall null;
+  }
+};
+
+module.exports.test = ({ describe, it, expect, code }) => {
+  describe.only("Curried functions", () => {
+    it("should transform and execute curried functions correctly", async () => {
+      console.log(code);
+      await expect(program()).resolves.toBe(5);
+    });
+  });
+};
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const subtract = x => y => x - y;
+
+const program = () => {
+  return runProgram(
+    (function*() {
+      yield withHandler(
+        {
+          *[__defaultEffectHandler__](e, resume) {
+            const result = yield function(handler) {
+              return new Promise(async (res, rej) => {
+                try {
+                  return stackResume(handler, null)
+                    .then(res)
+                    .catch(rej);
+                } catch (handlerError) {
+                  rej(handlerError);
+                }
+              });
+            };
+            return yield resume(result);
+          }
+        },
+        (async function*() {
+          const x = x => subtract(10)(x);
+
+          return yield x(5);
+        })()
+      );
+    })()
+  );
+};
+
+module.exports.test = ({ describe, it, expect, code }) => {
+  describe.only("Curried functions", () => {
+    it("should transform and execute curried functions correctly", async () => {
+      console.log(code);
+      await expect(program()).resolves.toBe(5);
+    });
+  });
+};
+
+
+`;
+
 exports[`transformEffects Transform proposed effects keywords into working JS data-passing.js: data-passing.js 1`] = `
 
 const main = () => {
